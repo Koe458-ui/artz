@@ -1,0 +1,124 @@
+name: checks
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  precache:
+    name: service worker precaches what index.html loads
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-precache.mjs
+
+  cachebust:
+    name: a changed stylesheet or script carries a new ?v=
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: versions move when the files do
+        run: |
+          git fetch --no-tags origin main:refs/remotes/origin/main || true
+          node scripts/check-cachebust.mjs origin/main
+
+  overlays:
+    name: every dialog renders over the page, not in it
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-overlays.mjs
+
+  sections:
+    name: one table of panels, one writer for the address bar
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-sections.mjs
+
+  cache:
+    name: cache keeps one member's data out of another's session
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/cache-test.mjs
+
+  security:
+    name: the security controls still refuse what they refused
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/security-test.mjs
+
+  deferredcss:
+    name: no first-screen stylesheet has been pushed off the critical path
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-deferred-css.mjs
+
+  csp:
+    name: the report-only policy still names every inline script
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-csp-hashes.mjs
+
+  sql:
+    name: every migrated function pins search_path
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-sql-functions.mjs
+
+  syntax:
+    name: changed javascript parses
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: parse
+        run: |
+          set -e
+          find js functions scripts -name '*.js' -o -name '*.mjs' | while read -r f; do
+            node --check "$f" || { echo "::error file=$f::does not parse"; exit 1; }
+          done
+          node --check sw.js
+          node --check uploadVerifier.js
+      - name: the modules the edge writes parse too
+        run: node scripts/check-emitted.mjs

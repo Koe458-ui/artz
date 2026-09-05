@@ -1,0 +1,18 @@
+/explore      /index.html  200
+/marketplace  /index.html  200
+/resources    /index.html  200
+/blog         /index.html  200
+/community    /index.html  200
+
+/gallery      /explore     301
+
+/artwork/*  /index.html  200
+
+/profile/*  /index.html  200
+
+/login      /index.html  200
+
+/resource/*  /index.html  200
+/blog/*      /index.html  200
+/listing/*   /index.html  200
+/job/*       /index.html  200

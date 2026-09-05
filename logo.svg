@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" width="1024" height="1024" role="img" aria-label="DigiArtz" shape-rendering="geometricPrecision">
+  <title>DigiArtz</title>
+  <defs>
+    <linearGradient id="dzFace0" gradientUnits="userSpaceOnUse" x1="72" y1="248" x2="-72" y2="776">
+      <stop offset="0" stop-color="#4a4a4a"/><stop offset="0.35" stop-color="#242424"/><stop offset="0.72" stop-color="#111111"/><stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="dzSide0" gradientUnits="userSpaceOnUse" x1="72" y1="248" x2="-72" y2="776">
+      <stop offset="0" stop-color="#171717"/><stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="dzGloss0" gradientUnits="userSpaceOnUse" x1="0" y1="248" x2="0" y2="406.4">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.1"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="dzFace1" gradientUnits="userSpaceOnUse" x1="332.5" y1="182" x2="152.5" y2="842">
+      <stop offset="0" stop-color="#ff4d3f"/><stop offset="0.35" stop-color="#ee1111"/><stop offset="0.72" stop-color="#cc0000"/><stop offset="1" stop-color="#8e0000"/>
+    </linearGradient>
+    <linearGradient id="dzSide1" gradientUnits="userSpaceOnUse" x1="332.5" y1="182" x2="152.5" y2="842">
+      <stop offset="0" stop-color="#7a0000"/><stop offset="1" stop-color="#340000"/>
+    </linearGradient>
+    <linearGradient id="dzGloss1" gradientUnits="userSpaceOnUse" x1="0" y1="182" x2="0" y2="380">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="dzFace2" gradientUnits="userSpaceOnUse" x1="575" y1="182" x2="395" y2="842">
+      <stop offset="0" stop-color="#4a4a4a"/><stop offset="0.35" stop-color="#242424"/><stop offset="0.72" stop-color="#111111"/><stop offset="1" stop-color="#050505"/>
+    </linearGradient>
+    <linearGradient id="dzSide2" gradientUnits="userSpaceOnUse" x1="575" y1="182" x2="395" y2="842">
+      <stop offset="0" stop-color="#171717"/><stop offset="1" stop-color="#000000"/>
+    </linearGradient>
+    <linearGradient id="dzGloss2" gradientUnits="userSpaceOnUse" x1="0" y1="182" x2="0" y2="380">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.1"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="dzFace3" gradientUnits="userSpaceOnUse" x1="799.5" y1="248" x2="655.5" y2="776">
+      <stop offset="0" stop-color="#ff4d3f"/><stop offset="0.35" stop-color="#ee1111"/><stop offset="0.72" stop-color="#cc0000"/><stop offset="1" stop-color="#8e0000"/>
+    </linearGradient>
+    <linearGradient id="dzSide3" gradientUnits="userSpaceOnUse" x1="799.5" y1="248" x2="655.5" y2="776">
+      <stop offset="0" stop-color="#7a0000"/><stop offset="1" stop-color="#340000"/>
+    </linearGradient>
+    <linearGradient id="dzGloss3" gradientUnits="userSpaceOnUse" x1="0" y1="248" x2="0" y2="406.4">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.18"/><stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <filter id="dzShadow" filterUnits="userSpaceOnUse" x="-199" y="55" width="1143" height="934" color-interpolation-filters="sRGB">
+      <feOffset in="SourceAlpha" dx="7" dy="12" result="dzOff"/>
+      <feGaussianBlur in="dzOff" stdDeviation="13" result="dzBlur"/>
+      <feFlood flood-color="#000000" flood-opacity="0.2" result="dzInk"/>
+      <feComposite in="dzInk" in2="dzBlur" operator="in" result="dzCast"/>
+      <feMerge><feMergeNode in="dzCast"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+  </defs>
+  
+  <g transform="translate(512,512) scale(0.72) translate(-368.75,-516)" filter="url(#dzShadow)" stroke-linecap="round">
+    <line x1="82" y1="256" x2="-62" y2="784" stroke="url(#dzSide0)" stroke-width="176"/>
+    <line x1="72" y1="248" x2="-72" y2="776" stroke="url(#dzFace0)" stroke-width="176"/>
+    <line x1="72" y1="248" x2="-72" y2="776" stroke="url(#dzGloss0)" stroke-width="176"/>
+    <line x1="342.5" y1="190" x2="162.5" y2="850" stroke="url(#dzSide1)" stroke-width="176"/>
+    <line x1="332.5" y1="182" x2="152.5" y2="842" stroke="url(#dzFace1)" stroke-width="176"/>
+    <line x1="332.5" y1="182" x2="152.5" y2="842" stroke="url(#dzGloss1)" stroke-width="176"/>
+    <line x1="585" y1="190" x2="405" y2="850" stroke="url(#dzSide2)" stroke-width="176"/>
+    <line x1="575" y1="182" x2="395" y2="842" stroke="url(#dzFace2)" stroke-width="176"/>
+    <line x1="575" y1="182" x2="395" y2="842" stroke="url(#dzGloss2)" stroke-width="176"/>
+    <line x1="809.5" y1="256" x2="665.5" y2="784" stroke="url(#dzSide3)" stroke-width="176"/>
+    <line x1="799.5" y1="248" x2="655.5" y2="776" stroke="url(#dzFace3)" stroke-width="176"/>
+    <line x1="799.5" y1="248" x2="655.5" y2="776" stroke="url(#dzGloss3)" stroke-width="176"/>
+  </g>
+</svg>

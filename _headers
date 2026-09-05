@@ -1,0 +1,83 @@
+/*
+  X-Frame-Options: SAMEORIGIN
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), usb=(), magnetometer=(), payment=(self "https://checkout.razorpay.com" "https://api.razorpay.com" "https://www.paypal.com"), interest-cohort=()
+  Cross-Origin-Opener-Policy: same-origin-allow-popups
+  X-Permitted-Cross-Domain-Policies: none
+  Content-Security-Policy: default-src 'self'; script-src 'self' blob: 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://adservice.google.com https://checkout.razorpay.com https://*.razorpay.com https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com; script-src-attr 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.razorpay.com; font-src 'self' data: https://fonts.gstatic.com https://*.razorpay.com https://*.paypalobjects.com; img-src 'self' data: blob: https:; media-src 'self' data: blob: https://tmqzqlrpjpydiftlrzmj.supabase.co; worker-src 'self' blob:; child-src 'self' blob: https://*.razorpay.com https://*.paypal.com; connect-src 'self' blob: https://challenges.cloudflare.com https://tmqzqlrpjpydiftlrzmj.supabase.co wss://tmqzqlrpjpydiftlrzmj.supabase.co https://generativelanguage.googleapis.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://api.razorpay.com https://*.razorpay.com https://*.paypal.com https://*.paypalobjects.com; frame-src 'self' https://challenges.cloudflare.com https://*.paypal.com https://*.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google; form-action 'self' https://*.razorpay.com https://*.paypal.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; upgrade-insecure-requests
+  Cross-Origin-Resource-Policy: same-site
+  Reporting-Endpoints: csp="/api/csp-report"
+  Content-Security-Policy-Report-Only: default-src 'self'; script-src 'self' blob: 'sha256-cbAFoBHcVXOdeAUtREeUjFf75lVNv+N5Ioy/njhFTy8=' 'sha256-T66+xJh0n9RLjCcwDpcvkYrZ9V23pTuuiFjJcOecCqM=' 'sha256-pzz7aeT1Y3wWp72Bd+CcVs1am9SDevOLhIb6lV7eiv4=' 'sha256-PrH3lFBD0eXbDaPNIPBpaQALhkespXVRKT4oOx/fIk4=' 'sha256-WVBYMwfVLrvN2n6yicVMeHwkm8ZPSiOIZ6QmBsnexZo=' 'sha256-rZ2G5aYcu4ZDaFnJe9nvzDL1NA5NAsg9YnkhOGzCmgU=' https://challenges.cloudflare.com https://www.googletagmanager.com https://www.google-analytics.com https://static.cloudflareinsights.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://adservice.google.com https://checkout.razorpay.com https://*.razorpay.com https://www.paypal.com https://*.paypal.com https://*.paypalobjects.com; script-src-attr 'unsafe-inline'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://*.razorpay.com; font-src 'self' data: https://fonts.gstatic.com https://*.razorpay.com https://*.paypalobjects.com; img-src 'self' data: blob: https://tmqzqlrpjpydiftlrzmj.supabase.co https://*.googlesyndication.com https://*.doubleclick.net https://*.google-analytics.com https://*.gstatic.com https://*.google.com; media-src 'self' data: blob: https://tmqzqlrpjpydiftlrzmj.supabase.co; worker-src 'self' blob:; child-src 'self' blob: https://*.razorpay.com https://*.paypal.com; connect-src 'self' blob: https://challenges.cloudflare.com https://tmqzqlrpjpydiftlrzmj.supabase.co wss://tmqzqlrpjpydiftlrzmj.supabase.co https://generativelanguage.googleapis.com https://www.google-analytics.com https://*.google-analytics.com https://www.googletagmanager.com https://cloudflareinsights.com https://static.cloudflareinsights.com https://pagead2.googlesyndication.com https://*.googlesyndication.com https://*.doubleclick.net https://*.adtrafficquality.google https://api.razorpay.com https://*.razorpay.com https://*.paypal.com https://*.paypalobjects.com; frame-src 'self' https://challenges.cloudflare.com https://*.paypal.com https://*.razorpay.com https://*.googlesyndication.com https://*.doubleclick.net https://*.google.com https://*.adtrafficquality.google; form-action 'self' https://*.razorpay.com https://*.paypal.com; frame-ancestors 'self'; object-src 'none'; base-uri 'self'; upgrade-insecure-requests report-uri /api/csp-report; report-to csp
+
+/sw.js
+  Cache-Control: no-cache
+
+/js/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/css/*
+  Cache-Control: public, max-age=31536000, immutable
+
+/config.js
+  Cache-Control: public, max-age=300, must-revalidate
+
+/favicon.svg
+  Cache-Control: public, max-age=604800
+/favicon.ico
+  Cache-Control: public, max-age=604800
+/apple-touch-icon.png
+  Cache-Control: public, max-age=604800
+/icon-192.png
+  Cache-Control: public, max-age=604800
+/icon-512.png
+  Cache-Control: public, max-age=604800
+/icon-maskable-512.png
+  Cache-Control: public, max-age=604800
+/logo.svg
+  Cache-Control: public, max-age=604800
+
+/site.webmanifest
+  Cache-Control: public, max-age=3600
+/robots.txt
+  Cache-Control: public, max-age=3600
+/ads.txt
+  Cache-Control: public, max-age=3600
+/8968b78d9c9d0df0553bf47f2e121021.txt
+  Cache-Control: public, max-age=3600
+  Content-Type: text/plain; charset=utf-8
+
+/
+  Cache-Control: public, max-age=0, must-revalidate
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate
+/artwork/*
+  Cache-Control: public, max-age=0, must-revalidate
+/resource/*
+  Cache-Control: public, max-age=0, must-revalidate
+/blog/*
+  Cache-Control: public, max-age=0, must-revalidate
+/listing/*
+  Cache-Control: public, max-age=0, must-revalidate
+/job/*
+  Cache-Control: public, max-age=0, must-revalidate
+/profile/*
+  Cache-Control: public, max-age=0, must-revalidate
+/login
+  Cache-Control: public, max-age=0, must-revalidate
+/explore
+  Cache-Control: public, max-age=0, must-revalidate
+/marketplace
+  Cache-Control: public, max-age=0, must-revalidate
+/resources
+  Cache-Control: public, max-age=0, must-revalidate
+/blog
+  Cache-Control: public, max-age=0, must-revalidate
+/community
+  Cache-Control: public, max-age=0, must-revalidate
+
+/api/*
+  Cache-Control: no-store, private, max-age=0
+  X-Robots-Tag: noindex, nofollow
+  Vary: Authorization

@@ -1,0 +1,55 @@
+html, body {
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+input, textarea, select, option,
+[contenteditable=""], [contenteditable="true"],
+[data-selectable], [data-selectable] *,
+
+#lbNm, #lbDesc,
+.avTagChip, .avCmName, .avCmBody,
+
+#pfUsername, #pfHandle, #pfHeadBio, #pfBioText,
+
+.albName, .xpLbName,
+
+.cpBubbleName, .cpBubbleText, .cpCommentUser, .cpShowcaseText,
+.dmMsg,
+
+.dzName, .dzRow .dzHint, .dzChip, .dzFileNm,
+.dzvTitle, .dzvDesc, .dzvExcerpt, .dzvArticle,
+.dzvFileName,
+.dzPTitle, .dzPExc,
+
+.upDraftTitle, .upPvVal, .upqTrkName,
+
+.admCardTitle, .admCardBody {
+  -webkit-touch-callout: default;
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+#lbDesc *, .avCmBody *, #pfHeadBio *, #pfBioText *,
+.cpBubbleText *, .cpShowcaseText *, .dmMsg *,
+.dzvDesc *, .dzvExcerpt *, .dzvArticle *, .admCardBody * {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+img, picture, canvas, video, svg {
+  -webkit-touch-callout: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  user-select: none !important;
+  -webkit-user-drag: none !important;
+  user-drag: none !important;
+}

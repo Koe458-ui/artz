@@ -1,0 +1,2381 @@
+<!DOCTYPE html>
+<html lang="en">
+ <head>
+  <meta charset="utf-8"/>
+  <meta name="color-scheme" content="light"/>
+  <meta name="theme-color" content="#F3F3F1"/>
+
+  <script>
+  (function(){
+    var K='koeTheme',V={graydark:1,light:1,offwhite:1},t=null;
+    try{t=localStorage.getItem(K);}catch(e){}
+    if(!V[t])t='offwhite';
+    document.documentElement.setAttribute('data-theme',t);
+    var C={graydark:'#1A1A1F',light:'#F7F5EB',offwhite:'#F3F3F1'};
+    var m=document.querySelector('meta[name="theme-color"]');
+    if(m)m.setAttribute('content',C[t]);
+    var s=document.querySelector('meta[name="color-scheme"]');
+    if(s)s.setAttribute('content',t==='graydark'?'dark':'light');
+  })();
+  </script>
+  <style>
+        html{background:var(--vbg,#E9E9E6);}
+    html[data-theme="graydark"]{--vbg:#101015;}
+    html[data-theme="light"]{--vbg:#EEEBDC;}
+    html[data-theme="offwhite"]{--vbg:#E9E9E6;}
+
+    #anPage{position:fixed;inset:0;z-index:545;overflow-y:auto;transform:translateX(100%);}
+    #anPage.open{transform:translateX(0);}
+
+    #artModal{position:fixed;inset:0;z-index:1100;display:none;flex-direction:column;background:var(--bg,#F7F5EB);}
+    #artModal.open{display:flex;}
+    #dzView{position:fixed;inset:0;z-index:1300;display:none;}
+    #dzView.open{display:flex;flex-direction:column;}
+    #dzLight{position:fixed;inset:0;z-index:1500;display:none;}
+    #dzLight.open{display:flex;align-items:center;justify-content:center;}
+
+    #artModal .avBox{width:100%;height:100%;display:flex;flex-direction:column;overflow:hidden;}
+    #artModal .avBody{flex:1;min-height:0;overflow:auto;}
+    #artModal #lbImg{max-width:100%;max-height:80vh;object-fit:contain;}
+
+    /* Panels and dialogs whose closed state is written in one of the media="print"
+       stylesheets below, which land after the first paint. Until their sheet
+       arrives they have no closed state at all -- fully opaque, untransformed and
+       in normal flow -- and the sheet brings the closed state and a transition for
+       it in the same rule, so applying it animates them out in front of the
+       loading screen. Half a second of the crop dialogs fading over the splash.
+       Declaring the same closed state here means nothing changes when the sheet
+       lands, so nothing has anything to animate. The `.open` rules are all a class
+       more specific than these, so opening still wins.
+       Anything added to those sheets with a hidden base state belongs here too. */
+    .upPop,.cropPop,.upGdPop,#upqBackdrop{position:fixed;inset:0;opacity:0;pointer-events:none;}
+    .upGdPop,#upqBackdrop{visibility:hidden;}
+    #pfUpMod{opacity:1;transform:translateX(100%);visibility:hidden;}
+    #rankHub,#rankPage,#fgSearchPage,#cmBrowsePage,#cmInfoPage,#cmChatPanel{
+      position:fixed;inset:0;transform:translateX(100%);
+    }
+    #cmChatPanel{visibility:hidden;}
+  </style>
+  <script data-cf-beacon='{"token": "aa4b7177387e4f689739a5fdf44cbffa"}' defer="" src="https://static.cloudflareinsights.com/beacon.min.js">
+  </script>
+
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-21DL9JWJ58"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('consent', 'default', {
+      analytics_storage: 'denied',
+      ad_storage: 'denied',
+      ad_user_data: 'denied',
+      ad_personalization: 'denied'
+    });
+    gtag('js', new Date());
+
+    gtag('config', 'G-21DL9JWJ58');
+  </script>
+  <meta content="width=device-width, initial-scale=1.0, viewport-fit=cover, interactive-widget=resizes-visual" name="viewport"/>
+  <title>
+   DigiArtz — The Digital Art Community
+  </title>
+  <meta name="description" content="DigiArtz is a place for digital artists to share their work, build a portfolio and meet other artists."/>
+  <link rel="canonical" href="https://digiartz.net/"/>
+  <meta name="robots" content="index, follow, max-image-preview:large"/>
+
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=4" sizes="any"/>
+  <link rel="icon" href="/favicon.ico?v=4" sizes="16x16 32x32 48x48 64x64 128x128"/>
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png?v=4"/>
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4"/>
+  <link rel="manifest" href="/site.webmanifest"/>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "Digiartz",
+    "url": "https://digiartz.net/",
+    "logo": "https://digiartz.net/icon-512.png?v=4"
+  }
+  </script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "DigiArtz",
+    "alternateName": "Digiartz",
+    "url": "https://digiartz.net/",
+    "description": "DigiArtz is a place for digital artists to share their work, build a portfolio and meet other artists.",
+    "publisher": { "@type": "Organization", "name": "Digiartz", "url": "https://digiartz.net/" },
+    "hasPart": [
+      { "@type": "CollectionPage", "name": "Explore", "url": "https://digiartz.net/explore" },
+      { "@type": "CollectionPage", "name": "Marketplace", "url": "https://digiartz.net/marketplace" },
+      { "@type": "CollectionPage", "name": "Community", "url": "https://digiartz.net/community" },
+      { "@type": "CollectionPage", "name": "Resources", "url": "https://digiartz.net/resources" },
+      { "@type": "CollectionPage", "name": "Blog", "url": "https://digiartz.net/blog" },
+      { "@type": "WebPage", "name": "Login", "url": "https://digiartz.net/login" }
+    ]
+  }
+  </script>
+  <script type="application/ld+json" id="ldGallery">
+  {"@context":"https://schema.org","@type":"ImageGallery","name":"DigiArtz — Digital Art Gallery","url":"https://digiartz.net/","description":"Digital art posted by the DigiArtz community: character illustrations, fan art, landscapes, cars and original work.","image":["https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/9f8c7d5a-49c2-4eb2-9bdd-608141294444/1783056107143_Ethereal_Violet__f1600.webp","https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/094f47b1-937e-4c63-b72a-5dde050258fe/1782822019716_Archer_Queen__f1600.webp","https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781717079470_Prushka__f1600.webp","https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781630475302_Meili_Portroute__f1600.webp","https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781459752137_Junko_Enoshima__f1600.webp","https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781282837085_Kyojuro_Rengoku__f1600.webp"],"hasPart":[{"@type":"ImageObject","position":1,"name":"Ethereal Violet","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/9f8c7d5a-49c2-4eb2-9bdd-608141294444/1783056107143_Ethereal_Violet__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/9f8c7d5a-49c2-4eb2-9bdd-608141294444/1783056107143_Ethereal_Violet__t300.webp","url":"https://digiartz.net/artwork/7cd74497-cd51-446b-a084-afb6b04fa84c","datePublished":"2026-07-03","creator":{"@type":"Person","name":"user_9f8c7d5a","url":"https://digiartz.net/profile/user_9f8c7d5a"}},{"@type":"ImageObject","position":2,"name":"Archer Queen","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/094f47b1-937e-4c63-b72a-5dde050258fe/1782822019716_Archer_Queen__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/094f47b1-937e-4c63-b72a-5dde050258fe/1782822019716_Archer_Queen__t300.webp","url":"https://digiartz.net/artwork/42b36e1e-0bea-4bd6-a1d4-33615cddbd8d","datePublished":"2026-06-30","creator":{"@type":"Person","name":"Koe_Official","url":"https://digiartz.net/profile/Koe_Official"}},{"@type":"ImageObject","position":3,"name":"Prushka","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781717079470_Prushka__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781717079470_Prushka__t300.webp","url":"https://digiartz.net/artwork/87230979-277b-48e7-9190-dcd90f1c8956","datePublished":"2026-06-17"},{"@type":"ImageObject","position":4,"name":"Meili Portroute","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781630475302_Meili_Portroute__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781630475302_Meili_Portroute__t300.webp","url":"https://digiartz.net/artwork/c1677e60-d791-4aee-a054-1c3b83914431","datePublished":"2026-06-16"},{"@type":"ImageObject","position":5,"name":"Junko Enoshima","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781459752137_Junko_Enoshima__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781459752137_Junko_Enoshima__t300.webp","url":"https://digiartz.net/artwork/e7a15ef1-f043-4176-b260-919e5da88d29","datePublished":"2026-06-14"},{"@type":"ImageObject","position":6,"name":"Kyojuro Rengoku","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781282837085_Kyojuro_Rengoku__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781282837085_Kyojuro_Rengoku__t300.webp","url":"https://digiartz.net/artwork/478488e3-0bcf-4b13-9fdd-e07ddaba2fd1","datePublished":"2026-06-12"},{"@type":"ImageObject","position":7,"name":"Fushi","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781195618071_Fushi__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781195618071_Fushi__t300.webp","url":"https://digiartz.net/artwork/637c58b1-0b8d-4e59-a4b5-45d8b364b888","datePublished":"2026-06-11"},{"@type":"ImageObject","position":8,"name":"Makima","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781091495828_Makima__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781091495828_Makima__t300.webp","url":"https://digiartz.net/artwork/40a29b41-36e1-4267-8f17-fd72a0a9fd92","datePublished":"2026-06-10"},{"@type":"ImageObject","position":9,"name":"Misa Amane","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781024008823_Misa_Amane__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781024008823_Misa_Amane__t300.webp","url":"https://digiartz.net/artwork/afd0f86b-ee4b-40b4-b4c5-e5d61559a818","datePublished":"2026-06-09"},{"@type":"ImageObject","position":10,"name":"Lelouch vi Britannia","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780944274654_Lelouch_vi_Britannia__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780944274654_Lelouch_vi_Britannia__t300.webp","url":"https://digiartz.net/artwork/a7f35adb-7f8c-4011-96b5-66a1c372d34a","datePublished":"2026-06-08"},{"@type":"ImageObject","position":11,"name":"Thorfinn Karlsefni","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780918474836_Thorfinn_Karlsefni__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780918474836_Thorfinn_Karlsefni__t300.webp","url":"https://digiartz.net/artwork/aa976152-d904-4955-b83b-6b9e4a41717d","datePublished":"2026-06-08"},{"@type":"ImageObject","position":12,"name":"Natsuki Subaru","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780902931537_Natsuki_Subaru__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780902931537_Natsuki_Subaru__t300.webp","url":"https://digiartz.net/artwork/641b7af6-922c-4726-b1b6-53fc53f92fcf","datePublished":"2026-06-08"},{"@type":"ImageObject","position":13,"name":"Crimson Horizon","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780836584964_Crimson_Horizon__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780836584964_Crimson_Horizon__t300.webp","url":"https://digiartz.net/artwork/44576437-ac6e-4be5-882b-98273b7ec8d7","datePublished":"2026-06-07"},{"@type":"ImageObject","position":14,"name":"Reinhard van Astrea","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780766256380_Reinhard_van_Astrea__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780766256380_Reinhard_van_Astrea__t300.webp","url":"https://digiartz.net/artwork/8a7f8e72-71ed-4d0a-8d44-712af28449b7","datePublished":"2026-06-06"},{"@type":"ImageObject","position":15,"name":"Subaru Natsuki","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780766222807_Subaru_Natsuki__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780766222807_Subaru_Natsuki__t300.webp","url":"https://digiartz.net/artwork/12bc412e-1c62-4dec-a007-278d9f129a3e","datePublished":"2026-06-06"},{"@type":"ImageObject","position":16,"name":"Natsuki Subaru","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780674011083_Natsuki_Subaru__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780674011083_Natsuki_Subaru__t300.webp","url":"https://digiartz.net/artwork/6b632969-253a-4510-9ec8-da2c4eee7f17","datePublished":"2026-06-05"},{"@type":"ImageObject","position":17,"name":"Mountain Field","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501989833_Mountain_Field__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501989833_Mountain_Field__t300.webp","url":"https://digiartz.net/artwork/d5e258ad-ce58-44d1-a280-b05f0d349436","datePublished":"2026-06-03"},{"@type":"ImageObject","position":18,"name":"Kirigiri Execution","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501850798_Kirigiri_Execution__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501850798_Kirigiri_Execution__t300.webp","url":"https://digiartz.net/artwork/7b77294f-a857-4795-9903-e7b4a7df24ff","datePublished":"2026-06-03"},{"@type":"ImageObject","position":19,"name":"Kaoruko Waguri","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501817488_Kaoruko_Waguri__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501817488_Kaoruko_Waguri__t300.webp","url":"https://digiartz.net/artwork/219ef20a-ab00-4b7b-b9a0-961ec78954d6","datePublished":"2026-06-03"},{"@type":"ImageObject","position":20,"name":"Koenigsegg Jesko Absolute","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501758632_Koenigsegg_Jesko_Absolute__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501758632_Koenigsegg_Jesko_Absolute__t300.webp","url":"https://digiartz.net/artwork/a8de271d-413a-476b-acca-5c31e89dcbc2","datePublished":"2026-06-03"},{"@type":"ImageObject","position":21,"name":"Cute Anime Girl","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501723126_Cute_Anime_Girl__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501723126_Cute_Anime_Girl__t300.webp","url":"https://digiartz.net/artwork/ade6dc20-0b1c-4fa9-8a34-a6f897c8fcdd","datePublished":"2026-06-03"},{"@type":"ImageObject","position":22,"name":"Melissa Moretti","contentUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501669939_Melissa_Moretti__f1600.webp","thumbnailUrl":"https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501669939_Melissa_Moretti__t300.webp","url":"https://digiartz.net/artwork/cf63b47e-af6f-4875-b104-f0f7a431a56a","datePublished":"2026-06-03"}]}
+  </script>
+  <meta property="og:site_name" content="Digiartz"/>
+  <meta property="og:type" content="website"/>
+  <meta property="og:title" content="DigiArtz — The Digital Art Community"/>
+  <meta property="og:description" content="DigiArtz is a place for digital artists to share their work, build a portfolio and meet other artists."/>
+  <meta property="og:url" content="https://digiartz.net/"/>
+  <meta property="og:image" content="https://digiartz.net/icon-512.png?v=4"/>
+  <meta property="og:image:alt" content="Digiartz — digital art showcase"/>
+  <meta name="twitter:card" content="summary_large_image"/>
+  <meta name="twitter:title" content="DigiArtz — The Digital Art Community"/>
+  <meta name="twitter:description" content="DigiArtz is a place for digital artists to share their work, build a portfolio and meet other artists."/>
+  <meta name="twitter:image" content="https://digiartz.net/icon-512.png?v=4"/>
+  <link href="https://fonts.googleapis.com" rel="preconnect"/>
+  <link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+  <link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&amp;family=Kaushan+Script&amp;family=Open+Sans:wght@400;500;600;700;800&amp;family=Syne:wght@700;800&amp;display=swap" onload="this.onload=null;this.rel='stylesheet';"/>
+  <noscript><link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&amp;family=Kaushan+Script&amp;family=Open+Sans:wght@400;500;600;700;800&amp;family=Syne:wght@700;800&amp;display=swap" rel="stylesheet"/></noscript>
+
+  <script>
+  (function(){
+    addEventListener('error', function(e){
+      var el = e.target;
+      if(!el || el.tagName !== 'LINK' || el.rel !== 'stylesheet') return;
+      if(el.dataset.retried) return;
+      el.dataset.retried = '1';
+      el.href = el.href.split('?')[0] + '?r=' + Date.now();
+    }, true);
+  })();
+  </script>
+  <link rel="stylesheet" href="/css/base.css?v=47">
+  <link rel="stylesheet" href="/css/hero.css?v=163">
+  <link rel="stylesheet" href="/css/viewer.css?v=53" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/community.css?v=41" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/connect.css?v=19">
+  <link rel="stylesheet" href="/css/ranking.css?v=20" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/profile.css?v=44" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/admin.css?v=14" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/auth.css?v=9" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/panels.css?v=36">
+  <link rel="stylesheet" href="/css/upload.css?v=27" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/widgets.css?v=35">
+  <link rel="stylesheet" href="/css/overrides.css?v=69">
+  <link rel="stylesheet" href="/css/select.css?v=5">
+  <noscript><link rel="stylesheet" href="/css/viewer.css?v=53"><link rel="stylesheet" href="/css/community.css?v=41"><link rel="stylesheet" href="/css/ranking.css?v=20"><link rel="stylesheet" href="/css/profile.css?v=44"><link rel="stylesheet" href="/css/admin.css?v=14"><link rel="stylesheet" href="/css/auth.css?v=9"><link rel="stylesheet" href="/css/upload.css?v=27"></noscript>
+ </head>
+ <body>
+
+  <div id="intro" aria-label="Loading" role="status">
+   <div class="iSpin" aria-hidden="true"></div>
+   <div class="iTxt">LOADING</div>
+  </div>
+  <div id="sBanner"></div>
+
+  <header id="dzTop" class="dzTop">
+   <a class="dzBrand" href="/" data-bn="bnHome" aria-label="DigiArtz — home"><span class="dzBrandD">Digi</span><span class="dzBrandA">Artz</span></a>
+
+   <nav class="dzLinks" aria-label="Primary">
+
+    <div class="dzUpWrap" id="dzExWrap">
+     <button class="dzLink dzLinkDd" type="button" id="dzExBtn" data-bn="bnGallery"
+             aria-haspopup="true" aria-expanded="false" aria-controls="dzExDd"
+             onclick="dzExToggle(event)">Explore<svg class="dzLinkChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+     <div class="dzUpDd" id="dzExDd" role="menu" aria-labelledby="dzExBtn">
+      <div class="dzUpDdInner">
+      <a class="dzUpItem" href="/explore" role="menuitem" style="--upA:var(--upcViolet)" onclick="dzExPick('artworks', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Artworks</span><span class="dzUpDesc">Browse art from creators worldwide</span></span>
+      </a>
+      <a class="dzUpItem" href="/marketplace" role="menuitem" style="--upA:var(--upcOrange)" onclick="dzExPick('marketplace', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.4 4.8 4.3A2 2 0 0 1 6.7 3h10.6a2 2 0 0 1 1.9 1.3L21 9.4"/><path d="M4.6 9.4V19a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2V9.4"/><path d="M3 9.4h18"/><path d="M9.6 21v-5.4h4.8V21"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Marketplace</span><span class="dzUpDesc">Buy digital products and commissions</span></span>
+      </a>
+      <a class="dzUpItem" href="/blog" role="menuitem" style="--upA:var(--upcIndigo)" onclick="dzExPick('blog', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="3" width="17.2" height="18" rx="2.4"/><path d="M7.3 8.2h9.4"/><path d="M7.3 12h9.4"/><path d="M7.3 15.8h5.2"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Blog</span><span class="dzUpDesc">Tutorials, interviews and studio notes</span></span>
+      </a>
+      <a class="dzUpItem" href="/resources" role="menuitem" style="--upA:var(--upcGreen)" onclick="dzExPick('resources', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 2.8 7.1 12 11.5l9.2-4.4z"/><path d="M3.2 12.1 12 16.3l8.8-4.2"/><path d="M3.2 16.5 12 20.7l8.8-4.2"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Resources</span><span class="dzUpDesc">Brushes, textures, fonts and packs</span></span>
+      </a>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcSky)" onclick="dzExPick('jobs', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Jobs</span><span class="dzUpDesc">Paid creative work, open right now</span></span>
+      </button>
+      </div>
+     </div>
+    </div>
+    <div class="dzUpWrap" id="dzCmWrap">
+     <button class="dzLink dzLinkDd" type="button" id="dzCmBtn" data-bn="bnCommunity"
+             aria-haspopup="true" aria-expanded="false" aria-controls="dzCmDd"
+             onclick="dzCmToggle(event)">Community<svg class="dzLinkChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+     <div class="dzUpDd" id="dzCmDd" role="menu" aria-labelledby="dzCmBtn">
+      <div class="dzUpDdInner">
+      <a class="dzUpItem" href="/community" role="menuitem" style="--upA:var(--upcTeal)" onclick="dzCmPick('communities', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.87"/><path d="M16 3.6a3.5 3.5 0 0 1 0 6.8"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Communities</span><span class="dzUpDesc">Topic rooms to join, or one of your own</span></span>
+      </a>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcPink)" onclick="dzCmPick('friends', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7" r="3.5"/><path d="M19 8v6M22 11h-6"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Friends</span><span class="dzUpDesc">Your people, your messages, and Zeo</span></span>
+      </button>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcYellow)" onclick="dzCmPick('ranking', event)">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 5.5H4.5v1A3.5 3.5 0 0 0 7 9.9"/><path d="M17 5.5h2.5v1A3.5 3.5 0 0 1 17 9.9"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Ranking</span><span class="dzUpDesc">Who is on top this week, board by board</span></span>
+      </button>
+      </div>
+     </div>
+    </div>
+
+    <div class="dzUpWrap" id="dzUpWrap">
+     <button class="dzLink dzLinkDd" type="button" id="dzUpBtn" data-bn="bnUpload"
+             aria-haspopup="true" aria-expanded="false" aria-controls="dzUpDd"
+             onclick="dzUpToggle(event)">Upload<svg class="dzLinkChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></button>
+     <div class="dzUpDd" id="dzUpDd" role="menu" aria-labelledby="dzUpBtn">
+      <div class="dzUpDdInner">
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcViolet)" onclick="dzUpPick('artwork')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Upload Artwork</span><span class="dzUpDesc">Share a piece with the community</span></span>
+      </button>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcOrange)" onclick="dzUpPick('marketplace')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.4 4.8 4.3A2 2 0 0 1 6.7 3h10.6a2 2 0 0 1 1.9 1.3L21 9.4"/><path d="M4.6 9.4V19a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2V9.4"/><path d="M3 9.4h18"/><path d="M9.6 21v-5.4h4.8V21"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">List a Product</span><span class="dzUpDesc">Sell a digital product or a commission</span></span>
+      </button>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcIndigo)" onclick="dzUpPick('blog')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="3" width="17.2" height="18" rx="2.4"/><path d="M7.3 8.2h9.4"/><path d="M7.3 12h9.4"/><path d="M7.3 15.8h5.2"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Write a Blog Post</span><span class="dzUpDesc">Publish a tutorial or a studio note</span></span>
+      </button>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcGreen)" onclick="dzUpPick('resources')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 2.8 7.1 12 11.5l9.2-4.4z"/><path d="M3.2 12.1 12 16.3l8.8-4.2"/><path d="M3.2 16.5 12 20.7l8.8-4.2"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Share a Resource</span><span class="dzUpDesc">Give away brushes, packs and presets</span></span>
+      </button>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcSky)" onclick="dzUpPick('jobs')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Post a Job</span><span class="dzUpDesc">Hire an artist for paid creative work</span></span>
+      </button>
+      </div>
+     </div>
+    </div>
+
+    <div class="dzUpWrap dzAcWrap" id="dzAcWrap">
+     <a class="dzLink dzLinkDd" id="dzTopAccount" data-bn="bnProfile" href="/login"
+        aria-haspopup="true" aria-expanded="false" aria-controls="dzAcDd"
+        onclick="dzAcClick(event)"><span id="dzTopAccountTxt">Sign in</span><svg class="dzLinkChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg></a>
+     <div class="dzUpDd" id="dzAcDd" role="menu" aria-labelledby="dzTopAccount">
+      <div class="dzUpDdInner">
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcViolet)" onclick="dzAcPick('portfolio')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Portfolio</span><span class="dzUpDesc">Your profile, as everyone else sees it</span></span>
+      </button>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcSky)" onclick="dzAcPick('analytics')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="8" width="4" height="11" rx="1"/><rect x="16" y="4" width="4" height="15" rx="1"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Analytics</span><span class="dzUpDesc">How your work is doing, section by section</span></span>
+      </button>
+      <button class="dzUpItem" type="button" role="menuitem" style="--upA:var(--upcGreen)" onclick="dzAcPick('payouts')">
+       <span class="dzUpIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M2.5 10.5h19"/><path d="M6.5 15h4"/></svg></span>
+       <span class="dzUpTxt"><span class="dzUpNm">Payouts</span><span class="dzUpDesc">Everything on your account to do with money</span></span>
+      </button>
+      </div>
+     </div>
+    </div>
+   </nav>
+
+   <div class="dzActions">
+    <button class="dzIcon dzIconSearch" id="dzTopSearchBtn" type="button" onclick="dzOpenSearch()" aria-label="Search" aria-controls="fgSearchPage">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.6-3.6"/></svg>
+    </button>
+    <button class="dzIcon" id="hNotifBtn" type="button" onclick="openNotifications()" title="Notifications" aria-label="Notifications" aria-controls="notifPage">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/>
+      <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+     </svg>
+     <span class="hNotifDot" aria-hidden="true"></span>
+    </button>
+    <button class="dzIcon dzCartBtn" id="dzCartBtn" type="button" onclick="dzGoCart()" title="Cart" aria-label="Cart">
+     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <circle cx="9" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/>
+      <path d="M2 3h3l2.6 12.4a1.8 1.8 0 0 0 1.8 1.4h8.4a1.8 1.8 0 0 0 1.8-1.4L21.5 7H6"/>
+     </svg>
+     <span class="dzCartCount" id="dzCartCount" aria-hidden="true"></span>
+    </button>
+    <button class="dzIcon dzHam" id="dzHamBtn" type="button" onclick="dzMenuToggle()" aria-label="Menu" aria-haspopup="true" aria-expanded="false" aria-controls="dzTopMenu">
+     <span class="dzHamBox" aria-hidden="true"><span></span><span></span><span></span></span>
+    </button>
+   </div>
+  </header>
+
+  <div class="dzMenuScrim" id="dzMenuScrim" onclick="dzMenuClose()" aria-hidden="true"></div>
+  <nav id="dzTopMenu" class="dzMenu" aria-label="Site menu">
+   <div class="dzMenuInner">
+    <button class="dzMenuItem" type="button" onclick="dzOpenSearch()">Search</button>
+    <div class="dzMenuGrp" id="dzMenuExGrp">
+     <button class="dzMenuItem dzMenuTog" type="button" id="dzMenuExBtn" data-bn="bnGallery"
+             aria-expanded="false" aria-controls="dzMenuExSub" onclick="dzMenuSubToggle('ex')">
+      <span>Explore</span><svg class="dzMenuChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+     </button>
+     <div class="dzMenuSub" id="dzMenuExSub">
+      <div class="dzMenuSubInner">
+      <a class="dzMenuSubItem" href="/explore" style="--upA:var(--upcViolet)" onclick="dzExPick('artworks', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></span><span>Artworks</span></a>
+      <a class="dzMenuSubItem" href="/marketplace" style="--upA:var(--upcOrange)" onclick="dzExPick('marketplace', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.4 4.8 4.3A2 2 0 0 1 6.7 3h10.6a2 2 0 0 1 1.9 1.3L21 9.4"/><path d="M4.6 9.4V19a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2V9.4"/><path d="M3 9.4h18"/><path d="M9.6 21v-5.4h4.8V21"/></svg></span><span>Marketplace</span></a>
+      <a class="dzMenuSubItem" href="/blog" style="--upA:var(--upcIndigo)" onclick="dzExPick('blog', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="3" width="17.2" height="18" rx="2.4"/><path d="M7.3 8.2h9.4"/><path d="M7.3 12h9.4"/><path d="M7.3 15.8h5.2"/></svg></span><span>Blog</span></a>
+      <a class="dzMenuSubItem" href="/resources" style="--upA:var(--upcGreen)" onclick="dzExPick('resources', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 2.8 7.1 12 11.5l9.2-4.4z"/><path d="M3.2 12.1 12 16.3l8.8-4.2"/><path d="M3.2 16.5 12 20.7l8.8-4.2"/></svg></span><span>Resources</span></a>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcSky)" onclick="dzExPick('jobs', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><span>Jobs</span></button>
+      </div>
+     </div>
+    </div>
+    <div class="dzMenuGrp" id="dzMenuCmGrp">
+     <button class="dzMenuItem dzMenuTog" type="button" id="dzMenuCmBtn" data-bn="bnCommunity"
+             aria-expanded="false" aria-controls="dzMenuCmSub" onclick="dzMenuSubToggle('cm')">
+      <span>Community</span><svg class="dzMenuChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+     </button>
+     <div class="dzMenuSub" id="dzMenuCmSub">
+      <div class="dzMenuSubInner">
+      <a class="dzMenuSubItem" href="/community" style="--upA:var(--upcTeal)" onclick="dzCmPick('communities', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.87"/><path d="M16 3.6a3.5 3.5 0 0 1 0 6.8"/></svg></span><span>Communities</span></a>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcPink)" onclick="dzCmPick('friends', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7" r="3.5"/><path d="M19 8v6M22 11h-6"/></svg></span><span>Friends</span></button>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcYellow)" onclick="dzCmPick('ranking', event)"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0Z"/><path d="M7 5.5H4.5v1A3.5 3.5 0 0 0 7 9.9"/><path d="M17 5.5h2.5v1A3.5 3.5 0 0 1 17 9.9"/></svg></span><span>Ranking</span></button>
+      </div>
+     </div>
+    </div>
+    <div class="dzMenuGrp" id="dzMenuUpGrp">
+     <button class="dzMenuItem dzMenuTog" type="button" id="dzMenuUpBtn" data-bn="bnUpload"
+             aria-expanded="false" aria-controls="dzMenuUpSub" onclick="dzMenuSubToggle('up')">
+      <span>Upload</span><svg class="dzMenuChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+     </button>
+     <div class="dzMenuSub" id="dzMenuUpSub">
+      <div class="dzMenuSubInner">
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcViolet)" onclick="dzUpPick('artwork')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg></span><span>Upload Artwork</span></button>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcOrange)" onclick="dzUpPick('marketplace')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.4 4.8 4.3A2 2 0 0 1 6.7 3h10.6a2 2 0 0 1 1.9 1.3L21 9.4"/><path d="M4.6 9.4V19a2 2 0 0 0 2 2h10.8a2 2 0 0 0 2-2V9.4"/><path d="M3 9.4h18"/><path d="M9.6 21v-5.4h4.8V21"/></svg></span><span>List a Product</span></button>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcIndigo)" onclick="dzUpPick('blog')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3.4" y="3" width="17.2" height="18" rx="2.4"/><path d="M7.3 8.2h9.4"/><path d="M7.3 12h9.4"/><path d="M7.3 15.8h5.2"/></svg></span><span>Write a Blog Post</span></button>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcGreen)" onclick="dzUpPick('resources')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.7 2.8 7.1 12 11.5l9.2-4.4z"/><path d="M3.2 12.1 12 16.3l8.8-4.2"/><path d="M3.2 16.5 12 20.7l8.8-4.2"/></svg></span><span>Share a Resource</span></button>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcSky)" onclick="dzUpPick('jobs')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg></span><span>Post a Job</span></button>
+      </div>
+     </div>
+    </div>
+    <div class="dzMenuGrp dzAcGrp" id="dzMenuAcGrp">
+     <a class="dzMenuItem dzMenuTog" id="dzMenuAccount" data-bn="bnProfile" href="/login"
+        aria-expanded="false" aria-controls="dzMenuAcSub" onclick="return dzAcMenuClick(event);">
+      <span id="dzMenuAccountTxt">Login</span><svg class="dzMenuChev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>
+     </a>
+     <div class="dzMenuSub" id="dzMenuAcSub">
+      <div class="dzMenuSubInner">
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcViolet)" onclick="dzAcPick('portfolio')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="3.6"/><path d="M4.5 20.2a7.5 7.5 0 0 1 15 0"/></svg></span><span>Portfolio</span></button>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcSky)" onclick="dzAcPick('analytics')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18"/><rect x="4" y="12" width="4" height="7" rx="1"/><rect x="10" y="8" width="4" height="11" rx="1"/><rect x="16" y="4" width="4" height="15" rx="1"/></svg></span><span>Analytics</span></button>
+      <button class="dzMenuSubItem" type="button" style="--upA:var(--upcGreen)" onclick="dzAcPick('payouts')"><span class="dzUpIco dzUpIcoSm" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="6" width="19" height="13" rx="2.5"/><path d="M2.5 10.5h19"/><path d="M6.5 15h4"/></svg></span><span>Payouts</span></button>
+      </div>
+     </div>
+    </div>
+   </div>
+  </nav>
+
+  <section id="hero">
+
+    <h1 class="srOnly">DigiArtz — The Digital Art Community · Art Has No Limits</h1>
+
+  </section>
+
+  <section id="heroPitch" aria-label="Welcome to DigiArtz">
+    <div class="hpInner">
+      <h1 class="hpHead">Where Artists <em>Create</em> &amp; <em>Inspire</em>.</h1>
+      <p class="hpSub">Post your work, build a portfolio, sell what you make, and follow the artists you care about.</p>
+      <div class="hpActions">
+        <button class="hpCta" type="button" onclick="hpGo()">Explore Gallery</button>
+        <button class="hpAlt" type="button" onclick="hpJoin()">Join Community<svg class="hpArrow" viewBox="0 0 24 24" aria-hidden="true"><line x1="4" y1="12" x2="19" y2="12"/><polyline points="13 6 19 12 13 18"/></svg></button>
+      </div>
+    </div>
+  </section>
+
+  <section id="artworks">
+    <div class="awTop">
+    <div class="hsWrap" id="hsWrap">
+      <div class="tgSearch hsBar" id="hsBar" data-mode="artwork">
+        <svg class="tgSearchIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+        <input type="search" class="tgSearchIn" id="hsIn" placeholder="Search artworks"
+               autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="60"
+               aria-label="Search artworks" oninput="hsInput(this.value)">
+        <button type="button" class="hsMode" id="hsModeBtn"
+                aria-label="Switch to searching artists" title="Switch to searching artists"
+                onclick="hsToggleMode()">
+          <svg class="hsIco hsIcoArtist" viewBox="0 0 24 24" fill="none" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <linearGradient id="hsgArtist" x1="0" y1="0" x2="0" y2="1"><stop offset="0" style="stop-color:var(--hsW1)"/><stop offset="1" style="stop-color:var(--hsW2)"/></linearGradient>
+            <g stroke="url(#hsgArtist)"><circle cx="12" cy="7.4" r="4.4"/><path d="M4.4 20.6v-.7a7.6 7.6 0 0 1 15.2 0v.7"/></g>
+          </svg>
+          <svg class="hsIco hsIcoArt" viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <linearGradient id="hsgArt" x1="0" y1="0" x2="1" y2="1"><stop offset="0" style="stop-color:var(--hsA1)"/><stop offset="1" style="stop-color:var(--hsA2)"/></linearGradient>
+            <g stroke="url(#hsgArt)"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="M21 15l-5-5L5 21"/></g>
+          </svg>
+        </button>
+      </div>
+    </div>
+    <div class="ftWrap" id="ftWrap">
+      <button type="button" class="ftNav ftPrev" data-ftnav="-1" aria-label="Scroll boards left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 19-7-7 7-7"/></svg></button>
+      <div class="ftRail" id="ftRail" role="group" aria-label="Feed boards">
+        <button type="button" class="ftTab" id="ftTab-following" aria-pressed="false" data-feed="following">
+          <span class="ftLbl">Following</span>
+        </button>
+        <button type="button" class="ftTab on" id="ftTab-trending" aria-pressed="true" data-feed="trending">
+          <span class="ftLbl">Trending</span>
+        </button>
+        <button type="button" class="ftTab" id="ftTab-new" aria-pressed="false" data-feed="new">
+          <span class="ftLbl">New arrival</span>
+        </button>
+        <button type="button" class="ftTab" id="ftTab-weekly" aria-pressed="false" data-feed="weekly">
+          <span class="ftLbl">Weekly hits</span>
+        </button>
+        <button type="button" class="ftTab" id="ftTab-monthly" aria-pressed="false" data-feed="monthly">
+          <span class="ftLbl">Monthly hits</span>
+        </button>
+        <button type="button" class="ftTab" id="ftTab-artists" aria-pressed="false" data-feed="artists">
+          <span class="ftLbl">Artists</span>
+        </button>
+      </div>
+      <button type="button" class="ftNav ftNext" data-ftnav="1" aria-label="Scroll boards right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+    </div>
+    </div>
+    <div class="awGrid" id="hsResults" role="region" aria-label="Search results" hidden></div>
+    <div class="awGrid" id="awGrid" role="region" aria-labelledby="ftTab-trending">
+      <a class="awCard" href="/artwork/7cd74497-cd51-446b-a084-afb6b04fa84c"><div class="awImgWrap"><img loading="eager" fetchpriority="high" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/9f8c7d5a-49c2-4eb2-9bdd-608141294444/1783056107143_Ethereal_Violet__t300.webp" alt="Ethereal Violet — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/42b36e1e-0bea-4bd6-a1d4-33615cddbd8d"><div class="awImgWrap"><img loading="eager" fetchpriority="high" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/094f47b1-937e-4c63-b72a-5dde050258fe/1782822019716_Archer_Queen__t300.webp" alt="Archer Queen — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/87230979-277b-48e7-9190-dcd90f1c8956"><div class="awImgWrap"><img loading="eager" fetchpriority="auto" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781717079470_Prushka__t300.webp" alt="Prushka — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/c1677e60-d791-4aee-a054-1c3b83914431"><div class="awImgWrap"><img loading="eager" fetchpriority="auto" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781630475302_Meili_Portroute__t300.webp" alt="Meili Portroute — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/e7a15ef1-f043-4176-b260-919e5da88d29"><div class="awImgWrap"><img loading="eager" fetchpriority="auto" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781459752137_Junko_Enoshima__t300.webp" alt="Junko Enoshima — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/478488e3-0bcf-4b13-9fdd-e07ddaba2fd1"><div class="awImgWrap"><img loading="eager" fetchpriority="auto" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781282837085_Kyojuro_Rengoku__t300.webp" alt="Kyojuro Rengoku — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/637c58b1-0b8d-4e59-a4b5-45d8b364b888"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781195618071_Fushi__t300.webp" alt="Fushi — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/40a29b41-36e1-4267-8f17-fd72a0a9fd92"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781091495828_Makima__t300.webp" alt="Makima — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/afd0f86b-ee4b-40b4-b4c5-e5d61559a818"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1781024008823_Misa_Amane__t300.webp" alt="Misa Amane — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/a7f35adb-7f8c-4011-96b5-66a1c372d34a"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780944274654_Lelouch_vi_Britannia__t300.webp" alt="Lelouch vi Britannia — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/aa976152-d904-4955-b83b-6b9e4a41717d"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780918474836_Thorfinn_Karlsefni__t300.webp" alt="Thorfinn Karlsefni — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/641b7af6-922c-4726-b1b6-53fc53f92fcf"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780902931537_Natsuki_Subaru__t300.webp" alt="Natsuki Subaru — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/44576437-ac6e-4be5-882b-98273b7ec8d7"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780836584964_Crimson_Horizon__t300.webp" alt="Crimson Horizon — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/8a7f8e72-71ed-4d0a-8d44-712af28449b7"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780766256380_Reinhard_van_Astrea__t300.webp" alt="Reinhard van Astrea — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/12bc412e-1c62-4dec-a007-278d9f129a3e"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780766222807_Subaru_Natsuki__t300.webp" alt="Subaru Natsuki — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/6b632969-253a-4510-9ec8-da2c4eee7f17"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780674011083_Natsuki_Subaru__t300.webp" alt="Natsuki Subaru — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/d5e258ad-ce58-44d1-a280-b05f0d349436"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501989833_Mountain_Field__t300.webp" alt="Mountain Field — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/7b77294f-a857-4795-9903-e7b4a7df24ff"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501850798_Kirigiri_Execution__t300.webp" alt="Kirigiri Execution — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/219ef20a-ab00-4b7b-b9a0-961ec78954d6"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501817488_Kaoruko_Waguri__t300.webp" alt="Kaoruko Waguri — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/a8de271d-413a-476b-acca-5c31e89dcbc2"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501758632_Koenigsegg_Jesko_Absolute__t300.webp" alt="Koenigsegg Jesko Absolute — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/ade6dc20-0b1c-4fa9-8a34-a6f897c8fcdd"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501723126_Cute_Anime_Girl__t300.webp" alt="Cute Anime Girl — digital artwork on DigiArtz"></div></a>
+      <a class="awCard" href="/artwork/cf63b47e-af6f-4875-b104-f0f7a431a56a"><div class="awImgWrap"><img loading="lazy" decoding="async" src="https://tmqzqlrpjpydiftlrzmj.supabase.co/storage/v1/object/public/koe-media/artworks/1780501669939_Melissa_Moretti__t300.webp" alt="Melissa Moretti — digital artwork on DigiArtz"></div></a>
+    </div>
+    <div class="hsEmpty" id="hsEmpty" role="status" aria-live="polite" hidden>
+      <p class="hsEmptyTitle" id="hsEmptyTitle">No results found</p>
+      <p class="hsEmptyText" id="hsEmptyText">It seems we can’t find any results based on your search.</p>
+    </div>
+    <div class="awEmpty" id="awEmpty" style="display:none;">NO ARTWORK YET</div>
+  </section>
+  <script defer src="/js/boot.js?v=4"></script>
+  <script defer src="/js/cache.js?v=4"></script>
+  <script defer src="/js/ranking.js?v=9"></script>
+
+  <div id="rankHub" role="dialog" aria-modal="true" aria-labelledby="rkTitle">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closeRankHub()" aria-label="Close ranking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle" id="rkTitle">RANKING</div>
+    </div>
+    <section id="rankSec" aria-labelledby="rkTitle">
+    <div class="rkHdr fsHdr">
+      <div class="secSub"><span class="rkLive" aria-hidden="true"></span>TOP ARTISTS · LIVE</div>
+    </div>
+    <div class="rkWrap">
+      <button class="rkNav rkNav--prev" id="rkPrev" type="button" aria-label="Previous board">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="rkTrack" id="rkGrid" role="group" aria-label="Ranking boards"></div>
+      <button class="rkNav rkNav--next" id="rkNext" type="button" aria-label="Next board">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+    <div class="rkDots" id="rkDots" role="tablist" aria-label="Board"></div>
+  </section>
+  </div>
+
+  <div id="rankPage" role="dialog" aria-modal="true" aria-label="Full ranking">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closeRankPage()" aria-label="Close ranking"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle" id="rkPgTitle">RANKING</div>
+    </div>
+    <div class="rkPgBdy">
+      <div class="rkPgMine" id="rkPgMine"></div>
+      <div class="xpCard" id="rkPgList"></div>
+      <div class="rkPgEnd" id="rkPgEnd"></div>
+    </div>
+  </div>
+
+  <div id="profilePage" role="dialog" aria-modal="true" aria-label="User profile">
+
+    <header class="pfTopBar">
+      <div class="pfTopL">
+        <button class="pfTopBtn pfTopBack" id="pfTopBack" onclick="closeProfilePage()" aria-label="Go back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg>
+        </button>
+        <span class="pfTopTitle">PROFILE</span>
+      </div>
+      <div class="pfTopR" id="pfTopGuest" hidden>
+        <button class="pfTopBtn" id="pfTopReportBtn" onclick="pfReportUser()" aria-label="Report this account">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21V4"/><path d="M4 5h11l-1.5 3L15 11H4"/></svg>
+        </button>
+      </div>
+      <div class="pfTopR" id="pfTopActions">
+        <button class="pfTopBtn" id="pfTopMenuBtn" onclick="openSettingsPage()" aria-label="Open settings menu" aria-controls="setPage">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16"/><path d="M4 12h16"/><path d="M4 17h16"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="pfBanner" id="pfBanner">
+      <img alt="" id="pfBannerImg">
+    </div>
+
+    <div class="pfBdy">
+
+      <section class="pfId" aria-label="Artist identity">
+        <div class="pfIdTop">
+          <div class="pfIdWho">
+            <div class="pfAvatarWrap">
+              <div class="pfAvatar" id="pfAvatar"><img alt="" id="pfAvatarImg"><span id="pfAvatarLetter">?</span></div>
+            </div>
+            <div class="pfIdText">
+              <div class="pfNameRow">
+                <span class="pfUsername" id="pfUsername">—</span>
+                <span class="pfWarnMark" id="pfWarnMark" title="This account has a low merit score" aria-label="Low merit warning">!</span>
+              </div>
+              <div class="pfHandle" id="pfHandle"></div>
+              <div class="msRibbon" id="pfMsRibbon" hidden></div>
+            </div>
+          </div>
+          <div class="pfStats" id="pfStats" hidden>
+            <p class="pfStatLine">
+              <span class="pfStat"><b class="pfStatN" id="pfFollowers">0</b><span class="pfStatL" id="pfFollowersL">Followers</span></span>
+              <span class="pfStat"><b class="pfStatN" id="pfFollowing">0</b><span class="pfStatL">Following</span></span>
+            </p>
+            <p class="pfStatLine pfStatLine--sub">
+              <span class="pfStat"><b class="pfStatN" id="pfStatArt">0</b><span class="pfStatL" id="pfStatArtL">Artworks</span></span>
+              <span class="pfStat"><b class="pfStatN" id="pfStatLikes">0</b><span class="pfStatL" id="pfStatLikesL">Likes</span></span>
+              <span class="pfStat"><b class="pfStatN" id="pfStatSaves">0</b><span class="pfStatL" id="pfStatSavesL">Saves</span></span>
+            </p>
+          </div>
+          <div class="pfActionRow" id="pfActionRow" hidden>
+            <button class="pfActBtn pfActBtn--pri" id="pfBtnFollow" onclick="pfFollowToggle()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1.4a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.6V20"/><circle cx="10" cy="8" r="3.2"/><path d="M18 8v6"/><path d="M21 11h-6"/></svg>
+              <span class="pfActTxt">Follow</span>
+            </button>
+            <button class="pfActBtn" id="pfBtnFriend" onclick="pfFriendBtnTap()">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 20v-1.4a3.5 3.5 0 0 0-3.5-3.5h-5A3.5 3.5 0 0 0 4 18.6V20"/><circle cx="10" cy="8" r="3.2"/><path d="M18 8v6"/><path d="M21 11h-6"/></svg>
+              <span class="pfActTxt">Add friend</span>
+            </button>
+            <button class="pfActBtn pfActBtn--pri" id="pfBtnEdit" onclick="openPfEditPage()" hidden>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20h4l10-10a2.4 2.4 0 0 0-3.4-3.4L4.6 16.6Z"/><path d="m13.6 7.4 3 3"/></svg>
+              <span class="pfActTxt">Edit profile</span>
+            </button>
+            <button class="pfActBtn" id="pfBtnShare" onclick="openPfShare()" aria-label="Share this profile">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5.5" r="2.6"/><circle cx="6" cy="12" r="2.6"/><circle cx="18" cy="18.5" r="2.6"/><path d="m8.3 10.8 7.4-4"/><path d="m8.3 13.2 7.4 4"/></svg>
+              <span class="pfActTxt">Share</span>
+            </button>
+          </div>
+          <div class="pfIdMeta">
+            <p class="pfHeadBio" id="pfHeadBio"></p>
+            <div class="pfJoined" id="pfJoined"></div>
+          </div>
+        </div>
+      </section>
+
+      <nav class="pfTabs" role="tablist" aria-label="Profile sections">
+        <div class="pfTabGroup" id="pfTabGroup">
+          <button class="pfTab active" id="pfTabGallery" role="tab" aria-selected="true" aria-controls="pfPanelGallery" onclick="pfSwitchTab('gallery')">
+            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-5-5L5 21"/></svg></span>
+            <span>Artwork</span>
+          </button>
+          <button class="pfTab" id="pfTabAlbum" role="tab" aria-selected="false" aria-controls="pfPanelAlbum" onclick="pfSwitchTab('album')">
+            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5h7L8.4 6H3.8a.8.8 0 0 0-.8.8Z"/><rect x="3" y="8.5" width="18" height="11" rx="2"/></svg></span>
+            <span>Albums</span>
+          </button>
+          <button class="pfTab" id="pfTabResources" role="tab" aria-selected="false" aria-controls="pfPanelResources" onclick="pfSwitchTab('resources')">
+            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c-1.8-1.3-4-2-6.5-2H3v13h2.5c2.5 0 4.7.7 6.5 2 1.8-1.3 4-2 6.5-2H21V5h-2.5C16 5 13.8 5.7 12 7Z"/><path d="M12 7v13"/></svg></span>
+            <span>Resources</span>
+          </button>
+          <button class="pfTab" id="pfTabBlog" role="tab" aria-selected="false" aria-controls="pfPanelBlog" onclick="pfSwitchTab('blog')">
+            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6Z"/><path d="M14 3v4h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span>
+            <span>Blog</span>
+          </button>
+          <button class="pfTab" id="pfTabMarketplace" role="tab" aria-selected="false" aria-controls="pfPanelMarketplace" onclick="pfSwitchTab('marketplace')">
+            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
+            <span>Marketplace</span>
+          </button>
+          <button class="pfTab" id="pfTabProgress" role="tab" aria-selected="false" aria-controls="pfPanelProgress" onclick="pfSwitchTab('progress')">
+            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5 9 11l4 4 8-8.5"/><path d="M16 6.5h5v5"/></svg></span>
+            <span>Level</span>
+          </button>
+          <button class="pfTab" id="pfTabAbout" role="tab" aria-selected="false" aria-controls="pfPanelAbout" onclick="pfSwitchTab('about')">
+            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6h.01"/></svg></span>
+            <span>About</span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="pfPanel active" id="pfPanelGallery" role="tabpanel" aria-labelledby="pfTabGallery">
+        <div class="pfGrid pfGridArt" id="pfGalleryGrid"></div>
+        <div class="pfEmpty" id="pfGalleryEmpty" style="display:none;">No artwork uploaded yet.</div>
+        <div class="igSentinel" id="pfGallerySentinel" aria-hidden="true" style="display:none;"></div>
+      </div>
+
+      <div class="pfPanel" id="pfPanelAlbum" role="tabpanel" aria-labelledby="pfTabAlbum">
+        <div class="albGrid" id="pfAlbumGrid"></div>
+        <div class="pfEmpty" id="pfAlbumEmpty" style="display:none;">No albums yet.</div>
+      </div>
+
+      <div class="pfPanel" id="pfPanelResources" role="tabpanel" aria-labelledby="pfTabResources">
+        <div class="dzGrid" id="pfResGrid"></div>
+        <div class="pfEmpty" id="pfResEmpty" style="display:none;">No resources uploaded yet.</div>
+      </div>
+
+      <div class="pfPanel" id="pfPanelBlog" role="tabpanel" aria-labelledby="pfTabBlog">
+        <div class="dzList" id="pfBlogList"></div>
+        <div class="pfEmpty" id="pfBlogEmpty" style="display:none;">No blog posts yet.</div>
+      </div>
+
+      <div class="pfPanel" id="pfPanelMarketplace" role="tabpanel" aria-labelledby="pfTabMarketplace">
+        <div class="dzGrid" id="pfMktGrid"></div>
+        <div class="pfEmpty" id="pfMktEmpty" style="display:none;">No marketplace listings yet.</div>
+      </div>
+
+      <div class="pfPanel" id="pfPanelProgress" role="tabpanel" aria-labelledby="pfTabProgress">
+        <div class="xpWrap" id="pfXpWrap"></div>
+      </div>
+
+      <div class="pfPanel" id="pfPanelAbout" role="tabpanel" aria-labelledby="pfTabAbout">
+        <div class="pfAboutWrap">
+          <section class="pfCard">
+            <h3 class="pfCardLbl">Bio</h3>
+            <div class="pfBioText" id="pfBioText">Just a regular human who likes art and creativity.</div>
+          </section>
+          <section class="pfCard">
+            <h3 class="pfCardLbl">Connect</h3>
+            <div class="pfConnectList" id="pfConnectList"></div>
+          </section>
+          <section class="pfCard">
+            <h3 class="pfCardLbl">Standing</h3>
+            <div class="pfMeritRow">
+              <span class="pfMeritNum" id="pfStatMerit">100</span>
+              <span class="pfMeritLbl">Merit score</span>
+            </div>
+            <p class="pfMeritHint">Merit starts at 100 and falls when uploads break the rules. A low score limits what an account can post.</p>
+          </section>
+        </div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="pfEditPage" role="dialog" aria-modal="true" aria-label="Edit profile">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closePfEditPage()" aria-label="Close edit profile"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">EDIT PROFILE</div>
+    </div>
+    <div class="pfEditBdy">
+      <div class="pfEditBannerWrap" id="pfEditBannerWrap">
+        <img alt="" id="pfEditBannerImg">
+        <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBannerPicker()" aria-label="Change banner">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+      </div>
+      <div class="pfEditAvatarWrap">
+        <div class="pfEditAvatar" id="pfEditAvatar">
+          <img alt="" id="pfEditAvatarImg">
+          <span id="pfEditAvatarLetter">?</span>
+        </div>
+        <button class="pfAvBEditBtn pfEditAvatarBtn" onclick="openPfAvatarPicker()" aria-label="Change profile photo">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+        </button>
+      </div>
+      <div class="pfEditField">
+        <label class="pfEditLbl" for="pfEditDisplayName">DISPLAY NAME</label>
+        <input class="pfEditInput" id="pfEditDisplayName" maxlength="30" placeholder="How your name appears on your profile" autocomplete="off">
+        <div class="pfEditHint">Leave empty to use your username.</div>
+      </div>
+      <div class="pfEditField">
+        <label class="pfEditLbl" for="pfEditUsername">USERNAME</label>
+        <input class="pfEditInput" id="pfEditUsername" maxlength="30" placeholder="Username" autocomplete="off">
+        <div class="pfEditHint" id="pfEditUsernameHint" style="display:none;">Your @handle can't be changed.</div>
+      </div>
+      <div class="pfEditField">
+        <label class="pfEditLbl" for="pfEditBio">BIO</label>
+        <textarea class="pfEditTextarea" id="pfEditBio" maxlength="500" placeholder="Tell people about yourself…"></textarea>
+        <div class="pfEditHint" id="pfEditBioCount">0/500</div>
+      </div>
+      <div class="pfEditField">
+        <span class="pfEditLbl">CONNECT</span>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_instagram">Instagram</label>
+          <input class="pfEditInput" id="pfConnect_instagram" placeholder="Add Instagram link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_facebook">Facebook</label>
+          <input class="pfEditInput" id="pfConnect_facebook" placeholder="Add Facebook link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_youtube">YouTube</label>
+          <input class="pfEditInput" id="pfConnect_youtube" placeholder="Add YouTube link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_x">X</label>
+          <input class="pfEditInput" id="pfConnect_x" placeholder="Add X link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_tiktok">TikTok</label>
+          <input class="pfEditInput" id="pfConnect_tiktok" placeholder="Add TikTok link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_linkedin">LinkedIn</label>
+          <input class="pfEditInput" id="pfConnect_linkedin" placeholder="Add LinkedIn link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_discord">Discord</label>
+          <input class="pfEditInput" id="pfConnect_discord" placeholder="Add Discord link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_reddit">Reddit</label>
+          <input class="pfEditInput" id="pfConnect_reddit" placeholder="Add Reddit link here" autocomplete="off">
+        </div>
+        <div class="pfConnectRow">
+          <label class="pfConnectRowLbl" for="pfConnect_pinterest">Pinterest</label>
+          <input class="pfEditInput" id="pfConnect_pinterest" placeholder="Add Pinterest link here" autocomplete="off">
+        </div>
+      </div>
+      <button class="pfEditSaveBtn" id="pfEditSaveBtn" onclick="savePfEditProfile()">SAVE CHANGES</button>
+    </div>
+  </div>
+
+  <div id="admPage"></div>
+
+  <div id="pfMyWorkPage" role="dialog" aria-modal="true" aria-label="Edit my work">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closeMyWorkPage()" aria-label="Close edit my work"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">EDIT MY WORK</div>
+    </div>
+    <div class="admBdy">
+      <div class="pfTabs" role="tablist">
+        <div class="pfTabGroup">
+          <button class="pfTab active" id="mwTab-art" role="tab" aria-selected="true" onclick="mwSwitchTab('art')">ARTWORK</button>
+          <button class="pfTab" id="mwTab-marketplace" role="tab" aria-selected="false" onclick="mwSwitchTab('marketplace')">MARKETPLACE</button>
+          <button class="pfTab" id="mwTab-blog" role="tab" aria-selected="false" onclick="mwSwitchTab('blog')">BLOG</button>
+          <button class="pfTab" id="mwTab-resources" role="tab" aria-selected="false" onclick="mwSwitchTab('resources')">RESOURCES</button>
+        </div>
+      </div>
+
+      <div class="pfPanel active" id="mwPanel-art">
+        <div class="pfGrid pfGridArt" id="mwGrid-art"></div>
+        <div class="pfEmpty" id="mwEmpty-art" style="display:none;">You haven't uploaded any artwork yet.</div>
+      </div>
+
+      <div class="pfPanel" id="mwPanel-marketplace">
+        <div class="pfGrid pfGridArt" id="mwGrid-marketplace"></div>
+        <div class="pfEmpty" id="mwEmpty-marketplace" style="display:none;">You haven't listed anything in the marketplace yet.</div>
+      </div>
+
+      <div class="pfPanel" id="mwPanel-blog">
+        <div class="pfGrid pfGridArt" id="mwGrid-blog"></div>
+        <div class="pfEmpty" id="mwEmpty-blog" style="display:none;">You haven't written any blog posts yet.</div>
+      </div>
+
+      <div class="pfPanel" id="mwPanel-resources">
+        <div class="pfGrid pfGridArt" id="mwGrid-resources"></div>
+        <div class="pfEmpty" id="mwEmpty-resources" style="display:none;">You haven't shared any resources yet.</div>
+      </div>
+
+    </div>
+  </div>
+
+  <div id="notifPage" role="dialog" aria-modal="true" aria-label="Notifications">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closeNotifPage()" aria-label="Close notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">NOTIFICATIONS</div>
+    </div>
+    <div class="notifBdy">
+      <div class="notifHdr">
+        <button class="notifReadAll" id="notifReadAll" type="button" onclick="notifReadAll()" hidden>MARK ALL READ</button>
+      </div>
+      <div class="pfEmpty" id="notifEmpty" style="display:none;"><span class="admEmptyIcon">🔔</span>No notifications yet.</div>
+      <div id="notifList" class="notifListWrap"></div>
+    </div>
+  </div>
+
+  <div class="cropPop" id="pfCropMod">
+   <div class="cropBox" onclick="event.stopPropagation()">
+    <div class="cropHead">
+      <h2>Set Thumbnail</h2>
+      <p>Drag to position, zoom to frame what shows in the square thumbnail.</p>
+    </div>
+    <div class="cropBody">
+      <div class="cropStage" id="pfCropStage">
+        <img alt="" id="pfCropImg"/>
+        <div class="cropGrid"></div>
+      </div>
+      <div class="cropZoomRow">
+        <button type="button" class="cropZoomBtn" onclick="pfCropNudgeZoom(-10)" aria-label="Zoom out">−</button>
+        <input type="range" class="cropZoom" id="pfCropZoom" min="100" max="200" step="1" value="100" oninput="pfCropSetZoom(this.value)" aria-label="Thumbnail zoom"/>
+        <button type="button" class="cropZoomBtn" onclick="pfCropNudgeZoom(10)" aria-label="Zoom in">＋</button>
+      </div>
+    </div>
+    <div class="cropFoot">
+      <button class="upBtnSec" onclick="cancelPfCrop()">Cancel</button>
+      <button class="upBtnPri" onclick="confirmPfCrop()">Use This</button>
+    </div>
+   </div>
+  </div>
+
+  <div id="upqBackdrop" role="dialog" aria-modal="true" aria-label="Upload status" onclick="if(event.target===this)upqCloseModal()">
+    <div class="legalModal">
+      <div class="lmHead">
+        <div class="lmTitle" id="upqMTitle">UPLOAD STATUS</div>
+        <button class="lmClose" onclick="upqCloseModal()" aria-label="Close">✕</button>
+      </div>
+      <div class="upqMBody" id="upqMBody"></div>
+      <div class="upqMFoot"><button class="upqOkBtn" onclick="upqCloseModal()">OK</button></div>
+    </div>
+  </div>
+
+  <input type="file" id="pfAvatarFileInput" accept="image/*" style="display:none" onchange="handlePfAvBFile(event,'avatar')">
+  <input type="file" id="pfBannerFileInput" accept="image/*" style="display:none" onchange="handlePfAvBFile(event,'banner')">
+  <div class="cropPop" id="pfAvBCropMod">
+   <div class="cropBox" onclick="event.stopPropagation()">
+    <div class="cropHead">
+      <h2 id="pfAvBCropTitle">Set Profile Photo</h2>
+      <p id="pfAvBCropSub">Drag the photo to choose what shows in the square frame.</p>
+    </div>
+    <div class="cropBody">
+      <div class="cropStage" id="pfAvBCropStage">
+        <img alt="" id="pfAvBCropImg"/>
+        <div class="cropGrid"></div>
+      </div>
+    </div>
+    <div class="cropFoot">
+      <button class="upBtnSec" onclick="cancelPfAvBCrop()">Cancel</button>
+      <button class="upBtnPri" id="pfAvBCropBtn" onclick="confirmPfAvBCrop()">Use This</button>
+    </div>
+   </div>
+  </div>
+
+  <div class="upPop" id="pfUpMod">
+   <div class="upPopBox">
+    <header class="upTopBar">
+      <div class="upTopL">
+        <button class="upTopBtn upTopBack" type="button" onclick="closePfUpload()" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg>
+        </button>
+        <span class="upTopTitle" id="pfUpNavTitle">UPLOAD</span>
+      </div>
+      <div class="upTopR">
+        <button class="upTopBtn" type="button" id="upGuideBtn" onclick="upGuideOpen()" aria-label="Upload guidelines" aria-haspopup="dialog" aria-controls="upGuideMod">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9.2"/><path d="M12 16.6v-5.1"/><path d="M12 7.8h.01"/></svg>
+        </button>
+      </div>
+    </header>
+    <div class="upPgBdy">
+    <div class="subPgHeadline">
+      <h2 id="pfUpTitle">Upload Artwork</h2>
+      <p id="pfUpSubtitle">Share your creativity with artists around the world.</p>
+    </div>
+    <div id="upSecForms" style="display:none;"></div>
+    <div class="upPopBody">
+     <div class="upMain">
+      <input id="pfUpEditId" type="hidden" value=""/>
+      <div class="upCard">
+      <div class="upMediaCol">
+      <div class="upDz" id="pfDz">
+       <input accept="image/*" id="pfUpF" onclick="if(pfGuestGate(event))return;" onchange="handlePfFile(event)" type="file"/>
+       <div class="upDzEmpty">
+        <span class="upDzBadge" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg></span>
+        <div class="upDzTitle" id="pfDzTxt">Drag &amp; drop your artwork here</div>
+        <div class="upDzSub">or browse from your device</div>
+        <button type="button" class="upDzBtn" tabindex="-1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg>Select image</button>
+        <div class="upDzHint" data-dz-mb="image">JPG · PNG · WEBP · GIF · up to 20MB</div>
+       </div>
+       <div class="dzFilePicked" id="pfDzPicked">
+        <span class="dzFileThumb" id="pfUpPrevWrap"><img alt="preview" class="upPrev" id="pfUpPrev"/></span>
+        <div class="dzFileMeta">
+          <div class="dzFileNm" id="pfUpFileNm">Selected image</div>
+          <div class="dzFileSz"><span id="pfUpFileSz">—</span><span class="dzFileOk" id="pfUpFileOk">Ready to publish</span></div>
+        </div>
+        <div class="dzFileActs" id="pfUpFileActs">
+          <button type="button" class="dzFileAct" id="pfUpThumbBtn" onclick="reopenPfCrop()">Adjust</button>
+          <button type="button" class="dzFileAct" onclick="pfReplaceFile(event)">Replace</button>
+          <button type="button" class="dzFileAct dzFileActRm" onclick="pfClearFile(event)">Remove</button>
+        </div>
+       </div>
+      </div>
+
+      <div id="pfComicPagesWrap" style="display:none;">
+        <div class="upDz upDzSm" id="pfDzPages">
+         <input accept="image/*" id="pfUpPages" multiple="" onclick="if(pfGuestGate(event))return;" onchange="handlePfPagesFile(event)" type="file"/>
+         <div class="upDzIco" id="pfDzPagesIco"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="m7 9 5-5 5 5"/><path d="M12 4v12"/></svg></div>
+         <div class="upDzTitle" id="pfDzPagesTitle">Drop page images here or click to browse</div>
+         <div class="upDzSub" id="pfDzPagesSub">Multiple pages supported</div>
+        </div>
+        <div id="pfPagesPreview" class="upPagesPreview"></div>
+      </div>
+      </div>
+
+      <div class="upFieldsCol">
+      <div class="upField upFCard" style="--fc:var(--upcViolet)">
+        <span class="upFIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg></span>
+        <div class="upFBody">
+          <label class="upLbl" for="pfUpNm">Title <span class="upReq">*</span></label>
+          <div class="upInWrap">
+            <input class="upIn" id="pfUpNm" maxlength="100" oninput="pfUpdateCount('pfUpNm','pfUpNmCount',100)" placeholder="Enter artwork title" type="text"/>
+            <span class="upCount" id="pfUpNmCount">0/100</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="pfUpX1"></div>
+
+      <div class="upField upFCard" style="--fc:var(--upcGreen)">
+        <span class="upFIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6h16"/><path d="M4 12h11"/><path d="M4 18h7"/></svg></span>
+        <div class="upFBody">
+          <label class="upLbl" for="pfUpDesc">Description <span class="upReq">*</span></label>
+          <div class="upInWrap upInWrapArea">
+            <textarea class="upIn upArea" id="pfUpDesc" maxlength="5000" oninput="pfUpdateCount('pfUpDesc','pfUpDescCount',5000)" placeholder="What it is, the story behind it, any notes…" rows="3"></textarea>
+            <span class="upCount" id="pfUpDescCount">0/5000</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="upField upFCard" id="pfUpCatField" style="--fc:var(--upcAmber)">
+        <span class="upFIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12.9 2.9H4.6A1.7 1.7 0 0 0 2.9 4.6v8.3a2 2 0 0 0 .6 1.4l7.2 7.2a2 2 0 0 0 2.8 0l6.6-6.6a2 2 0 0 0 0-2.8l-7.2-7.2a2 2 0 0 0-1.4-.6z"/><circle cx="7.4" cy="7.4" r="1.3"/></svg></span>
+        <div class="upFBody">
+          <span class="upLbl" id="pfUpCatLbl">Category <span class="upReq">*</span></span>
+          <div class="upCatDd" id="pfUpCatDd">
+            <button type="button" class="upCatTrigger" onclick="togglePfCatDd(event)" id="pfUpCatTrigger" aria-haspopup="listbox" aria-labelledby="pfUpCatLbl pfUpCatTriggerLbl">
+              <span id="pfUpCatTriggerLbl">Others</span><span class="upChev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </button>
+            <div class="upCatPanel" id="pfUpCatPanelWrap">
+              <div class="upCatSearchWrap">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" width="24" height="24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+                <input type="text" class="upCatSearch" id="pfUpCatSearch" placeholder="Search categories…" autocomplete="off" oninput="pfFilterCats(this.value)" onclick="event.stopPropagation()"/>
+              </div>
+              <div class="upCatList" id="pfUpCatPanel">
+              </div>
+              <div class="upCatNoMatch" id="pfUpCatNoMatch" style="display:none;">No matching category</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div id="pfUpX2"></div>
+
+      <div class="upField upFCard" style="--fc:var(--upcCyan)">
+        <span class="upFIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 9h16"/><path d="M4 15h16"/><path d="M10 3 8 21"/><path d="M16 3l-2 18"/></svg></span>
+        <div class="upFBody">
+          <label class="upLbl" for="pfUpTagsInput">Tags <span class="upReq">*</span></label>
+          <div class="upTagBox" id="pfUpTagBox" onclick="document.getElementById('pfUpTagsInput').focus()">
+            <span id="pfUpTagChips"></span>
+            <input class="upTagInput" id="pfUpTagsInput" maxlength="320" onkeydown="pfTagKeydown(event)" onblur="pfTagBlur(event)" onpaste="pfTagPaste(event)" placeholder="character, birds, nature, etc." type="text"/>
+          </div>
+          <input id="pfUpTags" type="hidden" value=""/>
+        </div>
+      </div>
+
+      <div class="upField upFCard" id="pfUpSoftwareField" style="--fc:var(--upcPink)">
+        <span class="upFIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="3.5" width="19" height="13" rx="2"/><path d="M8 21h8"/><path d="M12 16.5V21"/></svg></span>
+        <div class="upFBody">
+          <span class="upLbl" id="pfUpSoftwareLbl">Software Used</span>
+          <div class="upCatDd" id="pfUpSoftwareDd">
+            <button type="button" class="upCatTrigger" onclick="togglePfSoftwareDd(event)" id="pfUpSoftwareTrigger" aria-haspopup="listbox" aria-labelledby="pfUpSoftwareLbl pfUpSoftwareTriggerLbl">
+              <span id="pfUpSoftwareTriggerLbl">Select software…</span><span class="upChev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </button>
+            <div class="upCatPanel" id="pfUpSoftwarePanel">
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Photoshop"/> Photoshop</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="ibisPaint"/> ibisPaint</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Procreate"/> Procreate</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Clip Studio Paint"/> Clip Studio Paint</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Krita"/> Krita</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="MediBang Paint"/> MediBang Paint</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Autodesk SketchBook"/> Autodesk SketchBook</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Illustrator"/> Illustrator</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Affinity Designer"/> Affinity Designer</label>
+              <label class="upCatOpt"><input type="radio" name="pfUpSoftwareRadio" onchange="updatePfSoftwareDisplay()" value="Other"/> Other</label>
+            </div>
+          </div>
+          <input type="hidden" id="pfUpSoftware" value=""/>
+        </div>
+      </div>
+
+      <div id="pfUpX3"></div>
+
+      <div class="upField upFCard" id="pfUpAlbumField" style="--fc:var(--upcBlue)">
+        <span class="upFIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2Z"/></svg></span>
+        <div class="upFBody">
+          <span class="upLbl" id="pfUpAlbumLbl">Add to Album <span class="upOpt">optional</span></span>
+          <div class="upCatDd" id="pfUpAlbumDd">
+            <button type="button" class="upCatTrigger" onclick="togglePfAlbumDd(event)" id="pfUpAlbumTrigger" aria-haspopup="listbox" aria-labelledby="pfUpAlbumLbl pfUpAlbumTriggerLbl">
+              <span id="pfUpAlbumTriggerLbl">None</span><span class="upChev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </button>
+            <div class="upCatPanel" id="pfUpAlbumPanel">
+            </div>
+          </div>
+          <div class="upSchedHint">Pick as many as you like — or none.</div>
+        </div>
+      </div>
+
+      <div id="pfUpX4"></div>
+
+      <div class="upField upFCard" id="pfUpSchedField" style="--fc:var(--upcTeal)">
+        <span class="upFIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4.5" width="18" height="16.5" rx="2"/><path d="M16 2.5v4"/><path d="M8 2.5v4"/><path d="M3 10h18"/><path d="M12 13.5v3l2 1"/></svg></span>
+        <div class="upFBody">
+          <label class="upLbl" for="pfUpSched">Schedule <span class="upOpt">optional</span></label>
+          <div class="upCatDd" id="pfUpSchedDd">
+            <button type="button" class="upCatTrigger" id="pfUpSchedTrigger" onclick="pfSchedToggle(event)">
+              <span id="pfUpSchedLbl" class="upSchedPh">__/__/____&nbsp;&nbsp;__:__</span><span class="upChev" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg></span>
+            </button>
+            <input type="hidden" id="pfUpSched" value=""/>
+            <div class="upCatPanel upSchedPanel" id="pfUpSchedPanel">
+              <div class="upSchedNav">
+                <button type="button" class="upSchedNavBtn" onclick="pfSchedNav(-1,event)" aria-label="Previous month">‹</button>
+                <span id="pfUpSchedMon">—</span>
+                <button type="button" class="upSchedNavBtn" onclick="pfSchedNav(1,event)" aria-label="Next month">›</button>
+              </div>
+              <div class="upSchedDows"><span>S</span><span>M</span><span>T</span><span>W</span><span>T</span><span>F</span><span>S</span></div>
+              <div class="upSchedGrid" id="pfUpSchedGrid"></div>
+              <div class="upSchedTime">
+                <span class="upSchedTimeLbl">Time</span>
+                <select class="upSchedSel" id="pfUpSchedH" onchange="pfSchedApply()" aria-label="Hour"></select>
+                <span class="upSchedColon">:</span>
+                <select class="upSchedSel" id="pfUpSchedM" onchange="pfSchedApply()" aria-label="Minute"></select>
+              </div>
+              <div class="upSchedActs">
+                <button type="button" class="upBtnSec" onclick="pfSchedClear(event)">Clear</button>
+                <button type="button" class="upBtnPri" onclick="pfSchedDone(event)">Done</button>
+              </div>
+            </div>
+          </div>
+          <div class="upSchedHint" id="pfUpSchedHint">Leave empty to publish immediately.</div>
+        </div>
+      </div>
+
+      <div id="pfUpX5"></div>
+      </div>
+      </div>
+
+      <div class="upActions">
+        <button class="upBtnSec" id="pfUpBackBtn" style="display:none;" onclick="closePfUpload()">‹ Back</button>
+        <button class="upBtnSec" id="pfDraftBtn" onclick="updrSave()">💾 Save Draft</button>
+        <button class="upBtnPri" id="pfUpBtn" onclick="doPfUp()">📤 Upload Artwork</button>
+      </div>
+      <p class="dzHint" style="margin-top:.9rem">Uploads are reviewed before they appear publicly.</p>
+     </div>
+
+     <div class="upSide">
+       <div class="upSideCard" id="upSchedSec">
+         <div class="upDraftTitle">SCHEDULED</div>
+         <p class="upDraftNote">Publishes automatically at the set time</p>
+         <div class="upDraftRow" id="upSchedRow"></div>
+       </div>
+       <div class="upSideCard" id="upDraftSec">
+         <div class="upDraftTitle">SAVED DRAFTS</div>
+         <p class="upDraftNote">Saved on this device · auto-deleted after 7 days</p>
+         <div class="upDraftRow" id="upDraftRow"><div class="upDraftCard upDraftGhost" aria-hidden="true"><span class="upDraftGhostIn">✦</span><span class="upDraftExp">7d</span></div><div class="upDraftCard upDraftGhost" aria-hidden="true"><span class="upDraftGhostIn">✦</span><span class="upDraftExp">7d</span></div><div class="upDraftCard upDraftGhost" aria-hidden="true"><span class="upDraftGhostIn">✦</span><span class="upDraftExp">7d</span></div><div class="upDraftCard upDraftGhost" aria-hidden="true"><span class="upDraftGhostIn">✦</span><span class="upDraftExp">7d</span></div></div>
+       </div>
+     </div>
+    </div>
+
+    </div>
+   </div>
+  </div>
+
+  <div class="upGdPop" id="upGuideMod" role="dialog" aria-modal="true" aria-labelledby="upGuideTitle" onclick="upGuideBackdrop(event)">
+   <div class="upGdBox" role="document">
+    <div class="upGdHead">
+      <span class="upGdHeadIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.2"/><path d="M12 16.6v-5.1"/><path d="M12 7.8h.01"/></svg></span>
+      <div class="upGdHeadTx">
+        <div class="upGdKicker" id="upGuideKicker">ARTWORK</div>
+        <h2 class="upGdTitle" id="upGuideTitle">Upload Guidelines</h2>
+      </div>
+      <button class="upTopBtn" type="button" onclick="upGuideClose()" aria-label="Close guidelines">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m6 6 12 12"/><path d="m18 6-12 12"/></svg>
+      </button>
+    </div>
+    <div class="upGdBody" id="upGuideBody"></div>
+   </div>
+  </div>
+
+  <div class="upPop upPv" id="upPvMod" role="dialog" aria-modal="true" aria-label="Preview">
+   <div class="upPopBox">
+    <div class="upPvHead">
+      <div class="upPvKind" id="upPvKind">DRAFT</div>
+      <button class="upPopX" onclick="upPvClose()" aria-label="Close preview">✕</button>
+    </div>
+    <div class="upPvBody">
+      <div class="upPvImgWrap"><img id="upPvImg" alt=""/></div>
+      <div id="upPvMeta"></div>
+    </div>
+    <div class="upPvFoot" id="upPvFoot"></div>
+   </div>
+  </div>
+
+  <footer class="siteFooter" role="contentinfo">
+
+    <div class="ftMain">
+
+      <div class="ftBrand">
+        <div class="ftBrandName">DIGI<span class="ftBrandAccent">ARTZ</span></div>
+        <div class="ftBrandDivider" aria-hidden="true"></div>
+        <div class="ftBrandTagline">Art Has No Limits</div>
+        <p class="ftBrandDesc">DigiArtz — the digital art community. Character illustrations, landscapes, vehicles, and creative artwork from artists worldwide.</p>
+      </div>
+
+      <div class="ftCols">
+
+        <div class="ftCol">
+          <div class="ftColHead">Browse</div>
+          <ul class="ftColList">
+            <li><a class="ftColLink" href="/explore">Explore</a></li>
+            <li><a class="ftColLink" href="/marketplace">Marketplace</a></li>
+            <li><a class="ftColLink" href="/community">Community</a></li>
+            <li><a class="ftColLink" href="/resources">Resources for artists</a></li>
+            <li><a class="ftColLink" href="/blog">Blog</a></li>
+            <li><a class="ftColLink" href="/login">Login</a></li>
+          </ul>
+        </div>
+
+        <div class="ftCol">
+          <div class="ftColHead">Connect</div>
+          <ul class="ftColList">
+            <li><a class="ftColLink" href="https://x.com/DigiArtzHQ" target="_blank" rel="noopener">
+              <span class="ftLinkIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>X</a></li>
+            <li><a class="ftColLink" href="https://www.instagram.com/duttaanish458?igsh=MXVieThibGVxYndmcQ==" target="_blank" rel="noopener">
+              <span class="ftLinkIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="5.2"/><circle cx="12" cy="12" r="4.1"/><circle cx="17.1" cy="6.9" r="1.15" fill="currentColor" stroke="none"/></svg></span>Instagram</a></li>
+            <li><a class="ftColLink" href="https://digiartz.net" target="_blank" rel="noopener">
+              <span class="ftLinkIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a14 14 0 0 1 3.6 9 14 14 0 0 1-3.6 9 14 14 0 0 1-3.6-9A14 14 0 0 1 12 3z"/></svg></span>Website</a></li>
+            <li><a class="ftColLink" href="mailto:DigiArtzsupport@gmail.com">
+              <span class="ftLinkIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="2.5" y="4.5" width="19" height="15" rx="2.6"/><path d="m3 7.6 9 6 9-6"/></svg></span>Email</a></li>
+          </ul>
+        </div>
+
+      </div>
+
+    </div>
+
+    <div class="ftBase">
+      <div class="ftBaseLogo">DIGIARTZ</div>
+      <div class="ftBaseCopy">© 2026 DigiArtz. All rights reserved.</div>
+      <p class="ftBaseLegal">All artwork, manga, comics, website content, designs, graphics, assets, and website content on DigiArtz are protected by copyright law. Unauthorized reproduction, redistribution, resale, modification, or commercial use without permission is prohibited.</p>
+    </div>
+
+  </footer>
+
+  <div id="legalBackdrop" role="dialog" aria-modal="true" aria-labelledby="lmTitleText" onclick="handleBackdropClick(event)">
+    <div class="legalModal">
+      <div class="lmHead">
+        <div class="lmTitle" id="lmTitleText">PRIVACY POLICY</div>
+        <button class="lmClose" onclick="closeLegal()" aria-label="Close">✕</button>
+      </div>
+      <div class="lmBody" id="lmBody"></div>
+    </div>
+  </div>
+  <div id="fg" role="dialog" aria-modal="true" aria-label="Full Gallery">
+   <header class="fgTopBar">
+    <div class="fgTopL">
+     <button class="fgTopBtn fgTopBack" type="button" onclick="closeFG()" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg>
+     </button>
+     <span class="fgTopTitle" id="fgTopTitle">ARTWORKS</span>
+    </div>
+   </header>
+
+   <div class="fgSec active" id="fgSec-artworks">
+    <div class="fgBdy fgBdy--art">
+     <div id="fgC">
+     </div>
+    </div>
+   </div>
+
+   <div class="fgSec" id="fgSec-marketplace">
+    <div class="fgBdy"><div id="fgSecC-marketplace"></div></div>
+   </div>
+
+   <div class="fgSec" id="fgSec-blog">
+    <div class="fgBdy"><div id="fgSecC-blog"></div></div>
+   </div>
+
+   <div class="fgSec" id="fgSec-resources">
+    <div class="fgBdy"><div id="fgSecC-resources"></div></div>
+   </div>
+
+   <div class="fgSec" id="fgSec-jobs">
+    <div class="fgBdy"><div id="fgSecC-jobs"></div></div>
+   </div>
+
+  </div>
+  <div id="fgFltOvr" onclick="closeFilterPanel()"></div>
+  <div id="fgFltPanel" role="dialog" aria-label="Filter options">
+   <div class="fltPH">
+    <h3><span id="fltPTitle">FILTERS</span></h3>
+    <button class="fltPX" onclick="closeFilterPanel()" aria-label="Close filters">✕</button>
+   </div>
+   <div class="fltPBdy">
+    <div id="fltArtBody">
+    <div class="fltSec">
+     <div class="fltSecLbl">CATEGORY</div>
+     <div class="fltOpts" id="fltCatOpts">
+      <label class="fltOpt"><input type="radio" name="fltCat" value="all" checked><div class="fltDot"></div><span class="fltIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="3" width="7.5" height="7.5" rx="1.5"/><rect x="3" y="13.5" width="7.5" height="7.5" rx="1.5"/><rect x="13.5" y="13.5" width="7.5" height="7.5" rx="1.5"/></svg></span><span class="fltLbl">ALL CATEGORIES</span></label>
+     </div>
+    </div>
+    <div class="fltSep"></div>
+    <div class="fltSec">
+     <div class="fltSecLbl">SORT</div>
+     <div class="fltOpts" id="fltSrtOpts">
+      <label class="fltOpt"><input type="radio" name="fltSrt" value="trending" checked><div class="fltDot"></div><span class="fltIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20V10"/><path d="M10 20V4"/><path d="M16 20v-7"/><path d="M21 20H3"/></svg></span><span class="fltLbl">TRENDING</span></label>
+      <label class="fltOpt"><input type="radio" name="fltSrt" value="new"><div class="fltDot"></div><span class="fltIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3.5 2"/></svg></span><span class="fltLbl">LATEST</span></label>
+     </div>
+    </div>
+    <div class="fltSep"></div>
+    </div>
+    <div id="fltSecBody" style="display:none;"></div>
+    <button class="fltDone" onclick="applyFilters()">DONE</button>
+   </div>
+  </div>
+  <div id="communityPage">
+    <header class="fgTopBar cmTopBar" id="cmHomeHdr">
+     <div class="fgTopL">
+      <button class="fgTopBtn fgTopBack" type="button" onclick="closeCommunityPage()" aria-label="Back">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg>
+      </button>
+      <span class="fgTopTitle" id="cmHdrTitleTxt">COMMUNITIES</span>
+     </div>
+     <div class="fgTopR">
+      <button class="fgTopBtn" id="cmBrowseBtn" type="button" onclick="cmOpenBrowse()"
+              aria-label="Browse communities" aria-controls="cmBrowsePage">
+       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3a15 15 0 0 1 0 18M12 3a15 15 0 0 0 0 18"/></svg>
+      </button>
+     </div>
+    </header>
+  <script defer src="/js/community.js?v=10"></script>
+
+    <div class="cmView" id="cmViewCommunity" style="display:flex;">
+
+      <div class="cmScroll" id="cmGridScroll">
+        <div class="cmBanner">
+          <div class="cmBannerCopy">
+            <div class="cmBannerTitle">
+              <span class="cmBannerL1">Connect.</span>
+              <span class="cmBannerL2">Share.</span>
+              <span class="cmBannerL3">Grow Together.</span>
+            </div>
+            <div class="cmBannerSub">Join communities, share ideas, collaborate and grow with fellow artists.</div>
+            <div class="cmStats">
+              <div class="cmStat cmStat--green">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M17 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9.5" cy="7" r="3.5"/><path d="M22 20v-1.5a4 4 0 0 0-3-3.87"/><path d="M16 3.6a3.5 3.5 0 0 1 0 6.8"/></svg>
+                <div><span class="cmStatNum" id="cmStatNum">0</span><span class="cmStatLbl">COMMUNITIES</span></div>
+              </div>
+              <div class="cmStat cmStat--coral">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4V20"/><circle cx="9" cy="7" r="3.5"/><path d="M19 8v6M22 11h-6"/></svg>
+                <div><span class="cmStatNum" id="cmStatFriends">0</span><span class="cmStatLbl">FRIENDS</span></div>
+              </div>
+            </div>
+            <div class="cmBannerNote" id="cmBannerNote">
+              <span class="cmBannerDot"></span>
+              <span id="cmBannerNoteTxt">Join up to 50 communities and 200 friends.</span>
+            </div>
+          </div>
+          <div class="cmBannerFx" aria-hidden="true">
+            <span class="cmFxRing cmFxRing--1"></span>
+            <span class="cmFxRing cmFxRing--2"></span>
+            <span class="cmFxRing cmFxRing--3"></span>
+            <span class="cmFxRing cmFxRing--4"></span>
+
+            <span class="cmFxDots cmFxDots--tl"></span>
+            <span class="cmFxDots cmFxDots--br"></span>
+            <span class="cmFxDots cmFxDots--tr"></span>
+
+            <span class="cmFxBit cmFxBit--1"></span>
+            <span class="cmFxBit cmFxBit--2"></span>
+            <span class="cmFxBit cmFxBit--3"></span>
+            <span class="cmFxBit cmFxBit--4"></span>
+            <span class="cmFxBit cmFxBit--5"></span>
+          </div>
+        </div>
+
+        <div class="cmSectionHead" id="cmExploreHead">
+          <div>
+            <h3>Explore Communities</h3>
+            <p>Find the perfect community to connect and share.</p>
+          </div>
+        </div>
+
+        <div class="cmGrid" id="cmExploreGrid">
+          <div class="cmCard" onclick="cmOpenCommunity('official')">
+            <div class="cmCardIcon" style="background:linear-gradient(135deg,#4c1d95 0%,#7c3aed 55%,#a855f7 100%);">🎨</div>
+            <div class="cmCardMeta">
+              <div class="cmCardName">DigiArtz Official <span class="cmBadge">Official</span></div>
+              <p>Official community of DigiArtz. Get updates, announcements and more.</p>
+            </div>
+          </div>
+          <div class="cmCard" onclick="cmOpenCommunity('arttalk')">
+            <div class="cmCardIcon" style="background:linear-gradient(135deg,#0f766e 0%,#0891b2 55%,#22d3ee 100%);">💬</div>
+            <div class="cmCardMeta">
+              <div class="cmCardName">Art Talk</div>
+              <p>Discuss about art, share your thoughts, ask questions and grow together.</p>
+            </div>
+          </div>
+          <div class="cmCard" onclick="cmOpenCommunity('feedback')">
+            <div class="cmCardIcon" style="background:linear-gradient(135deg,#9d174d 0%,#db2777 55%,#f97316 100%);">📝</div>
+            <div class="cmCardMeta">
+              <div class="cmCardName">Art Feedback</div>
+              <p>Share your work and get constructive feedback from the community.</p>
+            </div>
+          </div>
+          <div class="cmCard" onclick="cmOpenCommunity('collab')">
+            <div class="cmCardIcon" style="background:linear-gradient(135deg,#065f46 0%,#059669 55%,#22d3ee 100%);">🤝</div>
+            <div class="cmCardMeta">
+              <div class="cmCardName">Collab Hub</div>
+              <p>Find artists to collaborate with on projects and bring ideas to life.</p>
+            </div>
+          </div>
+          <div class="cmCard" onclick="cmOpenCommunity('tips')">
+            <div class="cmCardIcon" style="background:linear-gradient(135deg,#78350f 0%,#b45309 55%,#facc15 100%);">💡</div>
+            <div class="cmCardMeta">
+              <div class="cmCardName">Tips &amp; Resources</div>
+              <p>Share helpful tips, tutorials, tools and resources for artists.</p>
+            </div>
+          </div>
+          <div class="cmCard" onclick="cmOpenCommunity('showcase')">
+            <div class="cmCardIcon" style="background:linear-gradient(135deg,#701a75 0%,#a21caf 55%,#6366f1 100%);">✦</div>
+            <div class="cmCardMeta">
+              <div class="cmCardName">Showcase</div>
+              <p>Share your latest work, celebrate progress and inspire others.</p>
+            </div>
+          </div>
+        </div>
+
+        <div id="cmMineWrap" style="display:none;">
+          <div class="cmSectionHead" id="cmMineHead" style="margin-top:2.2rem;">
+            <div>
+              <h3>Your Communities</h3>
+              <p>Communities you created or joined.</p>
+            </div>
+          </div>
+          <div class="cmGrid" id="cmMineGrid"></div>
+        </div>
+
+        <div class="cmFooterCta" id="cmFooterCta">
+          <div>
+            <strong>Can't find what you're looking for?</strong>
+            <p>Create your own community and build your space. One per artist, and you can be in up to <span id="cmCapMax">50</span>.</p>
+          </div>
+          <div class="cmHeadBtns">
+            <button class="cmCreateBtn" onclick="cmCreateCommunity()">Create</button>
+            <button class="cmCreateBtn cmJoinBtn" onclick="cmOpenJoin()">Join</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="cmChatPanel">
+      <div class="cmHdr chat" id="cmHdr">
+        <button class="cmHdrBack show" id="cmHdrBack" onclick="cmCloseChat()" title="Back" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="20" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+        </button>
+        <div class="cmHdrChat" id="cmHdrChat">
+          <div class="cmHdrTap" id="cmHdrTap">
+            <div class="cmHdrAv" id="cmHdrAv">
+              <img id="cmHdrAvImg" alt="" style="display:none;">
+              <span id="cmHdrAvTxt">?</span>
+            </div>
+            <div class="cmHdrInfo">
+              <div class="cmHdrName" id="cmHdrName">Chat</div>
+              <div class="cmHdrSub" id="cmHdrSub"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+<div class="cmChat" id="dmChatView">
+  <div class="cpBody" id="dmBody"></div>
+  <div class="dmGate" id="dmGate" style="display:none;"></div>
+  <div class="dmBar">
+    <button class="cpEmojiBtn" id="dmEmojiBtn" type="button" title="Emoji" aria-label="Insert emoji" aria-haspopup="true" aria-expanded="false" onclick="toggleEmojiPanel(this,'dmInput')">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8"/><line x1="9" y1="9.4" x2="9.01" y2="9.4" stroke-width="2.6"/><line x1="15" y1="9.4" x2="15.01" y2="9.4" stroke-width="2.6"/></svg>
+    </button>
+    <input class="cpBarInput" id="dmInput" type="text" maxlength="1000"
+           placeholder="Message" title="Text only — links aren't allowed" autocomplete="off"/>
+    <button class="cpBarSend" id="dmSendBtn" onmousedown="event.preventDefault()" title="Send" aria-label="Send message">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.6 21.8 12 3.4 3.4l-.01 6.7L15 12 3.39 13.9z"/></svg>
+    </button>
+  </div>
+</div>
+
+  <script defer src="/js/dm.js?v=18"></script>
+
+  <script defer src="/js/composer.js?v=3"></script>
+
+  <script defer src="/js/misc-core.js?v=10"></script>
+
+      <div class="cmChat" id="cmChatView">
+        <div class="cpBody" id="cpBody">
+          <div class="cpRefreshWrap" id="cpRefreshWrap" aria-hidden="true">
+            <div class="cpRefreshSpinner"></div>
+          </div>
+          <div class="cpEmpty" id="cpEmpty">
+            <div class="cpEIco">◎</div>
+            <div>NO COMMENTS YET</div>
+            <div style="font-size:.68rem;opacity:.6;margin-top:.2rem;">BE THE FIRST TO LEAVE ONE</div>
+          </div>
+        </div>
+      </div>
+
+    <div class="cpBar" id="cpBar">
+      <div class="cpComposerWrap">
+        <div class="cpSelectedImage" id="cpSelectedImage" style="display:none;border-bottom:1px solid var(--bdr);padding:0 0 6px 0;margin:0;">
+          <div class="cpThumbWrap">
+            <img id="cpSelectedImageImg" class="cpThumbPreview" alt="">
+            <button class="cpThumbClose" onclick="hideCommentThumbnail()">✕</button>
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:.75rem;">
+          <button class="cpAttachBtn" id="cpAttachBtn" onclick="cpOpenShowcasePicker()" title="Add your artwork" aria-label="Add your artwork" style="display:none;">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          </button>
+          <div class="cpBarAvatar" id="cpBarAvatar">
+            <img id="cpBarAvatarImg" alt="" style="display:none;">
+            <span id="cpBarAvatarTxt">?</span>
+          </div>
+          <button class="cpEmojiBtn" id="cpEmojiBtn" type="button" title="Emoji" aria-label="Insert emoji" aria-haspopup="true" aria-expanded="false" onclick="toggleEmojiPanel(this,'cpBarInput')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5s1.2 1.8 3.5 1.8 3.5-1.8 3.5-1.8"/><line x1="9" y1="9.4" x2="9.01" y2="9.4" stroke-width="2.6"/><line x1="15" y1="9.4" x2="15.01" y2="9.4" stroke-width="2.6"/></svg>
+          </button>
+          <input class="cpBarInput" id="cpBarInput" type="text" placeholder="Message" maxlength="1000" autocomplete="off"/>
+          <button class="cpBarSend" id="cpBarSend" onclick="cpSend()" onmousedown="event.preventDefault()" title="Send" aria-label="Send message">
+            <svg viewBox="0 0 24 24" fill="currentColor"><path d="M3.4 20.6 21.8 12 3.4 3.4l-.01 6.7L15 12 3.39 13.9z"/></svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="cpLockNote" id="cpLockNote">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="10" width="16" height="10" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg>
+      <span>Only DigiArtz can post here — everyone else can view</span>
+    </div>
+  </div>
+
+  <div id="showcasePicker">
+    <div class="spHdr">
+      <div class="spTitle">SELECT ARTWORK TO SHOWCASE</div>
+      <button class="cmBack" onclick="closeShowcasePicker()" title="Close" aria-label="Close">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="spBody" id="spBody"></div>
+    <div class="spEmpty" id="spEmpty" style="display:none;">
+      <div class="cpEIco">◎</div>
+      <div>NO ARTWORK YET</div>
+      <div style="font-size:.68rem;opacity:.6;margin-top:.2rem;">POST AN ARTWORK OR COMIC FROM YOUR PROFILE FIRST</div>
+    </div>
+  </div>
+
+  <div id="subPage" role="dialog" aria-modal="true" aria-label="Subscription plans">
+
+   <div class="subPgHdr">
+    <button class="subPgX" onclick="closeSubscription()" aria-label="Close subscription"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle">SUBSCRIPTION</div>
+   </div>
+
+   <div class="subPgBdy">
+
+    <div id="subPgGate">
+     <div class="subPgGateNote">
+      <p>Sign in to view this section.</p>
+      <button class="subBtn subBtn--purple" type="button" onclick="pfGuestGate(event)">Sign in</button>
+     </div>
+    </div>
+
+   </div>
+
+  </div>
+
+  <div id="faqSection" class="faqSection" aria-label="Frequently Asked Questions" hidden>
+
+    <div class="faqCatDiv" aria-hidden="true"></div>
+
+    <header class="faqHdr">
+      <h2 class="faqTitle">Frequently Asked Questions</h2>
+      <p class="faqSubtitle">Find answers to common questions about subscriptions, billing, account access, support, and security.</p>
+    </header>
+
+    <div class="faqTopDiv" aria-hidden="true"></div>
+  </div>
+
+  <div class="cmMod" id="cmCreateMod" onclick="if(event.target===this)cmCloseMod('cmCreateMod')">
+    <div class="cmModCard">
+      <div class="cmModTitle">Create Community</div>
+      <div class="cmModSub" id="cmCreateSub">Requires artist Level 100. One community per artist.</div>
+      <div class="cmLbl">NAME (MUST BE UNIQUE)</div>
+      <input class="cmInput" id="cmNewName" maxlength="40" placeholder="e.g. Concept Art Guild" autocomplete="off">
+      <div class="cmLbl">DESCRIPTION (OPTIONAL)</div>
+      <textarea class="cmArea" id="cmNewDesc" maxlength="500" placeholder="What's this community about?"></textarea>
+      <div class="cmModActs">
+        <button class="cmModBtn" onclick="cmCloseMod('cmCreateMod')">Cancel</button>
+        <button class="cmModBtn cmModBtn--go" id="cmCreateGo" onclick="cmDoCreate()">Create</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="cmMod" id="cmJoinMod" onclick="if(event.target===this)cmCloseMod('cmJoinMod')">
+    <div class="cmModCard">
+      <div class="cmModTitle">Join Community</div>
+      <div class="cmModSub">Enter the community name and its join ID.</div>
+      <div class="cmLbl">COMMUNITY NAME</div>
+      <input class="cmInput" id="cmJoinName" maxlength="40" placeholder="Community name" autocomplete="off">
+      <div class="cmLbl">JOIN ID</div>
+      <input class="cmInput" id="cmJoinCode" maxlength="12" placeholder="e.g. A1B2C3" autocomplete="off" style="text-transform:uppercase;">
+      <div class="cmModActs">
+        <button class="cmModBtn" onclick="cmCloseMod('cmJoinMod')">Cancel</button>
+        <button class="cmModBtn cmModBtn--go" id="cmJoinGo" onclick="cmDoJoin()">Join</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rptMod" class="rptMod" role="dialog" aria-modal="true" aria-labelledby="rptTitle" onclick="if(event.target===this)rptClose()">
+    <div class="rptCard">
+      <div class="rptTitle" id="rptTitle">🚩 Report Artwork</div>
+      <div class="rptSub">Why are you reporting this artwork?</div>
+      <div class="rptOpts" id="rptOpts">
+        <label class="rptOpt"><input type="radio" name="rptReason" value="copyright"><span>Copyright infringement</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="ai_undisclosed"><span>AI-generated artwork</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="nudity"><span>Nudity / Sexual content</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="violence"><span>Violence / Gore</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="hate"><span>Hate speech / Harassment</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="spam"><span>Spam / Advertising</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="misinformation"><span>Misinformation</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="impersonation"><span>Impersonation</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="illegal"><span>Illegal content</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="offtopic"><span>Off-topic / Wrong category</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="lowquality"><span>Low-quality / Broken upload</span></label>
+        <label class="rptOpt"><input type="radio" name="rptReason" value="other"><span>Other</span></label>
+      </div>
+      <div class="rptLbl">ADDITIONAL DETAILS (OPTIONAL)</div>
+      <textarea class="rptArea" id="rptDetails" maxlength="1000" placeholder="Describe the issue..."></textarea>
+      <div class="rptChecks">
+        <label class="rptCheck"><input type="checkbox" id="rptBlock"><span>Block this creator</span></label>
+        <label class="rptCheck"><input type="checkbox" id="rptHide"><span>Hide this artwork from my feed</span></label>
+      </div>
+      <div class="rptActions">
+        <button class="rptBtn" onclick="rptClose()">Cancel</button>
+        <button class="rptBtn rptBtn--go" id="rptSubmit" onclick="rptSubmit()">🚩 Submit Report</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="rptUserMod" class="rptMod" role="dialog" aria-modal="true" aria-labelledby="rptUserTitle" onclick="if(event.target===this)rptUserClose()">
+    <div class="rptCard">
+      <div class="rptTitle" id="rptUserTitle">🚩 Report Account</div>
+      <div class="rptSub" id="rptUserSub">Why are you reporting this account?</div>
+      <div class="rptOpts">
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="dmca"><span>DMCA / Copyright</span></label>
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="spam"><span>Spam / Advertising</span></label>
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="harassment"><span>Harassment</span></label>
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="fraud"><span>Fraud / Scam</span></label>
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="impersonation"><span>Impersonation</span></label>
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="hate"><span>Hate speech</span></label>
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="illegal"><span>Illegal activity</span></label>
+        <label class="rptOpt"><input type="radio" name="rptUserReason" value="other"><span>Other</span></label>
+      </div>
+      <div class="rptLbl">ADDITIONAL DETAILS (OPTIONAL)</div>
+      <textarea class="rptArea" id="rptUserDetails" maxlength="1000" placeholder="What has this account been doing?"></textarea>
+      <div class="rptActions">
+        <button class="rptBtn" onclick="rptUserClose()">Cancel</button>
+        <button class="rptBtn rptBtn--go" id="rptUserSubmit" onclick="rptUserSubmit()">🚩 Submit Report</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="dlQuotaMod" role="dialog" aria-modal="true" aria-labelledby="dlQuotaTitle" onclick="if(event.target===this)dzQuotaClose()">
+    <div class="dlqCard">
+      <div class="dlqIcon" aria-hidden="true">⬇</div>
+      <div class="dlqTitle" id="dlQuotaTitle">Daily download quota reached</div>
+      <p class="dlqSub" id="dlQuotaSub">You have used all of your downloads for today. To continue downloading more, you need to buy a subscription.</p>
+      <div class="dlqMeta" id="dlQuotaMeta"></div>
+      <div class="dlqActions">
+        <button class="dlqBtn" onclick="dzQuotaClose()">Cancel</button>
+        <button class="dlqBtn dlqBtn--go" onclick="dzQuotaBuy()">Buy subscription</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="vwCfm" hidden onclick="if(event.target===this)dzConfirmClose()">
+   <div class="vwCfmBox" role="dialog" aria-modal="true" aria-labelledby="vwCfmT">
+    <div class="vwCfmT" id="vwCfmT">Are you sure?</div>
+    <p class="vwCfmM" id="vwCfmM"></p>
+    <div class="vwCfmActs">
+     <button class="vwCfmBtn" type="button" id="vwCfmNo" onclick="dzConfirmClose()">Cancel</button>
+     <button class="vwCfmBtn vwCfmBtn--danger" type="button" id="vwCfmYes" onclick="dzConfirmYes()">Delete</button>
+    </div>
+   </div>
+  </div>
+
+  <div id="dzView" role="dialog" aria-modal="true" aria-label="Detail view">
+   <div class="dzvTop">
+    <button class="avNavTxt" id="dzvPrev" onclick="dzViewNav(-1)" aria-label="Previous">Previous</button>
+    <button class="avNavTxt" id="dzvNext" onclick="dzViewNav(1)" aria-label="Next">Next</button>
+   </div>
+   <div class="dzvBody" id="dzvBody"></div>
+  </div>
+
+  <div id="artModal" role="dialog" aria-modal="true" aria-label="Artwork viewer" data-state="closed">
+   <div class="avBox">
+    <div class="avTopBar">
+     <button class="avNavTxt" id="avPrevBtn" onclick="avNav(-1)" aria-label="Previous">Previous</button>
+     <button class="avNavTxt" id="avNextBtn" onclick="avNav(1)" aria-label="Next">Next</button>
+    </div>
+    <div class="avBody">
+
+     <div id="avAuthorCard"></div>
+     <div class="avImgPane">
+      <div class="avImgViewport" id="avImgViewport">
+       <img alt="" id="lbImg" draggable="false"/>
+      </div>
+      <div class="avImgStack" id="avImgStack" hidden></div>
+     </div>
+     <div class="avSide" id="avSide">
+      <div class="avSideScroll" tabindex="0" role="region" aria-label="Artwork details">
+       <div id="avActRail"></div>
+       <div class="avDlNote" id="avDlNote" hidden></div>
+       <div>
+        <div class="avTitleRow">
+         <div class="avTitle" id="lbNm"></div>
+        </div>
+        <div class="avSubType" id="avSubType"></div>
+        <div class="avSubType" id="avFeatured" hidden>★ Featured artwork</div>
+        <p class="avSummary" id="avSummary" hidden></p>
+       </div>
+       <div class="avDiv" id="avDescDiv" hidden></div>
+       <div id="avDescBlock" hidden>
+        <div class="avBlockH">Description</div>
+        <p class="avDescTxt" id="lbDesc"></p>
+       </div>
+       <div id="avExtraBlocks"></div>
+       <div class="avDiv"></div>
+       <div>
+        <div class="avBlockH">Details</div>
+        <div class="avMetaList" id="avMetaList"></div>
+       </div>
+       <div id="avLinkBlocks"></div>
+       <div class="avDiv" id="avTagsDiv" hidden></div>
+       <div id="avTagsBlock" hidden>
+        <div class="avBlockH">Tags</div>
+        <div class="avTagList" id="avTagList"></div>
+       </div>
+       <div id="avAdSlot"></div>
+       <div class="avDiv"></div>
+       <div class="avCmBlock">
+        <div class="avBlockH">Comments</div>
+        <div class="avCmBar">
+         <input class="avCmIn" id="avCmIn" type="text" maxlength="1000" placeholder="Write a comment…"
+                onkeydown="if(event.key==='Enter')dzCmPost('artwork',avCurrentArt&&avCurrentArt.id,'avCmIn','avCmList')">
+         <button class="avCmSend" onclick="dzCmPost('artwork',avCurrentArt&&avCurrentArt.id,'avCmIn','avCmList')" aria-label="Send comment">➤</button>
+        </div>
+        <div class="avCmEmpty" id="avCmOff" hidden>THE ARTIST TURNED COMMENTS OFF</div>
+        <div class="avCmList" id="avCmList"></div>
+        <button class="vwMore" type="button" id="avCmList_more" hidden onclick="dzCmMore('avCmList')">LOAD 20 MORE</button>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </div>
+
+  <div id="dzLight" role="dialog" aria-modal="true" aria-label="Full picture" tabindex="-1">
+   <img id="dzLightImg" alt="" draggable="false">
+  </div>
+  <div id="authMod" role="dialog" aria-modal="true" aria-label="Login">
+    <div class="subPgHdr">
+      <div class="subPgTitle">ACCOUNT</div>
+    </div>
+    <div class="laBody">
+
+      <p class="laTopLink"><span id="authLeadText">Don't have an account?</span><button id="authToggleBtn" onclick="switchAuthMode('signup')" type="button">Sign up</button></p>
+
+      <div class="laBrand">
+        <div class="laEyebrow">Welcome to</div>
+        <div class="laLogo">Digi<span>Artz</span></div>
+        <p class="laTag">A creative community for artists<br>to share, inspire, and grow together.</p>
+      </div>
+
+      <div class="laFeatures">
+        <div class="laFeat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.926 0 1.648-.746 1.648-1.688 0-.437-.18-.835-.437-1.125-.29-.289-.438-.652-.438-1.125a1.64 1.64 0 0 1 1.668-1.668h1.996c3.051 0 5.555-2.503 5.555-5.554C21.965 6.012 17.461 2 12 2Z"/></svg>
+          Share Your Art
+        </div>
+        <div class="laFeat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+          Connect &amp; Inspire
+        </div>
+        <div class="laFeat">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+          Grow Together
+        </div>
+      </div>
+
+      <div class="laDivider"></div>
+
+      <h2 class="laHead" id="authTitle">Welcome Back</h2>
+      <p class="laSub" id="authSubtitle">Sign in to continue to your account.</p>
+
+      <div class="laErr" id="authErr"></div>
+      <div class="laMsg" id="authMsg"></div>
+
+      <div class="laFieldWrap" id="authUserWrap" style="display:none;">
+        <label class="laLabel" for="authUser">Username</label>
+        <div class="laInputBox">
+          <svg class="laIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          <input class="laInput" id="authUser" placeholder="Choose a username" type="text" autocomplete="username"/>
+        </div>
+      </div>
+
+      <div class="laFieldWrap">
+        <label class="laLabel" for="authEmail">Email</label>
+        <div class="laInputBox">
+          <svg class="laIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 21a8 8 0 0 0-16 0"/><circle cx="12" cy="7" r="4"/></svg>
+          <input class="laInput" id="authEmail" placeholder="Enter your email" type="email" autocomplete="email"/>
+        </div>
+      </div>
+
+      <div class="laFieldWrap">
+        <label class="laLabel" for="authPass">Password</label>
+        <div class="laInputBox">
+          <svg class="laIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input class="laInput laHasEye" id="authPass" placeholder="Enter your password" type="password" autocomplete="current-password"
+            onkeydown="if(event.key==='Enter'){ authMode==='signup'?doSignUp():doAuth(); }"/>
+          <button type="button" class="laEyeBtn" onclick="toggleAuthPassVis()" aria-label="Show password">
+            <svg id="authEyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M1 12s4-7 11-7 11 7 11 7-4 7-11 7-11-7-11-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <div class="laRow">
+        <label class="laCheck"><input type="checkbox" id="authRemember"/> Remember me</label>
+        <button type="button" class="laForgot" onclick="showToast('Password reset — coming soon')">Forgot password?</button>
+      </div>
+
+      <button class="laSubmit" id="authBtn" onclick="doAuth()">Log In</button>
+
+      <div class="laOrDiv">or continue with</div>
+
+      <div class="laSocial">
+        <button type="button" class="laSocialBtn" onclick="doOAuth('google', this)" aria-label="Continue with Google">
+          <svg viewBox="0 0 48 48" aria-hidden="true"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.9 29.3 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.1 8 3l6-6C34.5 5.1 29.5 3 24 3 12.4 3 3 12.4 3 24s9.4 21 21 21 21-9.4 21-21c0-1.3-.1-2.7-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.5 16 18.9 13 24 13c3.1 0 5.8 1.1 8 3l6-6C34.5 6.1 29.5 4 24 4c-7.6 0-14.1 4.3-17.7 10.7z"/><path fill="#4CAF50" d="M24 44c5.3 0 10.1-2 13.7-5.4l-6.3-5.3C29.4 34.9 26.8 36 24 36c-5.3 0-9.7-3.6-11.3-8.4l-6.5 5C9.8 39.6 16.4 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.3-2.3 4.3-4.2 5.7l6.3 5.3C40.9 36.6 44 30.9 44 24c0-1.3-.1-2.7-.4-3.5z"/></svg>
+          Google
+        </button>
+        <button type="button" class="laSocialBtn" onclick="doOAuth('discord', this)" aria-label="Continue with Discord">
+          <svg viewBox="0 0 24 24" fill="#5865F2" aria-hidden="true"><path d="M20.317 4.369a19.79 19.79 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037 19.736 19.736 0 0 0-4.885 1.515.07.07 0 0 0-.032.027C.533 9.045-.32 13.579.099 18.057a.082.082 0 0 0 .031.056 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128c.126-.094.252-.192.372-.291a.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.099.246.198.373.292a.077.077 0 0 1-.006.127 12.3 12.3 0 0 1-1.873.892.076.076 0 0 0-.04.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.84 19.84 0 0 0 6.002-3.03.077.077 0 0 0 .032-.055c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.331c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.211 0 2.176 1.094 2.157 2.418 0 1.334-.946 2.419-2.157 2.419zm7.974 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.418 2.157-2.418 1.211 0 2.176 1.094 2.157 2.418 0 1.334-.946 2.419-2.157 2.419z"/></svg>
+          Discord
+        </button>
+        <button type="button" class="laSocialBtn" onclick="doOAuth('apple', this)" aria-label="Continue with Apple">
+          <svg viewBox="0 0 24 24" fill="#ffffff" aria-hidden="true"><path d="M16.365 1.43c0 1.14-.493 2.27-1.177 3.08-.744.9-1.99 1.57-2.987 1.57-.12 0-.23-.02-.3-.03-.01-.06-.04-.22-.04-.39 0-1.15.572-2.27 1.206-2.98.804-.94 2.142-1.64 3.248-1.68.03.13.05.28.05.43zm4.565 15.71c-.03.07-.463 1.58-1.518 3.12-.945 1.34-1.94 2.71-3.43 2.71-1.517 0-1.9-.88-3.63-.88-1.698 0-2.302.91-3.67.91-1.377 0-2.335-1.25-3.4-2.79-1.23-1.75-2.24-4.53-2.24-7.17 0-4.22 2.74-6.46 5.44-6.46 1.398 0 2.598.94 3.5.94.86 0 2.187-1 3.83-1 .61 0 2.905.06 4.394 2.19-.108.07-2.617 1.53-2.617 4.62 0 3.62 3.14 4.9 3.34 4.99z"/></svg>
+          Apple
+        </button>
+      </div>
+
+      <p class="laFooter">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg>
+        Your data is safe and secure with us.
+      </p>
+
+    </div>
+  </div>
+
+  <div id="setPage" role="dialog" aria-modal="true" aria-label="Settings">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closeSettingsPage()" aria-label="Close settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">SETTINGS</div>
+    </div>
+    <div class="bmBdy">
+      <div class="setList">
+
+        <section class="setGrp" aria-labelledby="setGrpPlan">
+          <h3 class="setGrpHd" id="setGrpPlan">
+            <span class="setGrpIcon" aria-hidden="true">💎</span>
+            <span class="setGrpTxt">Plan</span>
+          </h3>
+          <div class="setGrpItems">
+            <button class="pfMenuItem" onclick="setGo(openSubscription,'subPage')"><span class="pfMenuTxt">Subscription</span></button>
+            <div id="setListGate"></div>
+          </div>
+        </section>
+
+        <section class="setGrp" aria-labelledby="setGrpCon">
+          <h3 class="setGrpHd" id="setGrpCon">
+            <span class="setGrpIcon" aria-hidden="true">🎨</span>
+            <span class="setGrpTxt">Content</span>
+          </h3>
+          <div class="setGrpItems">
+            <button class="pfMenuItem" onclick="setGo(openMyWorkPage,'pfMyWorkPage')"><span class="pfMenuTxt">Edit My Work</span></button>
+            <button class="pfMenuItem" onclick="setGo(albOpenPage,'albPage')"><span class="pfMenuTxt">Albums</span></button>
+            <button class="pfMenuItem" onclick="setGo(openPfShare,'pfShareMod')"><span class="pfMenuTxt">Share Profile</span></button>
+          </div>
+        </section>
+
+        <section class="setGrp" aria-labelledby="setGrpAct">
+          <h3 class="setGrpHd" id="setGrpAct">
+            <span class="setGrpIcon" aria-hidden="true">📊</span>
+            <span class="setGrpTxt">Activity</span>
+          </h3>
+          <div class="setGrpItems">
+            <button class="pfMenuItem" onclick="setGo(openXpPage,'xpPage')"><span class="pfMenuTxt">Artist Progress</span></button>
+            <button class="pfMenuItem" onclick="setGo(openLikesPage,'bmPage')"><span class="pfMenuTxt">Likes</span> <span class="pfMenuCount" id="pfMenuLikeCount"></span></button>
+            <button class="pfMenuItem" onclick="setGo(openBookmarksPage,'bmPage')"><span class="pfMenuTxt">Bookmarks</span> <span class="pfMenuCount" id="pfMenuBmCount"></span></button>
+            <button class="pfMenuItem" onclick="setGo(openFriendsPage,'frdPage')"><span class="pfMenuTxt">Friends</span> <span class="pfMenuCount" id="pfMenuFrdCount"></span></button>
+          </div>
+        </section>
+
+        <section class="setGrp" aria-labelledby="setGrpAcc">
+          <h3 class="setGrpHd" id="setGrpAcc">
+            <span class="setGrpIcon" aria-hidden="true">⚙️</span>
+            <span class="setGrpTxt">Account</span>
+          </h3>
+          <div class="setGrpItems">
+            <button class="pfMenuItem pfMenuItem--soon" onclick="showToast('Privacy &amp; Security — coming soon')"><span class="pfMenuTxt">Privacy &amp; Security</span> <span class="pfMenuSoon">SOON</span></button>
+            <button class="pfMenuItem pfMenuItem--soon" onclick="showToast('Notification settings — coming soon')"><span class="pfMenuTxt">Notifications</span> <span class="pfMenuSoon">SOON</span></button>
+            <button class="pfMenuItem" onclick="setGo(openThemePage,'themePage')"><span class="pfMenuTxt">Theme</span></button>
+            <div id="setAdmGate"></div>
+          </div>
+        </section>
+
+        <section class="setGrp" aria-labelledby="setGrpSup">
+          <h3 class="setGrpHd" id="setGrpSup">
+            <span class="setGrpIcon" aria-hidden="true">❓</span>
+            <span class="setGrpTxt">Support</span>
+          </h3>
+          <div class="setGrpItems">
+            <button class="pfMenuItem pfMenuItem--soon" onclick="showToast('Help &amp; Support — coming soon')"><span class="pfMenuTxt">Help &amp; Support</span> <span class="pfMenuSoon">SOON</span></button>
+            <button class="pfMenuItem pfMenuItem--danger" onclick="pfMenuLogout()"><span class="pfMenuTxt">Log Out</span></button>
+          </div>
+        </section>
+
+        <section class="setGrp" aria-labelledby="setGrpLegal">
+          <h3 class="setGrpHd" id="setGrpLegal">
+            <span class="setGrpIcon" aria-hidden="true">📄</span>
+            <span class="setGrpTxt">Terms &amp; Privacy</span>
+          </h3>
+          <div class="setGrpItems">
+            <a class="pfMenuItem" href="/legal/privacy" onclick="return setGoLegal('privacy')"><span class="pfMenuTxt">Privacy Policy</span></a>
+            <a class="pfMenuItem" href="/legal/terms" onclick="return setGoLegal('terms')"><span class="pfMenuTxt">Terms &amp; Conditions</span></a>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="upPop loConfirm" id="loConfirm" role="dialog" aria-modal="true" aria-labelledby="loConfirmTitle" aria-describedby="loConfirmMsg">
+    <div class="loConfirmBox">
+      <svg class="loConfirmIcon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path class="loConfirmTri" d="M12 3.15c.62 0 1.19.33 1.5.87l7.35 12.73c.31.54.31 1.2 0 1.74-.31.54-.88.87-1.5.87H4.65c-.62 0-1.19-.33-1.5-.87a1.74 1.74 0 0 1 0-1.74L10.5 4.02c.31-.54.88-.87 1.5-.87Z"/>
+        <path class="loConfirmBang" d="M12 8.6v4.6"/>
+        <circle class="loConfirmDot" cx="12" cy="16.5" r="1.2"/>
+      </svg>
+      <h3 class="loConfirmTitle" id="loConfirmTitle">Log out?</h3>
+      <p class="loConfirmMsg" id="loConfirmMsg">Are you sure you want to log out of your account?</p>
+      <div class="loConfirmBtns">
+        <button type="button" class="loConfirmBtn loConfirmBtn--no" id="loConfirmNo" onclick="closeLogoutConfirm()">Cancel</button>
+        <button type="button" class="loConfirmBtn loConfirmBtn--yes" id="loConfirmYes" onclick="confirmLogout()">Yes, log out</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="xpPage" role="dialog" aria-modal="true" aria-label="Artist progress">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closeXpPage()" aria-label="Close progress"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">ARTIST PROGRESS</div>
+    </div>
+    <div class="bmBdy">
+      <div class="xpWrap" id="xpPageWrap"></div>
+    </div>
+  </div>
+
+  <div id="anHubPage" role="dialog" aria-modal="true" aria-label="Analytics">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="anHubClose()" aria-label="Close analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">ANALYTICS</div>
+    </div>
+    <div class="hubBdy">
+      <header class="hubHead">
+        <h2 class="hubLead">Your <em class="hubHi">Analytics</em></h2>
+        <p class="hubDesc">Four dashboards, one for each kind of thing you publish. Views, likes,
+          saves and downloads over time, where your audience arrives from, which pieces are
+          carrying the month, and — on the Marketplace — what you earned. Pick a board to open it.</p>
+      </header>
+      <div class="hubGrid" id="anHubGrid"></div>
+    </div>
+  </div>
+
+  <div id="payHubPage" role="dialog" aria-modal="true" aria-label="Payouts">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="payHubClose()" aria-label="Close payouts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">PAYOUTS</div>
+    </div>
+    <div class="hubBdy">
+      <header class="hubHead">
+        <h2 class="hubLead">Your <em class="hubHi">Money</em></h2>
+        <p class="hubDesc">Everything on your account to do with money, in one place.</p>
+      </header>
+      <div class="hubGrid" id="payHubGrid"></div>
+      <div class="hubNote" id="payHubNote">Sign in to see this.</div>
+    </div>
+  </div>
+
+  <div id="anPage" role="dialog" aria-modal="true" aria-label="Analytics">
+    <div class="subPgHdr">
+      <button class="subPgX" onclick="closeAnalyticsPage()" aria-label="Close analytics"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+      <div class="subPgTitle">ANALYTICS</div>
+    </div>
+    <div class="anBdy" id="anBdy"></div>
+  </div>
+
+  <div class="upPop" id="pfShareMod" role="dialog" aria-modal="true" aria-label="Share profile">
+    <div class="upPopBox pfShareBox">
+      <button class="upPopX" onclick="closePfShare()" aria-label="Close">✕</button>
+      <h3 class="pfShareTitle">SHARE PROFILE</h3>
+      <div class="pfShareQrCard">
+        <div id="pfShareQr" aria-label="Profile QR code"></div>
+      </div>
+      <div class="pfShareUser" id="pfShareUser"></div>
+      <div class="pfShareLink" id="pfShareLink"></div>
+      <div class="pfShareBtns">
+        <div class="pfShareAct">
+          <button class="pfShareCirc" onclick="pfShareCopy()" aria-label="Copy profile link">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15H4.5A1.5 1.5 0 0 1 3 13.5v-9A1.5 1.5 0 0 1 4.5 3h9A1.5 1.5 0 0 1 15 4.5V5"/></svg>
+          </button>
+          <span>COPY</span>
+        </div>
+        <div class="pfShareAct">
+          <button class="pfShareCirc pfShareCirc--pri" onclick="pfShareNative()" aria-label="Share profile">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="m8.6 10.5 6.8-4M8.6 13.5l6.8 4"/></svg>
+          </button>
+          <span>SHARE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">
+  </div>
+  <script defer src="/js/vendor/supabase-js-2.112.2.min.js"></script>
+  <script defer src="/js/badwords-list-a.js?v=3"></script>
+  <script defer src="/js/badwords-list-b.js?v=3"></script>
+  <script defer src="/js/badwords.js?v=5"></script>
+  <script defer src="/js/captcha.js?v=5"></script>
+  <script defer src="/config.js"></script>
+  <script defer src="/uploadVerifier.js"></script>
+  <script defer src="/js/app-core.js?v=60"></script>
+  <script defer src="/js/protect.js?v=4"></script>
+  <script defer src="/js/gallery.js?v=112"></script>
+  <script defer src="/js/fghead.js?v=11"></script>
+  <script defer src="/js/auth.js?v=35"></script>
+  <script defer src="/js/follow.js?v=3"></script>
+  <script defer src="/js/profile.js?v=29"></script>
+  <script defer src="/js/albums.js?v=32"></script>
+  <script defer src="/js/drafts.js?v=14"></script>
+  <script defer src="/js/upqueue.js?v=10"></script>
+  <script defer src="/js/avatar.js?v=7"></script>
+  <script defer src="/js/pfedit.js?v=26"></script>
+  <script defer src="/js/mywork.js?v=32"></script>
+  <script defer src="/js/startup.js?v=12"></script>
+  <script defer src="/js/search.js?v=30"></script>
+  <script defer src="/js/feed.js?v=22"></script>
+  <script defer src="/js/herosearch.js?v=10"></script>
+
+ <div id="rippleHost"></div>
+
+  <script defer src="/js/effects.js?v=15"></script>
+
+<div id="themePage" role="dialog" aria-modal="true" aria-label="Choose your theme">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="closeThemePage()" aria-label="Close theme settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle">THEME</div>
+  </div>
+  <div class="thmBdy">
+    <div class="thmIntro">
+      <h1 class="thmTitle">Choose Your Theme</h1>
+      <p class="thmSub">Select the theme that suits your style</p>
+    </div>
+
+    <div class="thmGrid" id="thmGrid" role="radiogroup" aria-label="Theme"></div>
+    <div class="thmFoot">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.4"><circle cx="8" cy="8" r="6.5"/><path d="M8 7.4v3.4" stroke-linecap="round"/><circle cx="8" cy="5" r=".7" fill="currentColor" stroke="none"/></svg>
+      You can change your theme anytime from settings.
+    </div>
+  </div>
+</div>
+
+  <script defer src="/js/theme.js?v=10"></script>
+
+<div id="legalPage" role="dialog" aria-modal="true" aria-labelledby="lgTitleText">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="closeLegalPage()" aria-label="Back to settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle" id="lgTitleText">LEGAL</div>
+  </div>
+  <div class="lgBdy" id="lgBody"></div>
+</div>
+
+<div id="fgSearchPage" role="dialog" aria-modal="true" aria-labelledby="fgSrchHead">
+  <div class="pfSrchHdr">
+    <button class="pfTopBtn" type="button" onclick="closeFgSearch()" aria-label="Close search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg>
+    </button>
+  </div>
+  <div class="srchLead">
+    <h2 class="srchHead" id="fgSrchHead">What are you <em class="fgHi">looking</em> for?</h2>
+    <p class="srchSub">Search artwork, artists, blogs, and more.</p>
+    <div class="tgSearch" id="fgSrchWrap">
+      <svg class="tgSearchIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" class="tgSearchIn" id="fgSrchIn" placeholder="Search artworks, artists, listings…"
+             autocomplete="off" autocapitalize="off" spellcheck="false"
+             aria-label="Search the gallery" oninput="fgSearchInput(this.value)">
+      <button type="button" class="tgSearchClear" onclick="fgSearchClear()" aria-label="Clear search">✕</button>
+    </div>
+  </div>
+  <div class="fgCatWrap srchRail">
+    <button type="button" class="fgCatNav fgCatPrev" data-fgnav="-1" aria-label="Scroll filters left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 19-7-7 7-7"/></svg></button>
+    <div class="fgCatRail" id="fgSrchScopes" role="tablist" aria-label="Limit search to a section">
+      <button class="fgCatChip on" role="tab" aria-selected="true" type="button" onclick="fgSearchScope('all')">All</button>
+      <button class="fgCatChip" role="tab" aria-selected="false" type="button" onclick="fgSearchScope('artwork')">Artworks</button>
+      <button class="fgCatChip" role="tab" aria-selected="false" type="button" onclick="fgSearchScope('artist')">Artists</button>
+      <button class="fgCatChip" role="tab" aria-selected="false" type="button" onclick="fgSearchScope('marketplace')">Market</button>
+      <button class="fgCatChip" role="tab" aria-selected="false" type="button" onclick="fgSearchScope('blog')">Blog</button>
+      <button class="fgCatChip" role="tab" aria-selected="false" type="button" onclick="fgSearchScope('resources')">Resources</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="artwork" data-q="Characters">Characters</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="artwork" data-q="Anime">Anime</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="artwork" data-q="Sketches">Sketches</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="artwork" data-q="Landscapes">Landscapes</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="artwork" data-q="Concept art">Concept art</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="marketplace" data-q="Prints">Prints</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="marketplace" data-q="Brushes">Brushes</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="marketplace" data-q="UI kits">UI kits</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="marketplace" data-q="3D models">3D models</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="marketplace" data-q="Commissions">Commissions</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="blog" data-q="Tutorials">Tutorials</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="blog" data-q="Interviews">Interviews</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="blog" data-q="Reviews">Reviews</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="blog" data-q="Events">Events</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="blog" data-q="Challenges">Challenges</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="resources" data-q="Textures">Textures</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="resources" data-q="Fonts">Fonts</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="resources" data-q="PSD files">PSD files</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="resources" data-q="Mockups">Mockups</button>
+      <button class="fgCatChip srchSug" type="button" data-scope="resources" data-q="Colour palettes">Colour palettes</button>
+    </div>
+    <button type="button" class="fgCatNav fgCatNext" data-fgnav="1" aria-label="Scroll filters right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
+  </div>
+  <div class="pfSrchBdy">
+    <div class="pfSrchNote" id="fgSrchNote">Type to search the gallery.</div>
+    <div id="fgSrchRes" aria-live="polite"></div>
+  </div>
+</div>
+
+<div id="cmBrowsePage" role="dialog" aria-modal="true" aria-label="Browse communities">
+  <div class="pfSrchHdr">
+    <button class="pfTopBtn" type="button" onclick="cmCloseBrowse()" aria-label="Back">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg>
+    </button>
+    <div class="tgSearch" id="cmBrwWrap">
+      <svg class="tgSearchIco" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input type="search" class="tgSearchIn" id="cmBrwIn" placeholder="Find a community"
+             autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="40"
+             aria-label="Find a community">
+      <button type="button" class="tgSearchClear" onclick="cmBrowseClear()" aria-label="Clear">✕</button>
+    </div>
+  </div>
+  <div class="pfSrchBdy">
+    <div class="cmBrwHd">MOST MEMBERS FIRST</div>
+    <div id="cmBrwList"></div>
+    <div class="pfSrchNote" id="cmBrwNote" hidden></div>
+    <div class="cmBrwMoreWrap"><button class="cmiAct" id="cmBrwMore" type="button" onclick="cmBrowseMore()" hidden>Load more</button></div>
+  </div>
+</div>
+
+<div class="cmMod" id="cmJoinAsk" onclick="if(event.target===this)cmCloseMod('cmJoinAsk')">
+  <div class="cmModCard" style="max-width:340px;">
+    <div class="cmModTitle" id="cmJoinAskTitle">Join this community?</div>
+    <div class="cmModSub" id="cmJoinAskSub">You will be able to read and post in it.</div>
+    <div class="cmModActs">
+      <button class="cmModBtn" onclick="cmCloseMod('cmJoinAsk')">Cancel</button>
+      <button class="cmModBtn cmModBtn--go" id="cmJoinAskGo" onclick="cmJoinAskGo()">Join</button>
+    </div>
+  </div>
+</div>
+
+<div id="albPage" role="dialog" aria-modal="true" aria-label="Albums">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="albClosePage()" aria-label="Close albums"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle">ALBUMS</div>
+  </div>
+  <div class="albBdy">
+    <div class="albGrid" id="albGrid"></div>
+  </div>
+</div>
+
+<div id="albViewPage" role="dialog" aria-modal="true" aria-label="Album">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="albCloseView()" aria-label="Close album"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle" id="albViewTitle">Album</div>
+  </div>
+  <div class="albBdy">
+    <div class="albViewBar">
+      <span class="albViewCount" id="albViewCount"></span>
+      <span id="albViewActs" style="display:none;">
+        <button class="albActBtn" onclick="albRenamePrompt()">EDIT</button>
+        <button class="albActBtn albActBtn--danger" onclick="albDeleteCurrent()">DELETE</button>
+      </span>
+    </div>
+    <div class="pfGrid pfGridArt" id="albViewGrid"></div>
+    <div class="albEmpty" id="albViewEmpty" style="display:none;"></div>
+  </div>
+</div>
+
+<div class="upPop" id="albCfm" role="dialog" aria-modal="true" aria-labelledby="albCfmTitle">
+  <div class="upPopBox albModBox">
+    <h3 class="albModTitle" id="albCfmTitle">DELETE ALBUM</h3>
+    <p class="albCfmTxt" id="albCfmTxt">Are you sure you want to delete this album?</p>
+    <div class="albCfmNote" id="albCfmNote"></div>
+    <div class="albModActs">
+      <button class="upBtnSec" onclick="albCfmClose()">No, keep it</button>
+      <button class="upBtnPri albCfmGo" onclick="albCfmYes()">Yes, delete</button>
+    </div>
+  </div>
+</div>
+
+<div class="upPop" id="albMod" role="dialog" aria-modal="true" aria-label="Album settings">
+  <div class="upPopBox albModBox">
+    <h3 class="albModTitle" id="albModTitle">NEW ALBUM</h3>
+    <input class="albModIn" id="albModIn" maxlength="40" placeholder="Album name…" autocomplete="off"
+           onkeydown="if(event.key==='Enter'){event.preventDefault();albModSave();}">
+    <div class="albModHint" id="albModHint">Up to 40 characters.</div>
+    <div class="albModVisLbl">Who can see it</div>
+    <div class="albModVis" role="group" aria-label="Who can see this album">
+      <button type="button" class="albModVisBtn on" id="albModPub" aria-pressed="true" onclick="albModSetVis(true)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M3 12h18"/><path d="M12 3a15 15 0 0 1 0 18a15 15 0 0 1 0-18"/></svg>
+        <span>Public</span>
+      </button>
+      <button type="button" class="albModVisBtn" id="albModPriv" aria-pressed="false" onclick="albModSetVis(false)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2.2"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/></svg>
+        <span>Private</span>
+      </button>
+    </div>
+    <div class="albModVisNote" id="albModVisNote">Anyone who opens your profile can see this.</div>
+    <div class="albModActs">
+      <button class="upBtnSec albModDel" id="albModDelete" onclick="albModDelete()" hidden>Delete</button>
+      <button class="upBtnSec" onclick="albModClose()">Cancel</button>
+      <button class="upBtnPri" id="albModSave" onclick="albModSave()">Create</button>
+    </div>
+  </div>
+</div>
+
+<div id="bmPage" role="dialog" aria-modal="true" aria-label="Bookmarked artworks">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="closeBookmarksPage()" aria-label="Close bookmarks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle" id="bmPageTitle">BOOKMARKS</div>
+  </div>
+  <div class="bmBdy">
+    <div class="bmGrid" id="bmGrid"></div>
+    <div class="bmEmpty" id="bmEmptyState" style="display:none;">
+      <div class="ico">◈</div>
+      <div id="bmEmptyTitle">NO BOOKMARKS YET</div>
+      <div id="bmEmptyHint" style="margin-top:.5rem;letter-spacing:.06em;opacity:.75;">Tap the bookmark icon on any artwork to save it here.</div>
+    </div>
+  </div>
+</div>
+
+<div id="cartPage" role="dialog" aria-modal="true" aria-label="Your cart">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="closeCartPage()" aria-label="Close cart"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle">CART</div>
+  </div>
+  <div class="fgBdy"><div id="fgSecC-cart"></div></div>
+</div>
+
+<div id="frdPage" role="dialog" aria-modal="true" aria-label="Friends">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="closeFriendsPage()" aria-label="Close friends"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle">FRIENDS</div>
+  </div>
+  <div class="frdBdy">
+    <div class="dmSearchWrap">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+      <input class="dmSearchInput" id="frdSearchInput" type="text" placeholder="Search artists by username…" autocomplete="off">
+    </div>
+    <div id="frdResults"></div>
+
+    <div class="frdSection">DIGIARTZ</div>
+    <div class="cmFriendList">
+      <div class="cmFriendItem" id="zeoRow" role="button" tabindex="0" onclick="zeoOpen()">
+        <div class="cmFriendAvatar zeoChip">
+          <img data-src="/zeo-avatar.png?v=6" alt="" draggable="false" loading="lazy" decoding="async"
+               onerror="this.style.display='none';this.nextElementSibling.style.display='flex';"/>
+          <span class="cmFriendAvatarFallback" style="display:none;">🤖</span>
+        </div>
+        <div class="cmFriendMeta">
+          <div class="cmFriendName">Zeo <span class="cmBadge">BOT</span></div>
+          <div class="cmFriendStatus"><span class="cmDot"></span>Always online · Your DigiArtz assistant</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="dmResults" id="dmResults" aria-live="polite"></div>
+    <div class="dmConvoHead" id="dmConvoHead" style="display:none;">MESSAGES</div>
+    <div class="cmFriendList" id="dmConvoList"></div>
+    <div class="cmEmpty" id="dmEmpty" style="display:none;">
+      <div class="cmEmptyIco">◎</div>
+      <div>NO CONVERSATIONS YET</div>
+      <div class="cmEmptySub">Search for an artist above and send a friend request — once they accept, you can chat.</div>
+    </div>
+
+    <div class="frdSection" id="frdSentHead" style="display:none;">REQUESTS SENT · <span id="frdSentCount">0</span></div>
+    <div class="cmFriendList" id="frdSentList"></div>
+    <div class="frdSection" id="frdListHead" style="display:none;">YOUR FRIENDS · <span id="frdCount">0</span></div>
+    <div class="cmFriendList" id="frdList"></div>
+    <div class="frdSection" id="frdBlockHead" style="display:none;">BLOCKED · <span id="frdBlockCount">0</span></div>
+    <div class="cmFriendList" id="frdBlockList"></div>
+    <div class="bmEmpty" id="frdEmptyState" style="display:none;">
+      <div class="ico">✦</div>
+      <div>NO FRIENDS YET</div>
+      <div style="margin-top:.5rem;letter-spacing:.06em;opacity:.75;">Search for artists above and send a friend request — once they accept, you can chat. Zeo is always there in the meantime.</div>
+    </div>
+  </div>
+</div>
+
+<div id="cmInfoPage" role="dialog" aria-modal="true" aria-label="Community">
+  <div class="subPgHdr">
+    <button class="subPgX" onclick="cmiClose()" aria-label="Back to the community"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 19 8 12l7-7"/></svg></button>
+    <div class="subPgTitle">COMMUNITY</div>
+  </div>
+  <div class="cmiBdy">
+
+    <div class="cmiHero">
+      <div class="cmiIcon" id="cmiIcon">?</div>
+      <div class="cmiName" id="cmiName">—</div>
+      <div class="cmiShort" id="cmiShort"></div>
+      <div class="cmiChips">
+        <span class="cmiChip" id="cmiVis">PRIVATE</span>
+        <span class="cmiChip cmiChip--role" id="cmiRole">MEMBER</span>
+        <span class="cmiChip"><b id="cmiCount">0</b>&nbsp;MEMBERS</span>
+      </div>
+    </div>
+
+    <section class="cmiSec" id="cmiAboutSec">
+      <h4 class="cmiSecHd">ABOUT</h4>
+      <p class="cmiText" id="cmiDesc"></p>
+    </section>
+
+    <section class="cmiSec" id="cmiRulesSec">
+      <h4 class="cmiSecHd">RULES</h4>
+      <p class="cmiText" id="cmiRules"></p>
+    </section>
+
+    <section class="cmiSec" id="cmiMemSec">
+      <h4 class="cmiSecHd">MEMBERS</h4>
+      <div class="cmiSeg" id="cmiSeg">
+        <button class="cmiSegBtn active" id="cmiSegAll" type="button" onclick="cmiMemTab('all')">All members</button>
+        <button class="cmiSegBtn" id="cmiSegBan" type="button" onclick="cmiMemTab('ban')" data-cmi="staff">Ban list</button>
+      </div>
+      <div id="cmiMemList"></div>
+    </section>
+
+    <section class="cmiSec" id="cmiSetSec" data-cmi="owner">
+      <h4 class="cmiSecHd">COMMUNITY SETTINGS</h4>
+      <div class="cmiJoinId">
+        <span>JOIN ID</span>
+        <code id="cmiJoinCode">------</code>
+        <button class="cmiMini" type="button" onclick="cmiCopyCode()">Copy</button>
+      </div>
+      <div class="cmLbl">ICON</div>
+      <div class="cmiIconPick">
+        <div class="cmiIconPrev" id="cmiIconPrev">?</div>
+        <div class="cmiIconPickMeta">
+          <button class="cmiMini" type="button" id="cmiIconBtn" onclick="cmiPickIcon()">Upload an image</button>
+          <button class="cmiMini cmiMini--danger" type="button" id="cmiIconClear" onclick="cmiClearIcon()">Remove</button>
+          <p>A square image, at least 128×128.</p>
+        </div>
+        <input type="file" id="cmiIconFile" accept="image/png,image/jpeg,image/webp" hidden onchange="cmiIconChosen(this)">
+      </div>
+      <div class="cmLbl">NAME</div>
+      <input class="cmInput" id="cmiSetName" maxlength="40" autocomplete="off">
+      <div class="cmLbl">SHORT DESCRIPTION</div>
+      <input class="cmInput" id="cmiSetShort" maxlength="120" placeholder="One line, shown on the card" autocomplete="off">
+      <div class="cmLbl">DESCRIPTION</div>
+      <textarea class="cmArea" id="cmiSetDesc" maxlength="500" placeholder="What is this community about?"></textarea>
+      <div class="cmLbl">RULES</div>
+      <textarea class="cmArea" id="cmiSetRules" maxlength="2000" placeholder="1. Be respectful…"></textarea>
+      <label class="cmToggleRow"><input type="checkbox" id="cmiSetPublic"><span>Public — anyone can read it, join it, and find it in Browse</span></label>
+      <div class="cmiNote">Communities are text only. Links are never allowed in one, and there is no setting for that.</div>
+      <div class="cmModActs">
+        <button class="cmModBtn cmModBtn--go" id="cmiSaveBtn" type="button" onclick="cmiSave()">Save settings</button>
+      </div>
+    </section>
+
+    <section class="cmiSec" id="cmiActSec">
+      <h4 class="cmiSecHd">ACTIONS</h4>
+      <div class="cmiActs">
+        <button class="cmiAct" id="cmiJoinBtn" type="button" onclick="cmiJoin()" hidden>Join community</button>
+        <button class="cmiAct" id="cmiReportBtn" type="button" onclick="cmiReport()" hidden>Report community</button>
+        <button class="cmiAct cmiAct--danger" id="cmiLeaveBtn" type="button" onclick="cmiLeave()" hidden>Leave community</button>
+        <button class="cmiAct cmiAct--danger" id="cmiDeleteBtn" type="button" onclick="cmiDelete()" data-cmi="owner">Delete community</button>
+      </div>
+      <div class="cmiNote" id="cmiActNote"></div>
+    </section>
+
+  </div>
+</div>
+
+<div class="cmMod" id="cmUserMod" onclick="if(event.target===this)cmCloseMod('cmUserMod')">
+  <div class="cmModCard" style="max-width:340px;">
+    <div class="cmuHead">
+      <div class="cmuAva" id="cmuAva">?</div>
+      <div class="cmuMeta">
+        <div class="cmuName" id="cmuName">User</div>
+        <div class="cmuHandle" id="cmuHandle">…</div>
+      </div>
+    </div>
+    <div class="cmActList" id="cmuActs"></div>
+    <div class="cmModActs">
+      <button class="cmModBtn" onclick="cmCloseMod('cmUserMod')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="cmMod" id="cmTxtMod" onclick="if(event.target===this)cmCloseMod('cmTxtMod')">
+  <div class="cmModCard" style="max-width:340px;">
+    <div class="cmModTitle">Message</div>
+    <div class="cmModSub cmTxtQuote" id="cmTxtQuote"></div>
+    <div class="cmActList" id="cmTxtActs"></div>
+    <div class="cmModActs">
+      <button class="cmModBtn" onclick="cmCloseMod('cmTxtMod')">Close</button>
+    </div>
+  </div>
+</div>
+
+<div class="cmMod" id="cmRptMod" onclick="if(event.target===this)cmCloseMod('cmRptMod')">
+  <div class="cmModCard" style="max-width:380px;">
+    <div class="cmModTitle" id="cmRptTitle">Report</div>
+    <div class="cmModSub" id="cmRptSub">Tell us what is wrong. Reports go to the DigiArtz team.</div>
+    <div class="cmActList" id="cmRptReasons"></div>
+    <div class="cmLbl">ANYTHING ELSE (OPTIONAL)</div>
+    <textarea class="cmArea" id="cmRptDetails" maxlength="300" placeholder="Optional detail"></textarea>
+    <div class="cmModActs">
+      <button class="cmModBtn" onclick="cmCloseMod('cmRptMod')">Cancel</button>
+      <button class="cmModBtn cmModBtn--danger" id="cmRptGo" onclick="cmRptSubmit()">Send report</button>
+    </div>
+  </div>
+</div>
+
+  <script defer src="/js/antrack.js?v=2"></script>
+  <script defer src="/js/engagement.js?v=12"></script>
+
+  <script defer src="/js/sections.js?v=142"></script>
+  <script defer src="/js/heropitch.js?v=5"></script>
+  <script defer src="/js/routes.js?v=4"></script>
+
+  <script defer src="/js/topnav.js?v=12"></script>
+
+  <script defer src="/js/navprogress.js?v=7"></script>
+  <script defer src="/js/lazy.js?v=14"></script>
+
+</body>
+</html>
