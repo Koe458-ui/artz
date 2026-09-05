@@ -883,7 +883,7 @@ enable **"Prevent use of compromised passwords."**
 ### 🟠 3. Activate the moderation gate (when ready to test)
 1. Deploy this branch to production.
 2. Cloudflare Pages → **Settings → Environment variables → Production** →
-   add `MOD_SIGNING_SECRET` = the secret Claude gave you in chat → redeploy.
+   add `MOD_SIGNING_SECRET` = your generated signing secret → redeploy.
 3. Upload one artwork to confirm it still publishes normally.
 4. Only then, in the Supabase SQL editor, with the SAME value:
 
