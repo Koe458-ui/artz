@@ -94,16 +94,6 @@ jobs:
           node-version: '22'
       - run: node scripts/check-csp-hashes.mjs
 
-  sql:
-    name: every migrated function pins search_path
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-      - run: node scripts/check-sql-functions.mjs
-
   syntax:
     name: changed javascript parses
     runs-on: ubuntu-latest

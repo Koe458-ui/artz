@@ -250,11 +250,12 @@ SQL suite is run by hand. Nothing failed here because nothing ran.
 `rls-regression.sql` cannot be wired in — it needs a live database and
 credentials CI has no business holding. But the mistake is made in the
 migrations, not in the catalogue, and that can be read statically.
-`scripts/check-sql-functions.mjs` replays the migrations in filename order and
+A static check replayed the migrations in filename order and
 judges only the state they add up to, so a later migration that re-pins or
 revokes settles an earlier one instead of being shouted at for history. It fails
 on both of today's regressions with `20260907` removed and passes with it back,
-which is the only evidence a new check is worth having. It runs as the `sql` job.
+which is the only evidence a new check is worth having. That check and the
+migrations are no longer kept in this repository.
 
 ### smart-function signed uploads into folders it never checked
 
