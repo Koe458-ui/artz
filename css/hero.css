@@ -771,23 +771,10 @@ html[data-theme="offwhite"] .tgSearch.hsBar{
 #artworks.hsOn > .awGrid:not(#hsResults){display:none;}
 #artworks.hsOn .awEmpty{display:none!important;}
 
-@media(min-width:1280px){
-  .awTop{
-    display:flex;align-items:center;justify-content:center;gap:var(--sp-3);
-    margin:var(--sp-6) 0 0;padding:0 var(--shellPad);
-  }
-  .hsWrap{
-    flex:0 1 520px;min-width:240px;max-width:520px;
-    margin:0;padding:0;
-  }
-  .tgSearch.hsBar{max-width:none;}
-  #artworks .awTop .ftWrap{
-    --ftPad:0px;
-    flex:0 1 auto;min-width:0;
-    margin:0;
-  }
-  #artworks .awTop .ftRail{justify-content:flex-start;}
-}
+  /* No wide-screen exception: the feed's search sits above its boards at every
+     width, the way every section head stacks .fgHeadSearch above .fgCatWrap.
+     This used to turn .awTop into a row at >=1280px, which put the search and
+     the boards on one line on a desktop and nowhere else. */
 
 @media(max-width:600px){
   .tgSearch.hsBar{padding:0 var(--sp-6) 0 var(--sp-6);}
