@@ -1,5 +1,33 @@
   var PF_AVB_COOLDOWN_MS = 7*24*60*60*1000;
-  var PF_AVB_DIMS = { avatar:{w:480,h:480}, banner:{w:1600,h:500} };
+    // the showcase card is 4:3; 1200x900 covers a ~600px card at 2x
+  var PF_AVB_DIMS = {
+    avatar      : { w:480,  h:480 },
+    banner      : { w:1200, h:900 },
+    commission_1: { w:1200, h:900 },
+    commission_2: { w:1200, h:900 }
+  };
+    // slide order on the profile carousel; index here is the slide index everywhere
+  var PF_BNR_SLOTS = ['banner', 'commission_1', 'commission_2'];
+  var PF_AVB_LABEL = {
+    avatar:'Profile photo', banner:'Banner',
+    commission_1:'Commission 1', commission_2:'Commission 2'
+  };
+    // storage folder per kind. Both commissions share one — names are timestamped,
+    // and storage RLS only cares that segment 2 is the caller's id
+  var PF_AVB_DIR = {
+    avatar:'avatars', banner:'banners',
+    commission_1:'commissions', commission_2:'commissions'
+  };
+  var PF_AVB_INPUT = {
+    avatar:'pfAvatarFileInput', banner:'pfBannerFileInput',
+    commission_1:'pfCommission_1FileInput', commission_2:'pfCommission_2FileInput'
+  };
+  function pfClearAvBInputs(){
+    for(var k in PF_AVB_INPUT){
+      var el = document.getElementById(PF_AVB_INPUT[k]);
+      if(el) el.value = '';
+    }
+  }
 
   function pfRenderAvatarBanner(){
     if(!pf.profile) return;
@@ -14,16 +42,80 @@
       aImg.style.display='none'; aLetter.style.display='';
       eaImg.style.display='none'; eaLetter.style.display='';
     }
-    var bImg = document.getElementById('pfBannerImg');
-    var ebImg = document.getElementById('pfEditBannerImg');
-    if(pf.profile.banner_url){
-      bImg.src = getViewUrl(pf.profile.banner_url); bImg.style.display='block';
-      ebImg.src = getViewUrl(pf.profile.banner_url); ebImg.style.display='block';
-    } else {
-      bImg.style.display='none';
-      ebImg.style.display='none';
+    PF_BNR_SLOTS.forEach(function(kind, i){
+      pfPaintBnrSlot(i, pf.profile[kind + '_url']);
+    });
+  }
+
+    // one slot, both places it shows: the profile carousel and the edit page card.
+    // No image means the black "nothing here" plate, not an empty frame.
+  function pfPaintBnrSlot(i, url){
+    var src = url ? getViewUrl(url) : '';
+    [['pfBnrImg', 'pfBnrNone'], ['pfEditBnrImg', 'pfEditBnrNone']].forEach(function(pair){
+      var img = document.getElementById(pair[0] + i);
+      var none = document.getElementById(pair[1] + i);
+      if(img){
+        if(src){ img.src = src; img.style.display = 'block'; }
+        else { img.removeAttribute('src'); img.style.display = 'none'; }
+      }
+      if(none) none.hidden = !!src;
+    });
+  }
+
+    // Native scroll-snap does the moving; the dots only report where it landed
+    // and command it. No transform track to keep in sync with a touch drag.
+  function pfBnrStill(){
+    return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
+  }
+  function pfBnrIndex(rail){
+    var w = rail.clientWidth || 1;
+    return Math.max(0, Math.min(PF_BNR_SLOTS.length - 1, Math.round(rail.scrollLeft / w)));
+  }
+  function pfBnrSyncDots(){
+    var rail = document.getElementById('pfBnrRail');
+    var dots = document.getElementById('pfBnrDots');
+    if(!rail || !dots) return;
+    var at = pfBnrIndex(rail);
+    var bs = dots.querySelectorAll('.pfBnrDot');
+    for(var i = 0; i < bs.length; i++){
+      bs[i].classList.toggle('on', i === at);
+      bs[i].setAttribute('aria-selected', i === at ? 'true' : 'false');
     }
   }
+  function pfBnrGo(i){
+    var rail = document.getElementById('pfBnrRail');
+    if(!rail || !rail.children[i]) return;
+    var left = rail.children[i].offsetLeft - rail.offsetLeft;
+    if(rail.scrollTo) rail.scrollTo({ left: left, behavior: pfBnrStill() ? 'auto' : 'smooth' });
+    else rail.scrollLeft = left;
+  }
+    // a freshly opened profile starts on its banner, not wherever the last one was left
+  function pfBnrReset(){
+    var rail = document.getElementById('pfBnrRail');
+    if(!rail) return;
+    var prev = rail.style.scrollBehavior;
+    rail.style.scrollBehavior = 'auto';
+    rail.scrollLeft = 0;
+    rail.style.scrollBehavior = prev;
+    pfBnrSyncDots();
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    var rail = document.getElementById('pfBnrRail');
+    var dots = document.getElementById('pfBnrDots');
+    if(!rail || !dots) return;
+    var queued = false;
+    rail.addEventListener('scroll', function(){
+      if(queued) return;
+      queued = true;
+      requestAnimationFrame(function(){ queued = false; pfBnrSyncDots(); });
+    }, { passive:true });
+    dots.addEventListener('click', function(e){
+      var b = e.target.closest && e.target.closest('[data-bnr]');
+      if(b) pfBnrGo(+b.getAttribute('data-bnr'));
+    });
+    window.addEventListener('resize', pfBnrSyncDots);
+  });
 
   function pfAvBCooldownLeft(updatedAt){
     if(!updatedAt) return 0;
@@ -42,7 +134,11 @@
     document.getElementById(input).click();
   }
   function openPfAvatarPicker(){ openPfAvBPicker('Profile photo', 'avatar_updated_at', 'pfAvatarFileInput'); }
-  function openPfBannerPicker(){ openPfAvBPicker('Banner', 'banner_updated_at', 'pfBannerFileInput'); }
+    // every showcase slot carries its own cooldown, so filling slide 2 is never
+    // blocked by having changed the banner this week
+  function openPfBnrPicker(kind){
+    openPfAvBPicker(PF_AVB_LABEL[kind] || 'Image', kind + '_updated_at', PF_AVB_INPUT[kind]);
+  }
 
   function handlePfAvBFile(e, kind){
     var f = e.target.files[0]; if(!f) return;
@@ -58,11 +154,12 @@
     pfAvBCropPending = file;
     pfAvBCrop.kind = kind;
     var stageEl = document.getElementById('pfAvBCropStage');
-    stageEl.classList.toggle('cropStage--banner', kind==='banner');
-    document.getElementById('pfAvBCropTitle').textContent = kind==='banner' ? 'Set Banner' : 'Set Profile Photo';
-    document.getElementById('pfAvBCropSub').textContent = kind==='banner'
-      ? 'Drag the photo to choose what shows across your banner.'
-      : 'Drag the photo to choose what shows in the square frame.';
+    var isAv = (kind === 'avatar');
+    stageEl.classList.toggle('cropStage--banner', !isAv);
+    document.getElementById('pfAvBCropTitle').textContent = 'Set ' + (PF_AVB_LABEL[kind] || 'Image');
+    document.getElementById('pfAvBCropSub').textContent = isAv
+      ? 'Drag the photo to choose what shows in the square frame.'
+      : 'Drag the photo to choose what shows on the card.';
     var img = document.getElementById('pfAvBCropImg');
     img.onload = function(){
       var rect = stageEl.getBoundingClientRect();
@@ -97,8 +194,7 @@
   function cancelPfAvBCrop(){
     document.getElementById('pfAvBCropMod').classList.remove('open');
     pfAvBCropPending = null;
-    document.getElementById('pfAvatarFileInput').value = '';
-    document.getElementById('pfBannerFileInput').value = '';
+    pfClearAvBInputs();
   }
   function confirmPfAvBCrop(){
     if(!pfAvBCropPending) return;
@@ -130,10 +226,11 @@
   async function doPfAvBUpload(kind, blob){
     try{
       if(!currentUser){ showToast('Sign in required'); return; }
+      var label = PF_AVB_LABEL[kind] || 'Image';
       var left = pfAvBCooldownLeft(pf.profile && pf.profile[kind+'_updated_at']);
-      if(left>0){ showToast((kind==='banner'?'Banner':'Profile photo')+' was updated recently. '+pfAvBCooldownMsg(left)); return; }
+      if(left>0){ showToast(label+' was updated recently. '+pfAvBCooldownMsg(left)); return; }
       var oldPath = pf.profile && pf.profile[kind+'_storage_path'];
-      var path = kind+'s/'+currentUser.id+'/'+Date.now()+'.jpg';
+      var path = (PF_AVB_DIR[kind] || kind+'s')+'/'+currentUser.id+'/'+Date.now()+'.jpg';
       var publicUrl = await s3Upload(BUCKET,path,blob);
       var nowIso = new Date().toISOString();
       var updates = {};
@@ -143,8 +240,13 @@
       var{error:de}=await sb.from('profiles').update(updates).eq('id',currentUser.id);
       if(de) throw de;
 
+        // profile_image and profile_banner_image both upsert on user_id — one row
+        // per user — so a commission slot has no ledger row to take without
+        // evicting the banner's. It is bookkeeping nothing reads; the storage
+        // object and the profiles column are the record that matters.
+      var ledger = (kind==='avatar') ? 'avatar' : (kind==='banner' ? 'banner' : null);
       await dzRecordUpload({
-        imageKind: (kind==='banner' ? 'banner' : 'avatar'),
+        imageKind: ledger,
         fileKind: null, url: publicUrl, path: path, file: blob
       });
 
@@ -164,8 +266,10 @@
       if(pf.profile.username){
         pfMediaCache[pf.profile.username] = { avatar_url: pf.profile.avatar_url||null, banner_url: pf.profile.banner_url||null };
       }
-      // the artist cache behind every card and chip holds the old picture
-      if(typeof dzArtistCache !== 'undefined' && dzArtistCache && dzArtistCache[currentUser.id]){
+      // the artist cache behind every card and chip holds the old picture. Only
+      // the avatar and banner appear there, so a commission slot has nothing to fix
+      if((kind==='avatar' || kind==='banner') &&
+         typeof dzArtistCache !== 'undefined' && dzArtistCache && dzArtistCache[currentUser.id]){
         dzArtistCache[currentUser.id][kind+'_url'] = publicUrl;
       }
       if(kind==='avatar'){
@@ -179,14 +283,11 @@
           try{ if(typeof cpRender === 'function') cpRender(); }catch(e){}
         }
       }
-      showToast((kind==='banner'?'Banner':'Profile photo')+' updated');
+      showToast(label+' updated');
     }catch(err){ console.error('Error: '+err.message);
       if(window.meritDenied && window.meritDenied(err, 'upload')) return;
       showToast(safeErr(err, 'Upload failed \u2014 try again')); }
-    finally{
-      document.getElementById('pfAvatarFileInput').value = '';
-      document.getElementById('pfBannerFileInput').value = '';
-    }
+    finally{ pfClearAvBInputs(); }
   }
 
   let tT;

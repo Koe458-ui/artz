@@ -151,15 +151,15 @@
   <link rel="stylesheet" href="/css/community.css?v=41" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/connect.css?v=19">
   <link rel="stylesheet" href="/css/ranking.css?v=20" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="/css/profile.css?v=45" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/profile.css?v=46" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/admin.css?v=14" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/auth.css?v=9" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/panels.css?v=36">
-  <link rel="stylesheet" href="/css/upload.css?v=27" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/upload.css?v=28" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/widgets.css?v=35">
   <link rel="stylesheet" href="/css/overrides.css?v=69">
   <link rel="stylesheet" href="/css/select.css?v=5">
-  <noscript><link rel="stylesheet" href="/css/viewer.css?v=53"><link rel="stylesheet" href="/css/community.css?v=41"><link rel="stylesheet" href="/css/ranking.css?v=20"><link rel="stylesheet" href="/css/profile.css?v=45"><link rel="stylesheet" href="/css/admin.css?v=14"><link rel="stylesheet" href="/css/auth.css?v=9"><link rel="stylesheet" href="/css/upload.css?v=27"></noscript>
+  <noscript><link rel="stylesheet" href="/css/viewer.css?v=53"><link rel="stylesheet" href="/css/community.css?v=41"><link rel="stylesheet" href="/css/ranking.css?v=20"><link rel="stylesheet" href="/css/profile.css?v=46"><link rel="stylesheet" href="/css/admin.css?v=14"><link rel="stylesheet" href="/css/auth.css?v=9"><link rel="stylesheet" href="/css/upload.css?v=28"></noscript>
  </head>
  <body>
 
@@ -519,13 +519,33 @@
       </div>
     </header>
 
-    <div class="pfBanner" id="pfBanner">
-      <img alt="" id="pfBannerImg">
-    </div>
-
     <div class="pfBdy">
 
-      <section class="pfId" aria-label="Artist identity">
+      <div class="pfHead">
+
+        <div class="pfBnr" id="pfBnr">
+          <div class="pfBnrRail" id="pfBnrRail" aria-live="off">
+          <div class="pfBnrSlide" id="pfBnrSlide0" role="group" aria-roledescription="slide" aria-label="Banner, 1 of 3">
+            <img alt="" id="pfBnrImg0">
+            <p class="pfBnrNone" id="pfBnrNone0"><span>nothing</span><span>here</span></p>
+          </div>
+          <div class="pfBnrSlide" id="pfBnrSlide1" role="group" aria-roledescription="slide" aria-label="Commission 1, 2 of 3">
+            <img alt="" id="pfBnrImg1">
+            <p class="pfBnrNone" id="pfBnrNone1"><span>nothing</span><span>here</span></p>
+          </div>
+          <div class="pfBnrSlide" id="pfBnrSlide2" role="group" aria-roledescription="slide" aria-label="Commission 2, 3 of 3">
+            <img alt="" id="pfBnrImg2">
+            <p class="pfBnrNone" id="pfBnrNone2"><span>nothing</span><span>here</span></p>
+          </div>
+          </div>
+          <div class="pfBnrDots" id="pfBnrDots" role="tablist" aria-label="Choose showcase slide">
+            <button type="button" class="pfBnrDot on" data-bnr="0" role="tab" aria-selected="true" aria-label="Banner"></button>
+            <button type="button" class="pfBnrDot" data-bnr="1" role="tab" aria-selected="false" aria-label="Commission 1"></button>
+            <button type="button" class="pfBnrDot" data-bnr="2" role="tab" aria-selected="false" aria-label="Commission 2"></button>
+          </div>
+        </div>
+
+        <section class="pfId" aria-label="Artist identity">
         <div class="pfIdTop">
           <div class="pfIdWho">
             <div class="pfAvatarWrap">
@@ -575,6 +595,7 @@
           </div>
         </div>
       </section>
+      </div>
 
       <nav class="pfTabs">
         <div class="fgCatWrap pfTabWrap">
@@ -652,11 +673,37 @@
       <div class="subPgTitle">EDIT PROFILE</div>
     </div>
     <div class="pfEditBdy">
-      <div class="pfEditBannerWrap" id="pfEditBannerWrap">
-        <img alt="" id="pfEditBannerImg">
-        <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBannerPicker()" aria-label="Change banner">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
-        </button>
+      <div class="pfEditBnrSet" aria-label="Showcase images">
+        <div class="pfEditBnrCard">
+          <div class="pfEditBnrLbl">Banner</div>
+          <div class="pfEditBannerWrap" id="pfEditBnrWrap0">
+            <img alt="" id="pfEditBnrImg0">
+            <p class="pfBnrNone" id="pfEditBnrNone0"><span>nothing</span><span>here</span></p>
+            <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBnrPicker('banner')" aria-label="Change banner">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="pfEditBnrCard">
+          <div class="pfEditBnrLbl">Commission 1</div>
+          <div class="pfEditBannerWrap" id="pfEditBnrWrap1">
+            <img alt="" id="pfEditBnrImg1">
+            <p class="pfBnrNone" id="pfEditBnrNone1"><span>nothing</span><span>here</span></p>
+            <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBnrPicker('commission_1')" aria-label="Change commission 1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+          </div>
+        </div>
+        <div class="pfEditBnrCard">
+          <div class="pfEditBnrLbl">Commission 2</div>
+          <div class="pfEditBannerWrap" id="pfEditBnrWrap2">
+            <img alt="" id="pfEditBnrImg2">
+            <p class="pfBnrNone" id="pfEditBnrNone2"><span>nothing</span><span>here</span></p>
+            <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBnrPicker('commission_2')" aria-label="Change commission 2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" width="24" height="24"><path d="M12 20h9"/><path d="M16.5 3.5a2.12 2.12 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            </button>
+          </div>
+        </div>
       </div>
       <div class="pfEditAvatarWrap">
         <div class="pfEditAvatar" id="pfEditAvatar">
@@ -816,6 +863,8 @@
 
   <input type="file" id="pfAvatarFileInput" accept="image/*" style="display:none" onchange="handlePfAvBFile(event,'avatar')">
   <input type="file" id="pfBannerFileInput" accept="image/*" style="display:none" onchange="handlePfAvBFile(event,'banner')">
+  <input type="file" id="pfCommission_1FileInput" accept="image/*" style="display:none" onchange="handlePfAvBFile(event,'commission_1')">
+  <input type="file" id="pfCommission_2FileInput" accept="image/*" style="display:none" onchange="handlePfAvBFile(event,'commission_2')">
   <div class="cropPop" id="pfAvBCropMod">
    <div class="cropBox" onclick="event.stopPropagation()">
     <div class="cropHead">
@@ -1951,11 +2000,11 @@
   <script defer src="/js/fghead.js?v=11"></script>
   <script defer src="/js/auth.js?v=35"></script>
   <script defer src="/js/follow.js?v=3"></script>
-  <script defer src="/js/profile.js?v=30"></script>
+  <script defer src="/js/profile.js?v=31"></script>
   <script defer src="/js/albums.js?v=32"></script>
   <script defer src="/js/drafts.js?v=14"></script>
   <script defer src="/js/upqueue.js?v=10"></script>
-  <script defer src="/js/avatar.js?v=7"></script>
+  <script defer src="/js/avatar.js?v=8"></script>
   <script defer src="/js/pfedit.js?v=26"></script>
   <script defer src="/js/mywork.js?v=32"></script>
   <script defer src="/js/startup.js?v=12"></script>

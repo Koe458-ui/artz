@@ -27,16 +27,83 @@
 
 .pfBdy{width:100%;padding:0 0 var(--sp-8);background:var(--bg);}
 
-.pfBanner{
-  position:relative;width:100%;
-  height:min(clamp(132px,30vw,300px),38dvh);
-  min-height:132px;
-  background:
-    radial-gradient(120% 150% at 20% 12%,rgba(59,130,246,.40),transparent 62%),
-    linear-gradient(160deg,color-mix(in srgb,#1E3A8A 26%,var(--sur2)) 0%,var(--sur2) 62%);
-  overflow:hidden;
+  /* Banner and identity share one shell at every width — the measure desktop
+     already had (--shellPad resolves to 10% there), not a phone-width one that
+     grows. Held to 1600px so it cannot sprawl on a very wide screen. */
+.pfHead{
+  --pfBnrR:clamp(28px,7vw,56px);
+  width:min(80%,1600px);margin-inline:auto;
+  display:grid;gap:var(--sp-6);padding-top:var(--sp-6);
 }
-.pfBanner img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;z-index:0;}
+  /* the shell already pads; a second --pfPad inside it would inset twice */
+.pfHead .pfId{padding-left:0;padding-right:0;}
+  /* the card is detached and round now, so the avatar has no edge to straddle */
+.pfHead .pfAvatarWrap{margin-top:0;}
+
+.pfBnr{position:relative;min-width:0;}
+.pfBnrRail{
+  display:flex;overflow-x:auto;overflow-y:hidden;
+  scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
+  -webkit-overflow-scrolling:touch;scroll-behavior:smooth;
+  scrollbar-width:none;-ms-overflow-style:none;
+  border-radius:var(--pfBnrR);
+}
+.pfBnrRail::-webkit-scrollbar{display:none;}
+.pfBnrSlide{
+  position:relative;flex:0 0 100%;width:100%;
+  aspect-ratio:4/3;
+  scroll-snap-align:center;scroll-snap-stop:always;
+  background:#000;overflow:hidden;
+}
+.pfBnrSlide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
+
+  /* an empty slide is the hero's signature face on black, in brand red — the
+     same treatment "Create & Inspire" gets, down to the stroke */
+.pfBnrNone{
+  position:absolute;inset:0;margin:0;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;pointer-events:none;
+  font-family:var(--fsig);font-weight:400;font-style:normal;
+  letter-spacing:0;-webkit-text-stroke:var(--sigInk) currentColor;
+  color:var(--brand-red);
+  font-size:clamp(1.75rem,6vw,3.25rem);line-height:1.08;
+}
+.pfBnrNone[hidden]{display:none;}
+
+  /* the dots ride inside the card, near its foot. They sit over whatever the
+     artist uploaded, so they carry their own dark pill rather than trusting the
+     image underneath to be dark enough. 22px of tap around a 9px dot. */
+.pfBnrDots{
+  position:absolute;z-index:2;
+  left:50%;transform:translateX(-50%);
+  bottom:clamp(10px,2.6vw,20px);
+  display:flex;justify-content:center;align-items:center;gap:var(--sp-1);
+  padding:var(--sp-1) var(--sp-2);border-radius:999px;
+  background:rgba(0,0,0,.45);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+}
+.pfBnrDot{
+  width:22px;height:22px;padding:0;border:0;background:none;cursor:pointer;border-radius:50%;
+  display:inline-flex;align-items:center;justify-content:center;
+  -webkit-tap-highlight-color:transparent;
+}
+.pfBnrDot::before{
+  content:'';width:9px;height:9px;border-radius:50%;
+  background:rgba(255,255,255,.45);transition:background .2s,transform .2s;
+}
+.pfBnrDot.on::before{background:#fff;transform:scale(1.3);}
+@media(hover:hover){ .pfBnrDot:hover::before{background:rgba(255,255,255,.75);} }
+.pfBnrDot.on:hover::before{background:#fff;}
+.pfBnrDot:focus-visible{outline:2px solid #fff;outline-offset:2px;}
+
+  /* profile left, banner right, details under the profile — the banner is tall
+     enough at 4:3 that the bio fills the column beside it rather than pushing down */
+@media(min-width:900px){
+  .pfHead{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:var(--sp-8);}
+  .pfId{grid-column:1;grid-row:1;}
+  .pfBnr{grid-column:2;grid-row:1;}
+}
+@media(prefers-reduced-motion:reduce){ .pfBnrRail{scroll-behavior:auto;} }
 
 .pfId{padding:0 var(--pfPad) var(--sp-6);}
   /* Row bottom-aligns to the avatar so the name is level with the banner edge; a negative margin would move the row, not the avatar */
@@ -535,15 +602,25 @@ a.pfMenuItem{text-decoration:none;}
 #pfEditPage .subPgTitle{color:var(--tx);}
 .pfEditBdy{margin:0 auto;box-sizing:border-box;padding:var(--sp-7) var(--shellPad) var(--sp-10);}
 .pfEditBdy > *{max-width:640px;}
+  /* three slots, same order and shape as the profile carousel */
+.pfEditBnrSet{display:grid;gap:var(--sp-6);margin-bottom:var(--sp-8);}
+@media(min-width:640px){ .pfEditBnrSet{grid-template-columns:repeat(3,minmax(0,1fr));} }
+.pfEditBnrLbl{
+  font-family:var(--fm);font-size:var(--fs-2xs);letter-spacing:var(--ls-wider);
+  text-transform:uppercase;color:var(--txd);margin-bottom:var(--sp-2);
+}
 .pfEditBannerWrap{
-  position:relative;width:100%;height:140px;border-radius:12px;overflow:hidden;
-  background:radial-gradient(ellipse at 25% 20%,rgba(59,130,246,.28),transparent 60%),
-    linear-gradient(160deg,#0b1220 0%,#111827 45%,#1e293b 80%,#0b1220 100%);
-  margin-bottom:var(--sp-9);
+  position:relative;width:100%;aspect-ratio:4/3;
+  border-radius:clamp(18px,4vw,32px);overflow:hidden;background:#000;
 }
 .pfEditBannerWrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
+.pfEditBannerWrap .pfBnrNone{font-size:clamp(1.1rem,4.5vw,1.7rem);}
 .pfEditBannerBtn{position:absolute;bottom:.7rem;right:.7rem;}
-.pfEditAvatarWrap{position:absolute;left:var(--shellPad);top:96px;}
+  /* the avatar used to hang off a single 140px strip at a fixed top:96px; with
+     three cards above it there is no such offset to hang from, so it sits in flow */
+  /* width:max-content matters: the pencil is positioned against this box, and a
+     full-width block would fling it to the right edge of the page */
+.pfEditAvatarWrap{position:relative;width:max-content;margin:0 0 var(--sp-7);}
 .pfEditAvatar{
   width:88px;height:88px;border-radius:50%;position:relative;overflow:hidden;
   display:flex;align-items:center;justify-content:center;

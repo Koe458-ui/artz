@@ -26,7 +26,7 @@
     }catch(e){ return ''; }
   }
 
-  var PF_PROFILE_COLS = 'id,username,display_name,bio,role,created_at,username_changed_at,follower_count,following_count,merit,avatar_url,avatar_storage_path,avatar_updated_at,banner_url,banner_storage_path,banner_updated_at,social_links';
+  var PF_PROFILE_COLS = 'id,username,display_name,bio,role,created_at,username_changed_at,follower_count,following_count,merit,avatar_url,avatar_storage_path,avatar_updated_at,banner_url,banner_storage_path,banner_updated_at,commission_1_url,commission_1_storage_path,commission_1_updated_at,commission_2_url,commission_2_storage_path,commission_2_updated_at,social_links';
 
   function pfOwnKey(){
     var c = window.dzCached ? window.dzCached() : null;
@@ -143,6 +143,9 @@
       .forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
     var _pgs=document.getElementById('pfGallerySentinel'); if(_pgs) _pgs.style.display='none';
     var mySeq = ++pfOpenSeq;
+      // both branches below paint a different person, so the carousel goes back
+      // to the banner rather than opening on the last profile's slide 3
+    if(typeof pfBnrReset === 'function') pfBnrReset();
 
     var pfLc = String(username).toLowerCase();
     var pfCache = window.dzCached ? window.dzCached() : null;
@@ -156,7 +159,14 @@
       document.getElementById('pfUsername').textContent='Loading…';
       document.getElementById('pfAvatarLetter').textContent='?';
       document.getElementById('pfAvatarImg').style.display='none';
-      document.getElementById('pfBannerImg').style.display='none';
+        // clear all three showcase slides, not just the banner, or the previous
+        // profile's commissions sit under the next one's name while it loads
+      for(var _s=0; _s<3; _s++){
+        var _si=document.getElementById('pfBnrImg'+_s);
+        var _sn=document.getElementById('pfBnrNone'+_s);
+        if(_si){ _si.removeAttribute('src'); _si.style.display='none'; }
+        if(_sn) _sn.hidden=false;
+      }
       document.getElementById('pfJoined').textContent='';
       var _hb=document.getElementById('pfHeadBio'); if(_hb) _hb.textContent='';
       var _hn=document.getElementById('pfHandle'); if(_hn) _hn.textContent='';
