@@ -34,10 +34,13 @@
      held the card to 80% on a phone too, where the shell is 94% — which read as
      a band of dead space either side of a card narrower than everything under it. */
 .pfHead{
-  --pfBnrR:clamp(28px,7vw,56px);
   box-sizing:border-box;width:100%;
   padding:var(--sp-6) var(--pfPad) 0;
-  display:grid;gap:var(--sp-6);
+    /* minmax(0,1fr), not the default minmax(auto,1fr): auto floors the track at
+       the content's min-width, and the action row's is ~411px, so on a phone the
+       column grew past the screen and cut the Follow and Share buttons off
+       instead of letting them squeeze as they are built to. */
+  display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-6);
 }
   /* the shell already pads; a second --pfPad inside it would inset twice */
 .pfHead .pfId{padding-left:0;padding-right:0;}
@@ -50,7 +53,12 @@
   scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
   -webkit-overflow-scrolling:touch;scroll-behavior:smooth;
   scrollbar-width:none;-ms-overflow-style:none;
-  border-radius:var(--pfBnrR);
+    /* One curve everywhere. A viewport clamp gave the phone 7.6% of the card's
+       width and a desktop 10%, so the same card looked rounder on a big screen.
+       The card is 4:3, so 7.5% of width and 10% of height come to the same
+       number of pixels — a circular corner that holds the phone's proportion
+       at every size. */
+  border-radius:7.5% / 10%;
 }
 .pfBnrRail::-webkit-scrollbar{display:none;}
 .pfBnrSlide{
@@ -116,9 +124,18 @@
   /* profile left, banner right, details under the profile — the banner is tall
      enough at 4:3 that the bio fills the column beside it rather than pushing down */
 @media(min-width:900px){
-  .pfHead{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:start;gap:var(--sp-8);}
+  .pfHead{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:var(--sp-8);}
   .pfId{grid-column:1;grid-row:1;}
+    /* .pfId's own padding rule sits later in this file at equal specificity,
+       so it has to be outranked, not merely restated */
+  .pfHead .pfId{padding-bottom:0;}
   .pfBnr{grid-column:2;grid-row:1;}
+    /* Both columns end together. The identity column is the shorter one — the head
+       bio is cut at 100 characters, so it cannot outrun a 4:3 card — and it already
+       wraps into lines (who, actions, stats, bio). Stretching it to the card's height
+       and spreading those lines puts the last of them on the card's bottom edge,
+       instead of leaving the column hanging half way up. */
+  .pfHead .pfIdTop{height:100%;align-content:space-between;}
 }
 @media(prefers-reduced-motion:reduce){ .pfBnrRail{scroll-behavior:auto;} }
 
@@ -617,8 +634,10 @@ a.pfMenuItem{text-decoration:none;}
 }
 #pfEditPage.open{transform:translateX(0);}
 #pfEditPage .subPgTitle{color:var(--tx);}
+  /* the shell is the measure here too: --shellPad is 10% a side at >=1024px,
+     capped by --shellMax, so this fills 80% and stops near 1600px. It used to
+     cap every child at 640px, which left the page a narrow column on a desktop */
 .pfEditBdy{margin:0 auto;box-sizing:border-box;padding:var(--sp-7) var(--shellPad) var(--sp-10);}
-.pfEditBdy > *{max-width:640px;}
   /* three slots, same order and shape as the profile carousel */
 .pfEditBnrSet{display:grid;gap:var(--sp-6);margin-bottom:var(--sp-8);}
 @media(min-width:640px){ .pfEditBnrSet{grid-template-columns:repeat(3,minmax(0,1fr));} }
@@ -628,7 +647,7 @@ a.pfMenuItem{text-decoration:none;}
 }
 .pfEditBannerWrap{
   position:relative;width:100%;aspect-ratio:4/3;
-  border-radius:clamp(18px,4vw,32px);overflow:hidden;background:#000;
+  border-radius:7.5% / 10%;overflow:hidden;background:#000;
 }
 .pfEditBannerWrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
 .pfEditBannerWrap .pfBnrNone{font-size:clamp(1.1rem,4.5vw,1.7rem);}
