@@ -27,13 +27,17 @@
 
 .pfBdy{width:100%;padding:0 0 var(--sp-8);background:var(--bg);}
 
-  /* Banner and identity share one shell at every width — the measure desktop
-     already had (--shellPad resolves to 10% there), not a phone-width one that
-     grows. Held to 1600px so it cannot sprawl on a very wide screen. */
+  /* Banner and identity sit in the page's own shell, the same one the tabs and
+     grids below them use. That shell already IS the desktop measure asked for:
+     --shellPad resolves to 10% a side at >=1024px, capped by --shellMax, so the
+     content is 80% and never wider than ~1600px. Hardcoding 80% here instead
+     held the card to 80% on a phone too, where the shell is 94% — which read as
+     a band of dead space either side of a card narrower than everything under it. */
 .pfHead{
   --pfBnrR:clamp(28px,7vw,56px);
-  width:min(80%,1600px);margin-inline:auto;
-  display:grid;gap:var(--sp-6);padding-top:var(--sp-6);
+  box-sizing:border-box;width:100%;
+  padding:var(--sp-6) var(--pfPad) 0;
+  display:grid;gap:var(--sp-6);
 }
   /* the shell already pads; a second --pfPad inside it would inset twice */
 .pfHead .pfId{padding-left:0;padding-right:0;}
@@ -56,6 +60,19 @@
   background:#000;overflow:hidden;
 }
 .pfBnrSlide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
+
+  /* says what the slide is, so a commission is never taken for the banner. Same
+     dark pill as the dots: it sits over the artist's image, not over a known ground */
+.pfBnrTag{
+  position:absolute;z-index:2;pointer-events:none;
+  top:clamp(10px,2.6vw,18px);left:clamp(12px,3vw,20px);
+  padding:var(--sp-1) var(--sp-3);border-radius:999px;
+  background:rgba(0,0,0,.45);
+  -webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  font-family:var(--fm);font-size:var(--fs-3xs);font-weight:700;
+  letter-spacing:var(--ls-wider);text-transform:uppercase;
+  color:#fff;line-height:var(--lh-flat);
+}
 
   /* an empty slide is the hero's signature face on black, in brand red — the
      same treatment "Create & Inspire" gets, down to the stroke */
