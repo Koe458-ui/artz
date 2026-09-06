@@ -55,10 +55,10 @@
   scrollbar-width:none;-ms-overflow-style:none;
     /* One curve everywhere. A viewport clamp gave the phone 7.6% of the card's
        width and a desktop 10%, so the same card looked rounder on a big screen.
-       The card is 4:3, so 7.5% of width and 10% of height come to the same
-       number of pixels — a circular corner that holds the phone's proportion
-       at every size. */
-  border-radius:7.5% / 10%;
+       A proportion of the card fixes that: the card is 4:3, so 10% of width and
+       13.3333% of height come to the same number of pixels, which is a circular
+       corner that scales with the card instead of with the window. */
+  border-radius:10% / 13.3333%;
 }
 .pfBnrRail::-webkit-scrollbar{display:none;}
 .pfBnrSlide{
@@ -647,7 +647,7 @@ a.pfMenuItem{text-decoration:none;}
 }
 .pfEditBannerWrap{
   position:relative;width:100%;aspect-ratio:4/3;
-  border-radius:7.5% / 10%;overflow:hidden;background:#000;
+  border-radius:10% / 13.3333%;overflow:hidden;background:#000;
 }
 .pfEditBannerWrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
 .pfEditBannerWrap .pfBnrNone{font-size:clamp(1.1rem,4.5vw,1.7rem);}
