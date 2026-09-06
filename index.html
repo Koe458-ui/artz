@@ -146,20 +146,20 @@
   })();
   </script>
   <link rel="stylesheet" href="/css/base.css?v=47">
-  <link rel="stylesheet" href="/css/hero.css?v=164">
+  <link rel="stylesheet" href="/css/hero.css?v=165">
   <link rel="stylesheet" href="/css/viewer.css?v=53" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/community.css?v=41" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/connect.css?v=19">
   <link rel="stylesheet" href="/css/ranking.css?v=20" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="/css/profile.css?v=50" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/profile.css?v=51" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/admin.css?v=14" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/auth.css?v=9" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/panels.css?v=36">
-  <link rel="stylesheet" href="/css/upload.css?v=28" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/upload.css?v=29" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/widgets.css?v=35">
   <link rel="stylesheet" href="/css/overrides.css?v=69">
   <link rel="stylesheet" href="/css/select.css?v=5">
-  <noscript><link rel="stylesheet" href="/css/viewer.css?v=53"><link rel="stylesheet" href="/css/community.css?v=41"><link rel="stylesheet" href="/css/ranking.css?v=20"><link rel="stylesheet" href="/css/profile.css?v=50"><link rel="stylesheet" href="/css/admin.css?v=14"><link rel="stylesheet" href="/css/auth.css?v=9"><link rel="stylesheet" href="/css/upload.css?v=28"></noscript>
+  <noscript><link rel="stylesheet" href="/css/viewer.css?v=53"><link rel="stylesheet" href="/css/community.css?v=41"><link rel="stylesheet" href="/css/ranking.css?v=20"><link rel="stylesheet" href="/css/profile.css?v=51"><link rel="stylesheet" href="/css/admin.css?v=14"><link rel="stylesheet" href="/css/auth.css?v=9"><link rel="stylesheet" href="/css/upload.css?v=29"></noscript>
  </head>
  <body>
 
@@ -524,27 +524,27 @@
       <div class="pfHead">
 
         <div class="pfBnr" id="pfBnr">
-          <div class="pfBnrRail" id="pfBnrRail" aria-live="off">
-          <div class="pfBnrSlide" id="pfBnrSlide0" role="group" aria-roledescription="slide" aria-label="Banner, 1 of 3">
+          <div class="pfBnrRail" id="pfBnrRail">
+          <div class="pfBnrSlide" role="group" aria-roledescription="slide" aria-label="Banner, 1 of 3">
             <img alt="" id="pfBnrImg0">
             <span class="pfBnrTag">Banner</span>
             <p class="pfBnrNone" id="pfBnrNone0"><span>nothing</span><span>here</span></p>
           </div>
-          <div class="pfBnrSlide" id="pfBnrSlide1" role="group" aria-roledescription="slide" aria-label="Commission 1, 2 of 3">
+          <div class="pfBnrSlide" role="group" aria-roledescription="slide" aria-label="Commission 1, 2 of 3">
             <img alt="" id="pfBnrImg1">
             <span class="pfBnrTag">Commission</span>
             <p class="pfBnrNone" id="pfBnrNone1"><span>nothing</span><span>here</span></p>
           </div>
-          <div class="pfBnrSlide" id="pfBnrSlide2" role="group" aria-roledescription="slide" aria-label="Commission 2, 3 of 3">
+          <div class="pfBnrSlide" role="group" aria-roledescription="slide" aria-label="Commission 2, 3 of 3">
             <img alt="" id="pfBnrImg2">
             <span class="pfBnrTag">Commission</span>
             <p class="pfBnrNone" id="pfBnrNone2"><span>nothing</span><span>here</span></p>
           </div>
           </div>
-          <div class="pfBnrDots" id="pfBnrDots" role="tablist" aria-label="Choose showcase slide">
-            <button type="button" class="pfBnrDot on" data-bnr="0" role="tab" aria-selected="true" aria-label="Banner"></button>
-            <button type="button" class="pfBnrDot" data-bnr="1" role="tab" aria-selected="false" aria-label="Commission 1"></button>
-            <button type="button" class="pfBnrDot" data-bnr="2" role="tab" aria-selected="false" aria-label="Commission 2"></button>
+          <div class="pfBnrDots" id="pfBnrDots" aria-label="Choose showcase slide">
+            <button type="button" class="pfBnrDot on" data-bnr="0" aria-current="true" aria-label="Banner"></button>
+            <button type="button" class="pfBnrDot" data-bnr="1" aria-label="Commission 1"></button>
+            <button type="button" class="pfBnrDot" data-bnr="2" aria-label="Commission 2"></button>
           </div>
         </div>
 
@@ -679,7 +679,7 @@
       <div class="pfEditBnrSet" aria-label="Showcase images">
         <div class="pfEditBnrCard">
           <div class="pfEditBnrLbl">Banner</div>
-          <div class="pfEditBannerWrap" id="pfEditBnrWrap0">
+          <div class="pfEditBannerWrap">
             <img alt="" id="pfEditBnrImg0">
             <p class="pfBnrNone" id="pfEditBnrNone0"><span>nothing</span><span>here</span></p>
             <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBnrPicker('banner')" aria-label="Change banner">
@@ -689,7 +689,7 @@
         </div>
         <div class="pfEditBnrCard">
           <div class="pfEditBnrLbl">Commission 1</div>
-          <div class="pfEditBannerWrap" id="pfEditBnrWrap1">
+          <div class="pfEditBannerWrap">
             <img alt="" id="pfEditBnrImg1">
             <p class="pfBnrNone" id="pfEditBnrNone1"><span>nothing</span><span>here</span></p>
             <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBnrPicker('commission_1')" aria-label="Change commission 1">
@@ -699,7 +699,7 @@
         </div>
         <div class="pfEditBnrCard">
           <div class="pfEditBnrLbl">Commission 2</div>
-          <div class="pfEditBannerWrap" id="pfEditBnrWrap2">
+          <div class="pfEditBannerWrap">
             <img alt="" id="pfEditBnrImg2">
             <p class="pfBnrNone" id="pfEditBnrNone2"><span>nothing</span><span>here</span></p>
             <button class="pfAvBEditBtn pfEditBannerBtn" onclick="openPfBnrPicker('commission_2')" aria-label="Change commission 2">
@@ -2003,11 +2003,11 @@
   <script defer src="/js/fghead.js?v=11"></script>
   <script defer src="/js/auth.js?v=35"></script>
   <script defer src="/js/follow.js?v=3"></script>
-  <script defer src="/js/profile.js?v=31"></script>
+  <script defer src="/js/profile.js?v=32"></script>
   <script defer src="/js/albums.js?v=32"></script>
   <script defer src="/js/drafts.js?v=14"></script>
   <script defer src="/js/upqueue.js?v=10"></script>
-  <script defer src="/js/avatar.js?v=8"></script>
+  <script defer src="/js/avatar.js?v=9"></script>
   <script defer src="/js/pfedit.js?v=26"></script>
   <script defer src="/js/mywork.js?v=32"></script>
   <script defer src="/js/startup.js?v=12"></script>

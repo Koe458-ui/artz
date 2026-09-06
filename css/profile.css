@@ -27,24 +27,12 @@
 
 .pfBdy{width:100%;padding:0 0 var(--sp-8);background:var(--bg);}
 
-  /* Banner and identity sit in the page's own shell, the same one the tabs and
-     grids below them use. That shell already IS the desktop measure asked for:
-     --shellPad resolves to 10% a side at >=1024px, capped by --shellMax, so the
-     content is 80% and never wider than ~1600px. Hardcoding 80% here instead
-     held the card to 80% on a phone too, where the shell is 94% — which read as
-     a band of dead space either side of a card narrower than everything under it. */
 .pfHead{
   box-sizing:border-box;width:100%;
   padding:var(--sp-6) var(--pfPad) 0;
-    /* minmax(0,1fr), not the default minmax(auto,1fr): auto floors the track at
-       the content's min-width, and the action row's is ~411px, so on a phone the
-       column grew past the screen and cut the Follow and Share buttons off
-       instead of letting them squeeze as they are built to. */
   display:grid;grid-template-columns:minmax(0,1fr);gap:var(--sp-6);
 }
-  /* the shell already pads; a second --pfPad inside it would inset twice */
 .pfHead .pfId{padding-left:0;padding-right:0;}
-  /* the card is detached and round now, so the avatar has no edge to straddle */
 .pfHead .pfAvatarWrap{margin-top:0;}
 
 .pfBnr{position:relative;min-width:0;}
@@ -53,11 +41,6 @@
   scroll-snap-type:x mandatory;overscroll-behavior-x:contain;
   -webkit-overflow-scrolling:touch;scroll-behavior:smooth;
   scrollbar-width:none;-ms-overflow-style:none;
-    /* One curve everywhere. A viewport clamp gave the phone 7.6% of the card's
-       width and a desktop 10%, so the same card looked rounder on a big screen.
-       A proportion of the card fixes that: the card is 4:3, so 10% of width and
-       13.3333% of height come to the same number of pixels, which is a circular
-       corner that scales with the card instead of with the window. */
   border-radius:10% / 13.3333%;
 }
 .pfBnrRail::-webkit-scrollbar{display:none;}
@@ -69,8 +52,6 @@
 }
 .pfBnrSlide img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
 
-  /* says what the slide is, so a commission is never taken for the banner. Same
-     dark pill as the dots: it sits over the artist's image, not over a known ground */
 .pfBnrTag{
   position:absolute;z-index:2;pointer-events:none;
   top:clamp(10px,2.6vw,18px);left:clamp(12px,3vw,20px);
@@ -82,8 +63,6 @@
   color:#fff;line-height:var(--lh-flat);
 }
 
-  /* an empty slide is the hero's signature face on black, in brand red — the
-     same treatment "Create & Inspire" gets, down to the stroke */
 .pfBnrNone{
   position:absolute;inset:0;margin:0;
   display:flex;flex-direction:column;align-items:center;justify-content:center;
@@ -95,9 +74,6 @@
 }
 .pfBnrNone[hidden]{display:none;}
 
-  /* the dots ride inside the card, near its foot. They sit over whatever the
-     artist uploaded, so they carry their own dark pill rather than trusting the
-     image underneath to be dark enough. 22px of tap around a 9px dot. */
 .pfBnrDots{
   position:absolute;z-index:2;
   left:50%;transform:translateX(-50%);
@@ -121,25 +97,11 @@
 .pfBnrDot.on:hover::before{background:#fff;}
 .pfBnrDot:focus-visible{outline:2px solid #fff;outline-offset:2px;}
 
-  /* profile left, banner right, details under the profile — the banner is tall
-     enough at 4:3 that the bio fills the column beside it rather than pushing down */
 @media(min-width:900px){
   .pfHead{grid-template-columns:minmax(0,1fr) minmax(0,1fr);align-items:stretch;gap:var(--sp-8);}
   .pfId{grid-column:1;grid-row:1;}
-    /* .pfId's own padding rule sits later in this file at equal specificity,
-       so it has to be outranked, not merely restated */
   .pfHead .pfId{padding-bottom:0;}
-    /* align-self:start, not the row's stretch. The card's height is its width at
-       4:3 and nothing else, but the identity column is the taller of the two
-       below about 1300px, so a stretched .pfBnr ran past the card — and the
-       dots, which hang off its bottom, ended up under the card by as much as
-       65px. Hugging the card keeps them on it at every width. */
   .pfBnr{grid-column:2;grid-row:1;align-self:start;}
-    /* Both columns end together. The identity column is the shorter one — the head
-       bio is cut at 100 characters, so it cannot outrun a 4:3 card — and it already
-       wraps into lines (who, actions, stats, bio). Stretching it to the card's height
-       and spreading those lines puts the last of them on the card's bottom edge,
-       instead of leaving the column hanging half way up. */
   .pfHead .pfIdTop{height:100%;align-content:space-between;}
 }
 @media(prefers-reduced-motion:reduce){ .pfBnrRail{scroll-behavior:auto;} }
@@ -305,22 +267,18 @@
 .pfTab.active{color:var(--tx);border-bottom-color:var(--pg);}
 .pfTab:focus-visible{outline:2px solid var(--pg);outline-offset:-2px;border-radius:6px;}
 
-  /* profile rail is the hero rail: same text pill, same pair of arrows, same drag.
-     Everything but the open-tab state comes from .fgCatWrap/.fgCatRail/.fgCatChip in hero.css */
 #profilePage .pfTabs{border-bottom:0;}
 #profilePage .pfTabWrap{
   --ftPad:var(--pfPad);
   margin:0;padding:var(--sp-2) var(--ftPad);
   box-sizing:border-box;
 }
-  /* the rail marks its open tab .active, not .on */
 #profilePage .pfTabs .fgCatChip.active{border-color:var(--pg);background:var(--pdim);color:var(--tx);}
 #profilePage .pfTabs .fgCatChip[hidden]{display:none;}
 @media(hover:hover){
   #profilePage .pfTabs .fgCatChip.active:hover{border-color:var(--pg);}
 }
 
-  /* nothing to scroll: no arrows, no gutters held open for them, no edge fades */
 #profilePage .pfTabWrap.pfRailFits .fgCatNav{display:none;}
 #profilePage .pfTabWrap.pfRailFits .fgCatRail{padding-left:0;padding-right:0;}
 #profilePage .pfTabWrap.pfRailFits::before,
@@ -639,11 +597,7 @@ a.pfMenuItem{text-decoration:none;}
 }
 #pfEditPage.open{transform:translateX(0);}
 #pfEditPage .subPgTitle{color:var(--tx);}
-  /* the shell is the measure here too: --shellPad is 10% a side at >=1024px,
-     capped by --shellMax, so this fills 80% and stops near 1600px. It used to
-     cap every child at 640px, which left the page a narrow column on a desktop */
 .pfEditBdy{margin:0 auto;box-sizing:border-box;padding:var(--sp-7) var(--shellPad) var(--sp-10);}
-  /* three slots, same order and shape as the profile carousel */
 .pfEditBnrSet{display:grid;gap:var(--sp-6);margin-bottom:var(--sp-8);}
 @media(min-width:640px){ .pfEditBnrSet{grid-template-columns:repeat(3,minmax(0,1fr));} }
 .pfEditBnrLbl{
@@ -657,10 +611,6 @@ a.pfMenuItem{text-decoration:none;}
 .pfEditBannerWrap img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none;}
 .pfEditBannerWrap .pfBnrNone{font-size:clamp(1.1rem,4.5vw,1.7rem);}
 .pfEditBannerBtn{position:absolute;bottom:.7rem;right:.7rem;}
-  /* the avatar used to hang off a single 140px strip at a fixed top:96px; with
-     three cards above it there is no such offset to hang from, so it sits in flow */
-  /* width:max-content matters: the pencil is positioned against this box, and a
-     full-width block would fling it to the right edge of the page */
 .pfEditAvatarWrap{position:relative;width:max-content;margin:0 0 var(--sp-7);}
 .pfEditAvatar{
   width:88px;height:88px;border-radius:50%;position:relative;overflow:hidden;

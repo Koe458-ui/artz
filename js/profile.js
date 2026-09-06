@@ -143,8 +143,6 @@
       .forEach(function(id){ var e=document.getElementById(id); if(e) e.style.display='none'; });
     var _pgs=document.getElementById('pfGallerySentinel'); if(_pgs) _pgs.style.display='none';
     var mySeq = ++pfOpenSeq;
-      // both branches below paint a different person, so the carousel goes back
-      // to the banner rather than opening on the last profile's slide 3
     if(typeof pfBnrReset === 'function') pfBnrReset();
 
     var pfLc = String(username).toLowerCase();
@@ -159,8 +157,6 @@
       document.getElementById('pfUsername').textContent='Loading…';
       document.getElementById('pfAvatarLetter').textContent='?';
       document.getElementById('pfAvatarImg').style.display='none';
-        // clear all three showcase slides, not just the banner, or the previous
-        // profile's commissions sit under the next one's name while it loads
       for(var _s=0; _s<3; _s++){
         var _si=document.getElementById('pfBnrImg'+_s);
         var _sn=document.getElementById('pfBnrNone'+_s);
@@ -513,10 +509,6 @@
     var btn = pfTabBtn(t);
     if(btn) try{ btn.focus({preventScroll:true}); }catch(e2){ btn.focus(); }
   }
-    // The hero rails keep both arrows on screen and dim them at the ends. A profile
-    // bar usually fits, and two dead buttons either side of it are just noise, so
-    // this rail drops them instead. Always measured with the arrow gutters in place,
-    // so showing them can never shrink the rail back under its own threshold.
   function pfFitTabRail(rail){
     var wrap = rail && rail.parentNode;
     if(!wrap) return;
@@ -524,8 +516,6 @@
     if(rail.scrollWidth <= rail.clientWidth + 1) wrap.classList.add('pfRailFits');
   }
 
-    // hiding a tab changes what the rail can travel but not its own box, so the
-    // watcher's ResizeObserver never fires — nudge it to re-read the ends
   function pfSyncTabArrows(){
     var rail = document.getElementById('pfTabGroup');
     if(!rail) return;
@@ -537,7 +527,6 @@
     var rail = document.getElementById('pfTabGroup');
     if(!rail) return;
     rail.addEventListener('keydown', pfTabKey);
-      // the same watcher the hero rails use, so the arrows scroll, drag and dim identically
     if(typeof window.dzRailWatch === 'function') window.dzRailWatch(rail);
     pfFitTabRail(rail);
     window.addEventListener('resize', function(){ pfFitTabRail(rail); });

@@ -1,19 +1,15 @@
   var PF_AVB_COOLDOWN_MS = 7*24*60*60*1000;
-    // the showcase card is 4:3; 1200x900 covers a ~600px card at 2x
   var PF_AVB_DIMS = {
     avatar      : { w:480,  h:480 },
     banner      : { w:1200, h:900 },
     commission_1: { w:1200, h:900 },
     commission_2: { w:1200, h:900 }
   };
-    // slide order on the profile carousel; index here is the slide index everywhere
   var PF_BNR_SLOTS = ['banner', 'commission_1', 'commission_2'];
   var PF_AVB_LABEL = {
     avatar:'Profile photo', banner:'Banner',
     commission_1:'Commission 1', commission_2:'Commission 2'
   };
-    // storage folder per kind. Both commissions share one — names are timestamped,
-    // and storage RLS only cares that segment 2 is the caller's id
   var PF_AVB_DIR = {
     avatar:'avatars', banner:'banners',
     commission_1:'commissions', commission_2:'commissions'
@@ -47,8 +43,6 @@
     });
   }
 
-    // one slot, both places it shows: the profile carousel and the edit page card.
-    // No image means the black "nothing here" plate, not an empty frame.
   function pfPaintBnrSlot(i, url){
     var src = url ? getViewUrl(url) : '';
     [['pfBnrImg', 'pfBnrNone'], ['pfEditBnrImg', 'pfEditBnrNone']].forEach(function(pair){
@@ -62,8 +56,6 @@
     });
   }
 
-    // Native scroll-snap does the moving; the dots only report where it landed
-    // and command it. No transform track to keep in sync with a touch drag.
   function pfBnrStill(){
     return !!(window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches);
   }
@@ -79,7 +71,8 @@
     var bs = dots.querySelectorAll('.pfBnrDot');
     for(var i = 0; i < bs.length; i++){
       bs[i].classList.toggle('on', i === at);
-      bs[i].setAttribute('aria-selected', i === at ? 'true' : 'false');
+      if(i === at) bs[i].setAttribute('aria-current', 'true');
+      else bs[i].removeAttribute('aria-current');
     }
   }
   function pfBnrGo(i){
@@ -89,7 +82,6 @@
     if(rail.scrollTo) rail.scrollTo({ left: left, behavior: pfBnrStill() ? 'auto' : 'smooth' });
     else rail.scrollLeft = left;
   }
-    // a freshly opened profile starts on its banner, not wherever the last one was left
   function pfBnrReset(){
     var rail = document.getElementById('pfBnrRail');
     if(!rail) return;
@@ -134,8 +126,6 @@
     document.getElementById(input).click();
   }
   function openPfAvatarPicker(){ openPfAvBPicker('Profile photo', 'avatar_updated_at', 'pfAvatarFileInput'); }
-    // every showcase slot carries its own cooldown, so filling slide 2 is never
-    // blocked by having changed the banner this week
   function openPfBnrPicker(kind){
     openPfAvBPicker(PF_AVB_LABEL[kind] || 'Image', kind + '_updated_at', PF_AVB_INPUT[kind]);
   }
@@ -240,10 +230,6 @@
       var{error:de}=await sb.from('profiles').update(updates).eq('id',currentUser.id);
       if(de) throw de;
 
-        // profile_image and profile_banner_image both upsert on user_id — one row
-        // per user — so a commission slot has no ledger row to take without
-        // evicting the banner's. It is bookkeeping nothing reads; the storage
-        // object and the profiles column are the record that matters.
       var ledger = (kind==='avatar') ? 'avatar' : (kind==='banner' ? 'banner' : null);
       await dzRecordUpload({
         imageKind: ledger,
@@ -266,8 +252,7 @@
       if(pf.profile.username){
         pfMediaCache[pf.profile.username] = { avatar_url: pf.profile.avatar_url||null, banner_url: pf.profile.banner_url||null };
       }
-      // the artist cache behind every card and chip holds the old picture. Only
-      // the avatar and banner appear there, so a commission slot has nothing to fix
+      // the artist cache behind every card and chip holds the old picture
       if((kind==='avatar' || kind==='banner') &&
          typeof dzArtistCache !== 'undefined' && dzArtistCache && dzArtistCache[currentUser.id]){
         dzArtistCache[currentUser.id][kind+'_url'] = publicUrl;
