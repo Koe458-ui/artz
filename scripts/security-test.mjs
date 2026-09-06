@@ -275,16 +275,64 @@ for (const f of ['functions/api/rzp.js', 'functions/api/paypal.js',
 }
 
 {
+  const src = readFileSync('functions/api/moderation/recheck.js', 'utf8');
+  truthy('the sweep will not fetch an image url off our own host',
+         /allowedHost\(String\(src\), sbUrl\(env\)\)/.test(src));
+  truthy('a deterministic unreadable image is demoted, not waved through',
+         /why\.startsWith\('type '\) \|\| why === 'empty' \|\| why === 'too large'/.test(src));
+  truthy('only a genuinely missing image counts as nothing to check',
+         /if \(why === 'no image'\) \{/.test(src));
+  // The bug this replaces: any unreadable image stamped mod_verified_at, and
+  // since dz_protect_mod_verified stops a member clearing it, that retired the
+  // row from the sweep permanently -- while the uploader chose the bytes that
+  // made it unreadable. A transient failure must leave the row unstamped.
+  const verify = src.slice(src.indexOf("if (!image.ok && mode === 'verify')"),
+                           src.indexOf('if (!image.ok) continue;'));
+  check('a transient failure leaves the row unverified for the next tick',
+        (verify.match(/markVerified/g) || []).length, 1);
+  truthy('the one stamp left is the no-image case',
+         /if \(why === 'no image'\) \{\s*await markVerified/.test(verify));
+}
+
+{
   const src = readFileSync('js/app-core.js', 'utf8');
-  truthy('escJs exists for values that land in an inline handler',
-         /function escJs\(s\)\{/.test(src));
-  // Order matters: escaping the backslash after the quote would re-escape the
-  // backslash the quote rule just introduced.
-  const esc = src.slice(src.indexOf('function escJs(s){'));
-  truthy('escJs escapes the backslash first',
-         esc.indexOf(String.raw`.replace(/\\/g,'\\\\')`) !== -1 &&
-         esc.indexOf(String.raw`.replace(/\\/g,'\\\\')`) < esc.indexOf(String.raw`.replace(/'/g,"\\'")`));
   truthy('the gallery query is bounded', /\.limit\(GAL_MAX\)/.test(src));
+
+  // escJs is exercised, not grepped. It sits at the seam between two parsers,
+  // and the bug it shipped with was invisible in the source: it escaped the
+  // double quote with a backslash, which JavaScript understands and the HTML
+  // parser does not -- so the attribute it existed to protect closed on the
+  // first quote of any value containing one.
+  const m = src.match(/function escJs\(s\)\{[\s\S]*?\n  \}/);
+  truthy('escJs is present and extractable', !!m);
+  const escJs = new Function(m[0] + '; return escJs;')();
+
+  // The HTML parser decodes entities before JavaScript sees anything.
+  const decode = (t) => t.replace(/&quot;/g, '"').replace(/&lt;/g, '<')
+                         .replace(/&gt;/g, '>').replace(/&amp;/g, '&');
+
+  for (const [name, payload] of [
+    ['a bare double quote',   '"'],
+    ['an attribute breakout', '" onmouseover=alert(1) x="'],
+    ['a script tag',          '"><script>alert(1)</script>'],
+  ]) {
+    falsy('escJs emits no raw double quote for ' + name, escJs(payload).includes('"'));
+  }
+
+  for (const [name, payload] of [
+    ['a bare single quote',  "'"],
+    ['a js string breakout', "'); alert(1);//"],
+    ['a backslash feint',    "\\'); alert(1);//"],
+  ]) {
+    // After the parser has decoded, every string delimiter must still be escaped.
+    falsy('escJs leaves no live single quote for ' + name,
+          /(^|[^\\])'/.test(decode(escJs(payload))));
+  }
+
+  check('escJs encodes the attribute delimiter as an entity', escJs('"'), '&quot;');
+  check('escJs escapes the string delimiter for javascript', escJs("'"), "\\'");
+  check('escJs doubles a backslash', escJs('\\'), '\\\\');
+  check('escJs does not double-encode an entity', escJs('&quot;'), '&amp;quot;');
 }
 
 

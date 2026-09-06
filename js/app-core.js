@@ -316,13 +316,27 @@
   // Every caller today passes a database uuid or one of our own literals, so
   // nothing here is currently reachable; this exists so the next value someone
   // threads through an inline handler is not the one that proves it.
+  // Two layers, and each character belongs to exactly one of them.
+  //
+  // The HTML parser runs first and decodes entities; JavaScript only ever sees
+  // what is left. So the delimiter of the *attribute* -- the double quote --
+  // has to be an entity, because a backslash means nothing to the parser: it
+  // reads \" as a literal backslash followed by the quote that ends the
+  // attribute, and everything after it becomes markup. The delimiter of the
+  // *string* -- the single quote -- has to be a backslash escape, because that
+  // is what JavaScript reads after the decode.
+  //
+  // Hence the order: backslash first so it cannot double up later, then the
+  // JavaScript escapes, then & before we introduce entities of our own, then
+  // the HTML ones.
   function escJs(s){
     return String(s==null?'':s)
       .replace(/\\/g,'\\\\')
       .replace(/'/g,"\\'")
-      .replace(/"/g,'\\"')
       .replace(/\r/g,'\\r').replace(/\n/g,'\\n')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+      .replace(/&/g,'&amp;')
+      .replace(/"/g,'&quot;')
+      .replace(/</g,'&lt;').replace(/>/g,'&gt;');
   }
   window.escJs = escJs;
 

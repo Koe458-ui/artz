@@ -1,5 +1,5 @@
-import { json } from '../../lib/http.js';
-import { sbUser, sbSvc, sbService, underLimit } from '../../lib/sb.js';
+import { json, allowedHost } from '../../lib/http.js';
+import { sbUrl, sbUser, sbSvc, sbService, underLimit } from '../../lib/sb.js';
 import {
   MODERATION_PROMPT, CATEGORIES, MESSAGES,
   RESOURCE_PROMPT, RESOURCE_CATEGORIES, RESOURCE_MESSAGES,
@@ -48,20 +48,48 @@ export async function onRequestPost(context) {
     const { queue, row, mode } = waiting[n];
     const more = waiting.length > n + 1;
 
-    const image = await loadImage(row[queue.image]);
-
-    if (!image.ok && mode === 'verify') {
-      // What is published is not a readable image. A content-type that is not
-      // an image at all is the shape the ticket weakness would produce, so that
-      // one is demoted. The rest -- a fetch that failed, an empty body, an
-      // oversized one -- are indistinguishable from a bad minute at the CDN, so
-      // they are stamped and left alone rather than left to sit at the head of
-      // the queue forever, blocking every row behind them.
-      if (String(image.reason || '').startsWith('type ')) {
-        await demote(env, context, queue, row, image.reason);
+    // Where the sweep is about to send a server-side fetch. The url is a column
+    // the uploader wrote, so without this it decides what the edge connects to
+    // and what comes back. A published image lives in this project's storage;
+    // anything else is not a row we should be fetching on the strength of.
+    const src = row[queue.image];
+    if (src && !allowedHost(String(src), sbUrl(env))) {
+      if (mode === 'verify') {
+        await demote(env, context, queue, row, 'off-host image url');
         return json({ processed: 1, more, down: false }, 200);
       }
-      await markVerified(env, queue, row);
+      continue;   // queued: leave it pending, which is already not public
+    }
+
+    const image = await loadImage(src);
+
+    if (!image.ok && mode === 'verify') {
+      const why = String(image.reason || '');
+
+      // Nothing to look at. A text-only blog post has no cover, and the insert
+      // gate skips those for the same reason -- so this is verified, not failed.
+      if (why === 'no image') {
+        await markVerified(env, queue, row);
+        continue;
+      }
+
+      // Decided by whoever uploaded it, and decided the same way every time: not
+      // an image, empty, larger than the moderator will ever read, or gone for
+      // good. A real derivative is none of these.
+      if (why.startsWith('type ') || why === 'empty' || why === 'too large' ||
+          /^http 4\d\d$/.test(why)) {
+        await demote(env, context, queue, row, why);
+        return json({ processed: 1, more, down: false }, 200);
+      }
+
+      // Genuinely transient -- a refused connection, a 5xx from storage. Left
+      // unverified on purpose so the sweep comes back to it.
+      //
+      // It must not be stamped. mod_verified_at is how the sweep finds work, and
+      // dz_protect_mod_verified stops a member clearing it again, so stamping a
+      // row the moderator could not read would retire it from verification for
+      // good -- and an uploader picks the bytes, so "could not read" was theirs
+      // to arrange. That is a way through the check, not a tidy-up.
       continue;
     }
 
