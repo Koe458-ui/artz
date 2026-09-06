@@ -7,12 +7,14 @@ audit environment" is a reason to write it down, not a reason to drop it.
 Each one says what it is, why it cannot be automated from here, and exactly what
 to click or run.
 
-**Updated 2026-09-06.** The remediation pass closed eight findings in code and in
-four applied migrations — the per-member limit on `/api/moderate-upload`,
-`visibility` in the five SELECT policies, the `resources`/`artworks` column
-grants, `rank_scores` revoked from `anon`, the notification-link guard at both
-ends, and `get_artist_progress` honouring the privacy flags. What follows is what
-is left, and it is all console work or work that needs live traffic.
+**Updated 2026-09-06.** The remediation pass closed six of the audit's ten
+findings, in code and in four applied migrations — the per-member limit on
+`/api/moderate-upload`, `visibility` in the five SELECT policies, the
+`resources`/`artworks` column grants, `rank_scores` revoked from `anon`, the
+notification-link guard at both ends, and `get_artist_progress` honouring the
+privacy flags. What follows is the other four: two console settings (§1, §2), one
+deferred pending live CSP data (§4), and one deferred deliberately (below). §5 is
+new and is not from the ten.
 
 Two corrections to this file, both of which would have cost someone an hour:
 the repository is **private**, not public — item 1 below said otherwise — and

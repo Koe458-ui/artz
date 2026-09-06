@@ -7,8 +7,12 @@ Summary of the security review and the changes made.
 ## Remediation — 2026-09-06
 
 A third pass went at the system from outside — live catalogue, full git history,
-GitHub API — and then fixed what it found. Ten findings; eight are closed, two
-are decisions rather than defects.
+GitHub API — and then fixed what it found. Ten findings: **six are closed** (the
+six in the table below), two are console settings this environment cannot reach,
+and two are decisions rather than defects. Two further hardening items were taken
+while the same files were open — `artworks.storage_path` and `mod_token` alongside
+M-3, and `pg_temp` appended to the search_path of the four functions rewritten
+here — but neither was a finding and neither is counted as one.
 
 Nothing was rated critical. No path to database compromise, account takeover or
 admin escalation was found: RLS is on every table, no write policy is
