@@ -419,6 +419,19 @@ export async function onRequest(context) {
 
   if (pathname.startsWith('/legal/')) return origin;
 
+  // These two do not depend on each other: resolve() looks up whatever this URL
+  // names, fetchArtworks() always asks for the same 60 rows for the grid. Run
+  // sequentially they put two Supabase round-trips in front of TTFB on every
+  // HTML request; started together they cost one.
+  //
+  // Kicked off here rather than before next(), because this middleware also runs
+  // for every static asset and only the content-type check above tells us this
+  // request is a document — starting it any earlier would fire a database call
+  // for every script and stylesheet on the page.
+  //
+  // fetchArtworks() swallows its own errors and returns [], so the promise
+  // cannot reject and leaving it unawaited on the 'gone' path below is safe.
+  const artsPromise = fetchArtworks(env);
   const hit = await resolve(env, pathname);
 
   if (hit.status === 'gone') {
@@ -432,7 +445,7 @@ export async function onRequest(context) {
     return new Response(gone.body, { status: 404, headers: gone.headers });
   }
 
-  const arts = await fetchArtworks(env);
+  const arts = await artsPromise;
   const meta = hit.status === 'found' && hit.type === 'artwork' ? artworkMeta(hit.row, hit.artist)
              : hit.status === 'found' && hit.type === 'profile' ? profileMeta(hit.row)
              : hit.type === 'section' ? sectionMeta(hit.path, hit.sec)
