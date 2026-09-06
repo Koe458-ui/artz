@@ -461,6 +461,7 @@
     });
       // the open tab may have just been taken off the rail
     if(!pfTabShown(pf.tab)) pfSwitchTab(pfVisibleTabs()[0] || 'progress');
+    pfSyncTabArrows();
   }
 
   async function pfLoadTabRail(){
@@ -502,9 +503,35 @@
     var btn = pfTabBtn(t);
     if(btn) try{ btn.focus({preventScroll:true}); }catch(e2){ btn.focus(); }
   }
+    // The hero rails keep both arrows on screen and dim them at the ends. A profile
+    // bar usually fits, and two dead buttons either side of it are just noise, so
+    // this rail drops them instead. Always measured with the arrow gutters in place,
+    // so showing them can never shrink the rail back under its own threshold.
+  function pfFitTabRail(rail){
+    var wrap = rail && rail.parentNode;
+    if(!wrap) return;
+    wrap.classList.remove('pfRailFits');
+    if(rail.scrollWidth <= rail.clientWidth + 1) wrap.classList.add('pfRailFits');
+  }
+
+    // hiding a tab changes what the rail can travel but not its own box, so the
+    // watcher's ResizeObserver never fires — nudge it to re-read the ends
+  function pfSyncTabArrows(){
+    var rail = document.getElementById('pfTabGroup');
+    if(!rail) return;
+    pfFitTabRail(rail);
+    try{ rail.dispatchEvent(new Event('scroll')); }catch(e){}
+  }
+
   document.addEventListener('DOMContentLoaded', function(){
     var rail = document.getElementById('pfTabGroup');
-    if(rail) rail.addEventListener('keydown', pfTabKey);
+    if(!rail) return;
+    rail.addEventListener('keydown', pfTabKey);
+      // the same watcher the hero rails use, so the arrows scroll, drag and dim identically
+    if(typeof window.dzRailWatch === 'function') window.dzRailWatch(rail);
+    pfFitTabRail(rail);
+    window.addEventListener('resize', function(){ pfFitTabRail(rail); });
+    if(window.ResizeObserver) new ResizeObserver(function(){ pfFitTabRail(rail); }).observe(rail);
   });
 
   function pfDzCard(sec){

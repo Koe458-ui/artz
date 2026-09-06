@@ -151,7 +151,7 @@
   <link rel="stylesheet" href="/css/community.css?v=41" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/connect.css?v=19">
   <link rel="stylesheet" href="/css/ranking.css?v=20" media="print" onload="this.media='all'">
-  <link rel="stylesheet" href="/css/profile.css?v=44" media="print" onload="this.media='all'">
+  <link rel="stylesheet" href="/css/profile.css?v=45" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/admin.css?v=14" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/auth.css?v=9" media="print" onload="this.media='all'">
   <link rel="stylesheet" href="/css/panels.css?v=36">
@@ -159,7 +159,7 @@
   <link rel="stylesheet" href="/css/widgets.css?v=35">
   <link rel="stylesheet" href="/css/overrides.css?v=69">
   <link rel="stylesheet" href="/css/select.css?v=5">
-  <noscript><link rel="stylesheet" href="/css/viewer.css?v=53"><link rel="stylesheet" href="/css/community.css?v=41"><link rel="stylesheet" href="/css/ranking.css?v=20"><link rel="stylesheet" href="/css/profile.css?v=44"><link rel="stylesheet" href="/css/admin.css?v=14"><link rel="stylesheet" href="/css/auth.css?v=9"><link rel="stylesheet" href="/css/upload.css?v=27"></noscript>
+  <noscript><link rel="stylesheet" href="/css/viewer.css?v=53"><link rel="stylesheet" href="/css/community.css?v=41"><link rel="stylesheet" href="/css/ranking.css?v=20"><link rel="stylesheet" href="/css/profile.css?v=45"><link rel="stylesheet" href="/css/admin.css?v=14"><link rel="stylesheet" href="/css/auth.css?v=9"><link rel="stylesheet" href="/css/upload.css?v=27"></noscript>
  </head>
  <body>
 
@@ -576,36 +576,19 @@
         </div>
       </section>
 
-      <nav class="pfTabs" role="tablist" aria-label="Profile sections">
-        <div class="pfTabGroup" id="pfTabGroup">
-          <button class="pfTab active" id="pfTabGallery" role="tab" aria-selected="true" aria-controls="pfPanelGallery" onclick="pfSwitchTab('gallery')">
-            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.6"/><path d="m21 15-5-5L5 21"/></svg></span>
-            <span>Artwork</span>
-          </button>
-          <button class="pfTab" id="pfTabAlbum" role="tab" aria-selected="false" aria-controls="pfPanelAlbum" onclick="pfSwitchTab('album')">
-            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5h7L8.4 6H3.8a.8.8 0 0 0-.8.8Z"/><rect x="3" y="8.5" width="18" height="11" rx="2"/></svg></span>
-            <span>Albums</span>
-          </button>
-          <button class="pfTab" id="pfTabResources" role="tab" aria-selected="false" aria-controls="pfPanelResources" onclick="pfSwitchTab('resources')">
-            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 7c-1.8-1.3-4-2-6.5-2H3v13h2.5c2.5 0 4.7.7 6.5 2 1.8-1.3 4-2 6.5-2H21V5h-2.5C16 5 13.8 5.7 12 7Z"/><path d="M12 7v13"/></svg></span>
-            <span>Resources</span>
-          </button>
-          <button class="pfTab" id="pfTabBlog" role="tab" aria-selected="false" aria-controls="pfPanelBlog" onclick="pfSwitchTab('blog')">
-            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h8l4 4v14H6Z"/><path d="M14 3v4h4"/><path d="M9 12h6"/><path d="M9 16h4"/></svg></span>
-            <span>Blog</span>
-          </button>
-          <button class="pfTab" id="pfTabMarketplace" role="tab" aria-selected="false" aria-controls="pfPanelMarketplace" onclick="pfSwitchTab('marketplace')">
-            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg></span>
-            <span>Marketplace</span>
-          </button>
-          <button class="pfTab" id="pfTabProgress" role="tab" aria-selected="false" aria-controls="pfPanelProgress" onclick="pfSwitchTab('progress')">
-            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 17.5 9 11l4 4 8-8.5"/><path d="M16 6.5h5v5"/></svg></span>
-            <span>Level</span>
-          </button>
-          <button class="pfTab" id="pfTabAbout" role="tab" aria-selected="false" aria-controls="pfPanelAbout" onclick="pfSwitchTab('about')">
-            <span class="pfTabIco" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5"/><path d="M12 7.6h.01"/></svg></span>
-            <span>About</span>
-          </button>
+      <nav class="pfTabs">
+        <div class="fgCatWrap pfTabWrap">
+          <button type="button" class="fgCatNav fgCatPrev" data-fgnav="-1" aria-label="Scroll tabs left"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 19-7-7 7-7"/></svg></button>
+          <div class="fgCatRail" id="pfTabGroup" role="tablist" aria-label="Profile sections">
+          <button class="fgCatChip active" id="pfTabGallery" role="tab" aria-selected="true" aria-controls="pfPanelGallery" onclick="pfSwitchTab('gallery')">Artwork</button>
+          <button class="fgCatChip" id="pfTabAlbum" role="tab" aria-selected="false" aria-controls="pfPanelAlbum" onclick="pfSwitchTab('album')">Albums</button>
+          <button class="fgCatChip" id="pfTabResources" role="tab" aria-selected="false" aria-controls="pfPanelResources" onclick="pfSwitchTab('resources')">Resources</button>
+          <button class="fgCatChip" id="pfTabBlog" role="tab" aria-selected="false" aria-controls="pfPanelBlog" onclick="pfSwitchTab('blog')">Blog</button>
+          <button class="fgCatChip" id="pfTabMarketplace" role="tab" aria-selected="false" aria-controls="pfPanelMarketplace" onclick="pfSwitchTab('marketplace')">Marketplace</button>
+          <button class="fgCatChip" id="pfTabProgress" role="tab" aria-selected="false" aria-controls="pfPanelProgress" onclick="pfSwitchTab('progress')">Level</button>
+          <button class="fgCatChip" id="pfTabAbout" role="tab" aria-selected="false" aria-controls="pfPanelAbout" onclick="pfSwitchTab('about')">About</button>
+          </div>
+          <button type="button" class="fgCatNav fgCatNext" data-fgnav="1" aria-label="Scroll tabs right"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 5 7 7-7 7"/></svg></button>
         </div>
       </nav>
 
@@ -1968,7 +1951,7 @@
   <script defer src="/js/fghead.js?v=11"></script>
   <script defer src="/js/auth.js?v=35"></script>
   <script defer src="/js/follow.js?v=3"></script>
-  <script defer src="/js/profile.js?v=29"></script>
+  <script defer src="/js/profile.js?v=30"></script>
   <script defer src="/js/albums.js?v=32"></script>
   <script defer src="/js/drafts.js?v=14"></script>
   <script defer src="/js/upqueue.js?v=10"></script>

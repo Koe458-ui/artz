@@ -195,11 +195,30 @@
   -webkit-tap-highlight-color:transparent;
 }
 .pfTab[hidden]{display:none;}
-.pfTabIco{display:flex;}
-.pfTabIco svg{width:17px;height:17px;display:block;}
 @media(hover:hover){ .pfTab:hover{color:var(--tx);} }
 .pfTab.active{color:var(--tx);border-bottom-color:var(--pg);}
 .pfTab:focus-visible{outline:2px solid var(--pg);outline-offset:-2px;border-radius:6px;}
+
+  /* profile rail is the hero rail: same text pill, same pair of arrows, same drag.
+     Everything but the open-tab state comes from .fgCatWrap/.fgCatRail/.fgCatChip in hero.css */
+#profilePage .pfTabs{border-bottom:0;}
+#profilePage .pfTabWrap{
+  --ftPad:var(--pfPad);
+  margin:0;padding:var(--sp-2) var(--ftPad);
+  box-sizing:border-box;
+}
+  /* the rail marks its open tab .active, not .on */
+#profilePage .pfTabs .fgCatChip.active{border-color:var(--pg);background:var(--pdim);color:var(--tx);}
+#profilePage .pfTabs .fgCatChip[hidden]{display:none;}
+@media(hover:hover){
+  #profilePage .pfTabs .fgCatChip.active:hover{border-color:var(--pg);}
+}
+
+  /* nothing to scroll: no arrows, no gutters held open for them, no edge fades */
+#profilePage .pfTabWrap.pfRailFits .fgCatNav{display:none;}
+#profilePage .pfTabWrap.pfRailFits .fgCatRail{padding-left:0;padding-right:0;}
+#profilePage .pfTabWrap.pfRailFits::before,
+#profilePage .pfTabWrap.pfRailFits::after{display:none;}
 
 .pfPanel{display:none;padding:var(--sp-6) 0 0;}
 .pfPanel.active{display:block;}
