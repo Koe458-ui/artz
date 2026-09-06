@@ -129,7 +129,12 @@
     /* .pfId's own padding rule sits later in this file at equal specificity,
        so it has to be outranked, not merely restated */
   .pfHead .pfId{padding-bottom:0;}
-  .pfBnr{grid-column:2;grid-row:1;}
+    /* align-self:start, not the row's stretch. The card's height is its width at
+       4:3 and nothing else, but the identity column is the taller of the two
+       below about 1300px, so a stretched .pfBnr ran past the card — and the
+       dots, which hang off its bottom, ended up under the card by as much as
+       65px. Hugging the card keeps them on it at every width. */
+  .pfBnr{grid-column:2;grid-row:1;align-self:start;}
     /* Both columns end together. The identity column is the shorter one — the head
        bio is cut at 100 characters, so it cannot outrun a 4:3 card — and it already
        wraps into lines (who, actions, stats, bio). Stretching it to the card's height
