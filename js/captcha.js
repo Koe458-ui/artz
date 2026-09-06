@@ -120,8 +120,12 @@
               }, 120000);
               if (typeof onPrompt === 'function') { try { onPrompt(); } catch (e) {   } }
             },
-            'error-callback': function () {
-              why('Turnstile refused \u2014 check the site key is this widget\u2019s and lists this domain');
+            'error-callback': function (code) {
+              var c = (code === 0 || code) ? String(code) : '';
+              why('Turnstile refused' + (c ? ' with error ' + c : '') +
+                  ' \u2014 check the site key is this widget\u2019s and that the widget lists ' +
+                  'this domain. Code reference: https://developers.cloudflare.com/turnstile/' +
+                  'troubleshooting/client-side-errors/error-codes/');
               finish(null);
             },
             'expired-callback': function () { why('the challenge expired before it was used'); finish(null); },
