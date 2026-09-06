@@ -684,8 +684,8 @@
       var unread = !n.is_read;
       var req = n.type === 'friend_request' && n.conversation_id;
       return '<div class="notifItem'+(unread?' unread':'')+'" data-id="'+esc(String(n.id))+'" '+
-          'role="button" tabindex="0" onclick="notifGo('+n.id+')" '+
-          'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();notifGo('+n.id+');}">'+
+          'role="button" tabindex="0" onclick="notifGo('+Number(n.id)+')" '+
+          'onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();notifGo('+Number(n.id)+');}">'+
         '<div class="notifAvWrap">'+notifAvatar(n)+
           '<span class="notifIcoWrap ico-'+esc(n.type||'admin')+'">'+notifIcon(n.type)+'</span>'+
         '</div>'+

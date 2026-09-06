@@ -304,6 +304,28 @@
 
   function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#39;');}
 
+  // For a value that lands inside a JavaScript string that is itself inside an
+  // HTML attribute -- onclick="f('HERE')".
+  //
+  // esc() is the wrong tool there and quietly so. It turns ' into &#39;, and the
+  // HTML parser turns &#39; back into ' before JavaScript ever sees the
+  // attribute -- so the quote is restored, in the string, and the call is out of
+  // the author's hands. Escaping has to survive that decode, which means the
+  // backslash goes in first and the entity encoding on top.
+  //
+  // Every caller today passes a database uuid or one of our own literals, so
+  // nothing here is currently reachable; this exists so the next value someone
+  // threads through an inline handler is not the one that proves it.
+  function escJs(s){
+    return String(s==null?'':s)
+      .replace(/\\/g,'\\\\')
+      .replace(/'/g,"\\'")
+      .replace(/"/g,'\\"')
+      .replace(/\r/g,'\\r').replace(/\n/g,'\\n')
+      .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+  window.escJs = escJs;
+
   window.dzLinkBlock = function(head, arr){
     if(!Array.isArray(arr) || !arr.length) return '';
     return '<div><div class="avBlockH">'+esc(head)+'</div><ul class="dzvRefs">'+
@@ -719,10 +741,18 @@
              software:a.software||null, pages:a.pages||null };
   }
 
+  // The grid pages through this in the browser, so the query behind it asked
+  // for every approved artwork on the site and had no upper bound at all --
+  // fine at a few dozen, a full-table read on every visit once the gallery
+  // grows, paid for in Supabase egress each time. The cap is far above what
+  // anyone scrolls and turns an unbounded query into a bounded one.
+  var GAL_MAX = 1000;
+
   async function galFetch(){
     const{data:imgs,error}=await sb.from('artworks').select('*')
       .eq('status','approved').eq('visibility','published').eq('kind',ART_KIND_ART)
-      .order('created_at',{ascending:false});
+      .order('created_at',{ascending:false})
+      .limit(GAL_MAX);
     if(error) throw error;
     return imgs||[];
   }

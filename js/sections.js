@@ -2848,9 +2848,9 @@
     var ex=dzExcerpt(d.data||{});
     var sched=d.data && d.data.__sched;
     var title=d.title||'Untitled';
-    return '<div class="upDraftCard dzPCard" onclick="dzResumeDraft(\''+d.id+'\')" role="button" tabindex="0" '+
+    return '<div class="upDraftCard dzPCard" onclick="dzResumeDraft(\''+escJs(d.id)+'\')" role="button" tabindex="0" '+
         'title="'+esc(title)+'" aria-label="Resume draft: '+esc(title)+'">'+
-      '<button type="button" class="upDraftX" onclick="event.stopPropagation();dzDeleteDraft(\''+d.id+'\')" aria-label="Delete draft">✕</button>'+
+      '<button type="button" class="upDraftX" onclick="event.stopPropagation();dzDeleteDraft(\''+escJs(d.id)+'\')" aria-label="Delete draft">✕</button>'+
       '<span class="upDraftExp">'+dzDaysLeft(d.savedAt)+'d</span>'+
       '<div class="dzPIn">'+
         '<div class="dzPTitle">'+esc(title)+'</div>'+
@@ -2866,7 +2866,7 @@
     var tip=title+' · '+(err ? err : dzFmtWhen(r.publish_at));
     return '<div class="upDraftCard dzPCard dzPSched'+(err?' upSchedBad':'')+'" '+
         'title="'+esc(tip)+'" aria-label="'+(err?'Failed: ':'Scheduled: ')+esc(title)+'">'+
-      '<button type="button" class="upDraftX" onclick="dzCancelSched(\''+r.id+'\',\''+sec+'\')" aria-label="'+(err?'Dismiss':'Cancel schedule')+'">✕</button>'+
+      '<button type="button" class="upDraftX" onclick="dzCancelSched(\''+escJs(r.id)+'\',\''+escJs(sec)+'\')" aria-label="'+(err?'Dismiss':'Cancel schedule')+'">✕</button>'+
       '<span class="upDraftExp'+(err?'':' upSchedMark')+'">'+(err?'!':dzMark(r.publish_at))+'</span>'+
       '<div class="dzPIn">'+
         '<div class="dzPTitle">'+esc(title)+'</div>'+
@@ -3046,7 +3046,12 @@
     var btn = document.getElementById('dzSubmit-'+sec);
     var s = st(sec), row = {user_id: currentUser.id, tags: s.tags, status:'approved'};
       // Reassigned below once the content check has run: an upload the moderator could not see is written pending.
-    function dzHoldRow(){ if(held) row.status = 'pending'; }
+      // The approval ticket travels with the row: dz_section_mod_gate reads mod_token and writes anything without a
+      // valid one to pending, so a publish that skipped the check above cannot land approved.
+    function dzHoldRow(){
+      if(held) row.status = 'pending';
+      row.mod_token = modToken;
+    }
 
     var miss = FORMS[sec].fields.filter(function(fd){
       if(!fd.req || !dzCondShow(sec, fd)) return false;
@@ -3068,6 +3073,9 @@
     else if(sec === 'blog'){   modImg = st(sec).files.cover;   modMode = 'artwork'; modRecv = 'Cover image received'; }
     var moderated = !!modImg;
     var held = false;
+      // The ticket /api/moderate-upload signs when it approves. Function-scoped so dzHoldRow can reach it however
+      // early the submit returned, and null unless a check actually passed — a deferred or absent check sends none.
+    var modToken = null;
       // Every object this submit puts in storage, so a submit that fails on the way to the database takes them back out —
       // the failure panel says so. Declared out here because the catch reads it however early the throw came.
     var landedFiles = [];
@@ -3112,6 +3120,7 @@
           dzV.step('safety','fail', devNote);
           throw new Error(mod.reason || 'This upload did not pass the content check.');
         } else {
+          modToken = mod.token || null;
           dzV.step('safety','pass', mod.rating === 'MATURE' ? 'Approved · 18+' : 'Safe for all audiences');
         }
         dzV.step('transfer','run');

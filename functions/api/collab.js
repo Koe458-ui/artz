@@ -181,6 +181,15 @@ const ACTIONS = {
     if (url && !/^\/[\w\-./]*$/.test(url))
       throw new Refused('A target has to be a path on DigiArtz, like /explore', 400);
 
+    // Staff first, on the caller's own token, before anything runs as the
+    // service role. The name lookup below reads the profiles table with a key
+    // that ignores RLS, and it used to happen before any check had been made --
+    // so a signed-in stranger could make the service role work on their behalf
+    // and read the reply for whether a name existed. dz_admin_notify still does
+    // the real refusing; this only decides who gets as far as the lookup.
+    const who = await rpc(env, request, 'dz_my_collab_state');
+    if (!(who && who.is_staff)) throw new Refused('Not allowed', 403);
+
     // names in, ids out — the client never names an id, and never sees one
     let users = null;
     const names = String(body.to || '').split(/[\s,]+/)
@@ -235,7 +244,7 @@ export async function handle(action, { env, request }) {
   if (typeof fn !== 'function') return json({ error: 'Unknown action' }, 404);
 
   const [limit, seconds] = has(LIMITS, name) ? LIMITS[name] : LIMIT_DEFAULT;
-  if (!(await underLimit(env, 'cl:' + name + ':' + user.id, limit, seconds)))
+  if (!(await underLimit(env, 'cl:' + name + ':' + user.id, limit, seconds, true)))
     return json({ error: 'Too many attempts — wait a moment' }, 429);
 
   try {

@@ -387,7 +387,11 @@ function applyMeta(rw, m) {
 
   if (m.robots) set('meta[name="robots"]', m.robots);
 
-  const json = JSON.stringify(m.ld).replace(/<\//g, '<\\/');
+  // Every `<`, not just `</`. Inside a script element `<!--` opens the escaped
+  // text state, after which a later `</script>` no longer closes the block --
+  // so escaping only the closing sequence left an artwork title able to derail
+  // how the rest of the head parses. `<` never has to be literal in JSON.
+  const json = JSON.stringify(m.ld).replace(/</g, '\\u003c');
   rw.on('head', {
     element(el) {
       el.append(
@@ -477,7 +481,7 @@ export async function onRequest(context) {
         url: `${SITE}/artwork/${a.id}`,
         datePublished: (a.created_at || '').slice(0, 10)
       }))
-    }).replace(/<\//g, '<\\/');
+    }).replace(/</g, '\\u003c');
 
     rw = rw.on('div#awGrid', {
       element(el) { el.setInnerContent(cards, { html: true }); }

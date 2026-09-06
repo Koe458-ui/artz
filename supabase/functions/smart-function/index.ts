@@ -42,13 +42,29 @@ const ASSET_EXT = new Set([
   "mp4","webm","mov",
 ]);
 
-const cors = {
-  "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, content-type",
-  "Access-Control-Allow-Methods": "POST, OPTIONS",
-};
+// Only the site may call this from a browser. Authorization here is a bearer
+// token rather than a cookie, so `*` was not exploitable on its own -- but it
+// also meant any page anywhere could drive this function with a token it had
+// got hold of, and origin is a free extra layer to have.
+const ALLOWED_ORIGINS = new Set([
+  "https://digiartz.net",
+  "https://www.digiartz.net",
+]);
+
+function corsFor(req: Request): Record<string, string> {
+  const origin = req.headers.get("origin") || "";
+  const allow = ALLOWED_ORIGINS.has(origin) ? origin : "https://digiartz.net";
+  return {
+    "Access-Control-Allow-Origin": allow,
+    "Access-Control-Allow-Headers": "authorization, content-type",
+    "Access-Control-Allow-Methods": "POST, OPTIONS",
+    "Vary": "Origin",
+  };
+}
+// CORS is attached once, by the wrapper at the bottom, so every exit path --
+// including a thrown one -- carries the same headers.
 const json = (b: unknown, s = 200) =>
-  new Response(JSON.stringify(b), { status: s, headers: { ...cors, "content-type": "application/json" } });
+  new Response(JSON.stringify(b), { status: s, headers: { "content-type": "application/json" } });
 
 const extOf = (p: string) => (p.split(".").pop() || "").toLowerCase();
 
@@ -59,7 +75,20 @@ function serviceClient() {
 }
 
 Deno.serve(async (req) => {
-  if (req.method === "OPTIONS") return new Response(null, { headers: cors });
+  const headers = corsFor(req);
+  if (req.method === "OPTIONS") return new Response(null, { headers });
+  let res: Response;
+  try {
+    res = await handle(req);
+  } catch {
+    res = json({ error: "unexpected error" }, 500);
+  }
+  const out = new Response(res.body, res);
+  for (const [k, v] of Object.entries(headers)) out.headers.set(k, v);
+  return out;
+});
+
+async function handle(req: Request): Promise<Response> {
   if (req.method !== "POST")    return json({ error: "POST only" }, 405);
 
   const supa = createClient(
@@ -169,24 +198,57 @@ Deno.serve(async (req) => {
         return json({ error: "file too large" }, 400);
     }
 
-    try {
-      const now = Date.now();
-      const since10m = new Date(now - 10 * 60 * 1000).toISOString();
-      const since24h = new Date(now - 24 * 60 * 60 * 1000).toISOString();
-      const [r10, r24] = await Promise.all([
-        supa.from("upload_events").select("id", { count: "exact", head: true })
-          .eq("user_id", user.id).gte("created_at", since10m),
-        supa.from("upload_events").select("id", { count: "exact", head: true })
-          .eq("user_id", user.id).gte("created_at", since24h),
-      ]);
-      if ((r10.count ?? 0) >= RATE_10MIN || (r24.count ?? 0) >= RATE_24H)
-        return json({ error: "Upload limit reached — please try again in a little while." }, 429);
-      await supa.from("upload_events").insert({ user_id: user.id });
-    } catch (_e) {
+    // Counting rows and then inserting one is two statements with a gap in the
+    // middle: N requests sent together all read the same count, all find room,
+    // and all proceed. dz_rate_take closes the gap -- it is a single
+    // INSERT .. ON CONFLICT DO UPDATE .. RETURNING, so the Nth caller in a
+    // burst sees N, not 0.
+    //
+    // It also fails closed. This limiter is the only thing standing between one
+    // account and an unbounded run at 400MB-a-file storage, and the old
+    // `catch (_e) {}` around it turned every hiccup into free uploads.
+    //
+    // dz_rate_take rather than dz_rate_ok: the two are the same counter, but
+    // dz_rate_ok sweeps rate_hits older than an hour. A 24h window is stamped
+    // at UTC midnight, so that sweep would delete the daily bucket every hour
+    // and the daily cap would never bind. dz_rate_take sweeps at a day, which
+    // outlives the window it is counting.
+    {
+      const rateSvc = serviceClient();
+      if (!rateSvc) return json({ error: "upload limiter is not configured" }, 503);
+      try {
+        const [burst, daily] = await Promise.all([
+          rateSvc.rpc("dz_rate_take", {
+            p_bucket: `up:10m:${user.id}`, p_limit: RATE_10MIN, p_seconds: 600,
+          }),
+          rateSvc.rpc("dz_rate_take", {
+            p_bucket: `up:24h:${user.id}`, p_limit: RATE_24H, p_seconds: 86400,
+          }),
+        ]);
+        if (burst.error || daily.error) throw burst.error || daily.error;
+        if (burst.data === false || daily.data === false)
+          return json({ error: "Upload limit reached — please try again in a little while." }, 429);
+        if (burst.data !== true || daily.data !== true)
+          return json({ error: "Could not check your upload allowance — try again shortly." }, 503);
+      } catch (_e) {
+        return json({ error: "Could not check your upload allowance — try again shortly." }, 503);
+      }
+      // Kept for the audit trail the dashboard reads; the limit above no longer
+      // depends on it, so a failure here cannot grant an upload.
+      await supa.from("upload_events").insert({ user_id: user.id }).then(
+        () => {}, () => {},
+      );
     }
 
     const isImage = IMG_TYPES.test(ct);
-    const isPrivate = body.visibility === "private" && !isImage;
+
+    // `visibility` arrives from the client, and it used to be the only thing
+    // deciding which bucket a sell file landed in -- so a caller could put the
+    // very file people pay for into the public bucket, where the paywall is a
+    // URL away from irrelevant. Anything that is not an image and sits under a
+    // resources/ or market/ prefix is downloadable goods: it goes private
+    // whatever the client asked for. Previews are images and still go public.
+    const isPrivate = !isImage && (asset || body.visibility === "private");
     const targets: Array<Record<string, unknown>> = [];
 
     const sign = async (bucket: string, objPath: string, role: string) => {
@@ -248,4 +310,4 @@ Deno.serve(async (req) => {
   }
 
   return json({ error: "unknown action" }, 400);
-});
+}

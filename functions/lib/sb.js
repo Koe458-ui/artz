@@ -77,13 +77,26 @@ export async function signObject(sbUrlStr, svcKey, bucket, path, seconds) {
   return signed.startsWith('http') ? signed : sbUrlStr + '/storage/v1' + signed;
 }
 
-export async function underLimit(env, bucket, limit, seconds) {
-  if (!sbSvc(env)) return true;
+// `strict` decides what an unanswerable limiter means.
+//
+// The counter lives in Postgres, so the limiter fails exactly when the database
+// is already struggling -- which is the moment the limits matter most. Letting
+// every caller through then is backwards: the load that breaks the counter is
+// the load the counter exists to bound.
+//
+// Browsing still fails open, because refusing to serve a gallery over a blip in
+// a rate-limit table is a worse outcome than serving it. Anything that moves
+// money, grants a role or acts as staff fails closed: a 429 the caller can
+// retry costs a moment, and the alternative is an unbounded run at checkout,
+// payouts or the admin surface while nothing is counting.
+export async function underLimit(env, bucket, limit, seconds, strict = false) {
+  if (!sbSvc(env)) return !strict;
   try {
     const r = await sbRpc(env, 'dz_rate_take',
       { p_bucket: bucket, p_limit: limit, p_seconds: seconds });
-    return !r.ok || r.body !== false;
-  } catch { return true; }
+    if (!r.ok) return !strict;
+    return r.body !== false;
+  } catch { return !strict; }
 }
 
 export async function hmacMatches(secret, message, signature) {

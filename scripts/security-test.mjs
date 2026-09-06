@@ -59,7 +59,11 @@ falsy('ALLOWED_ORIGINS does not open the door to others',
 
 const SB = 'https://tmqzqlrpjpydiftlrzmj.supabase.co';
 truthy('project host allowed',      allowedHost(SB + '/storage/v1/object/x', SB));
-truthy('sibling supabase host',     allowedHost('https://other.supabase.co/x', SB));
+// Anyone can create a project on supabase.co, so "ends with .supabase.co" is
+// not a statement about us. A legacy file_url pointing at someone else's
+// project was fetched by the edge and streamed to the member as ours; only this
+// project's own hostname is the origin we mean.
+falsy('sibling supabase host refused', allowedHost('https://other.supabase.co/x', SB));
 falsy('plain http refused',         allowedHost('http://tmqzqlrpjpydiftlrzmj.supabase.co/x', SB));
 falsy('attacker host refused',      allowedHost('https://evil.example/x', SB));
 falsy('suffix-glued host refused',  allowedHost('https://evil-supabase.co/x', SB));
@@ -198,6 +202,89 @@ for (const f of ['functions/api/paypal.js', 'functions/api/paypal-webhook.js']) 
   const served = ['index.html', 'sw.js', 'uploadVerifier.js', 'aiAssistantData.js', 'config.example.js']
     .concat(readdirSync('js').filter((f) => f.endsWith('.js')).map((f) => 'js/' + f));
   for (const f of served) falsy(`${f} carries no secret-shaped literal`, SECRET.test(readFileSync(f, 'utf8')));
+}
+
+// ---------------------------------------------------------------------------
+// Regressions from the 2026-09 audit. Each one pins a fix that is invisible at
+// runtime until the day it matters, which is exactly the kind that gets undone.
+// ---------------------------------------------------------------------------
+
+{
+  const src = readFileSync('functions/lib/sb.js', 'utf8');
+  truthy('underLimit takes a strict flag',
+         /export async function underLimit\(env, bucket, limit, seconds, strict = false\)/.test(src));
+  falsy('underLimit no longer returns true unconditionally on error',
+        /catch \{ return true; \}/.test(src));
+  truthy('an unanswerable limiter refuses a strict caller',
+         /catch \{ return !strict; \}/.test(src));
+}
+
+for (const f of ['functions/api/rzp.js', 'functions/api/paypal.js',
+                 'functions/api/payouts.js', 'functions/api/collab.js']) {
+  const src = readFileSync(f, 'utf8');
+  truthy(`${f} rate-limits strictly`, /underLimit\([^)]*,\s*true\)/.test(src));
+}
+
+{
+  const src = readFileSync('functions/api/payouts.js', 'utf8');
+  falsy('payout batch id does not carry a clock, so a resend is idempotent',
+        /sender_batch_id[\s\S]{0,80}Date\.now\(\)|batchId = 'dzpo_' \+ req\.id\.slice\(0, 8\) \+ '_' \+ Date\.now\(\)/.test(src));
+  truthy('payout batch id is derived from the request id',
+         /const batchId = 'dzpo_' \+ req\.id;/.test(src));
+  truthy('a payout that PayPal accepted is not returned to the approved queue',
+         /if \(sent\) \{/.test(src));
+  truthy('a sent-but-unrecorded payout is flagged for manual reconciliation',
+         /SENT, BOOKKEEPING INCOMPLETE/.test(src));
+}
+
+{
+  const src = readFileSync('functions/_middleware.js', 'utf8');
+  falsy('JSON-LD no longer escapes only the closing sequence',
+        /replace\(\/<\\\/\/g/.test(src));
+  const hits = src.match(/replace\(\/<\/g, '\\\\u003c'\)/g) || [];
+  check('every JSON-LD block escapes all of <', hits.length, 2);
+}
+
+{
+  const src = readFileSync('functions/api/collab.js', 'utf8');
+  const bc = src.slice(src.indexOf('async broadcast('));
+  const guard = bc.indexOf('who.is_staff');
+  const lookup = bc.indexOf('sbService(env');
+  truthy('broadcast confirms staff before it spends the service role',
+         guard !== -1 && lookup !== -1 && guard < lookup);
+}
+
+{
+  const src = readFileSync('supabase/functions/smart-function/index.ts', 'utf8');
+  falsy('the upload limiter no longer swallows its own failure',
+        /\}\s*catch \(_e\) \{\s*\n\s*\}/.test(src));
+  truthy('the upload limiter counts atomically in the database',
+         /rpc\("dz_rate_take"/.test(src));
+  truthy('a sell file cannot be talked into the public bucket',
+         /const isPrivate = !isImage && \(asset \|\| body\.visibility === "private"\)/.test(src));
+  falsy('the edge function no longer answers every origin',
+        /"Access-Control-Allow-Origin": "\*"/.test(src));
+}
+
+{
+  const src = readFileSync('js/sections.js', 'utf8');
+  truthy('a section publish carries its approval ticket',
+         /row\.mod_token = modToken;/.test(src));
+  truthy('the ticket is only kept when a check actually passed',
+         /modToken = mod\.token \|\| null;/.test(src));
+}
+
+{
+  const src = readFileSync('js/app-core.js', 'utf8');
+  truthy('escJs exists for values that land in an inline handler',
+         /function escJs\(s\)\{/.test(src));
+  // Order matters: escaping the backslash after the quote would re-escape the
+  // backslash the quote rule just introduced.
+  const esc = src.slice(src.indexOf('function escJs(s){'));
+  truthy('escJs escapes the backslash first',
+         esc.indexOf(String.raw`.replace(/\\/g,'\\\\')`) !== -1 &&
+         esc.indexOf(String.raw`.replace(/\\/g,'\\\\')`) < esc.indexOf(String.raw`.replace(/'/g,"\\'")`));
+  truthy('the gallery query is bounded', /\.limit\(GAL_MAX\)/.test(src));
 }
 
 console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');

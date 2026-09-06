@@ -52,7 +52,7 @@
       else if(j.stage==='uploading')  hint = j.upTotal>1 ? ('Transferring '+Math.min(j.upDone+1,j.upTotal)+' of '+j.upTotal+' images') : 'Transferring image';
       else if(j.stage==='finalizing') hint = 'Publishing';
       else if(j.stage==='queued')     hint = 'Waiting for review';
-      return '<div class="upqCard'+(j.stage==='live'?' upqLive':'')+'" onclick="upqOpenModal(\''+j.id+'\')" role="status" title="Tap for status">'+
+      return '<div class="upqCard'+(j.stage==='live'?' upqLive':'')+'" onclick="upqOpenModal(\''+escJs(j.id)+'\')" role="status" title="Tap for status">'+
         '<div class="upqImgWrap">'+
           (j.preview ? '<img class="upqImg" src="'+j.preview+'" alt="" style="'+thumbStyle(j.thumbFocus.x, j.thumbFocus.y, j.thumbFocus.z)+'">' : '')+
           '<div class="upqOvl">'+

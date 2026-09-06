@@ -242,9 +242,9 @@
     row.innerHTML = list.map(function(r){
       var daysLeft = Math.max(1, Math.ceil((r.created + UPDR_TTL - Date.now())/(24*60*60*1000)));
       var u = URL.createObjectURL(r.file); updrUrls.push(u);
-      return '<div class="upDraftCard" onclick="updrPreview(\''+r.id+'\')" role="button" tabindex="0" title="'+esc(r.name||'Untitled draft')+'" aria-label="Preview draft: '+esc(r.name||'Untitled draft')+'">'+
+      return '<div class="upDraftCard" onclick="updrPreview(\''+escJs(r.id)+'\')" role="button" tabindex="0" title="'+esc(r.name||'Untitled draft')+'" aria-label="Preview draft: '+esc(r.name||'Untitled draft')+'">'+
         '<img src="'+u+'" alt="" style="'+thumbStyle(r.thumb&&r.thumb.x, r.thumb&&r.thumb.y, r.thumb&&r.thumb.z)+'">'+
-        '<button type="button" class="upDraftX" onclick="updrRemove(\''+r.id+'\',event)" aria-label="Delete draft">✕</button>'+
+        '<button type="button" class="upDraftX" onclick="updrRemove(\''+escJs(r.id)+'\',event)" aria-label="Delete draft">✕</button>'+
         '<span class="upDraftExp">'+daysLeft+'d</span>'+
       '</div>';
     }).join('') + Array(Math.max(0, UPDR_SLOTS - list.length) + 1).join(updrGhost());

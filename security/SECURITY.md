@@ -1005,9 +1005,23 @@ drop table    if exists private.mod_config;
 To check which state it is in:
 
 ```sql
-select case when secret = '' then 'inert' else 'enforcing' end
+select case when coalesce(secret, '') = '' then 'inert'
+            else 'enforcing: artworks' end
+       || case when coalesce(sections_enforced, false)
+               then ' + sections' else ' ONLY (sections NOT enforced)' end
   from private.mod_config where id = true;
 ```
+
+Read both columns, not just the secret. `secret` alone arms the gate for
+**artworks**; `sections_enforced` arms it for **blog posts, marketplace listings
+and resources**, and those are separate switches. The earlier version of this
+query looked at `secret` only and answered `enforcing` while three of the four
+content types were still publishing without a ticket -- an operator following
+this file would have read a green light for a gate that was open.
+
+`jobs` has no content gate on either switch. `dz_job_post_gate` is a
+subscription and quota check, not a moderation check; job postings are covered
+only by the `dz_content_guard` word filter.
 
 The secret is a credential: it belongs in the Cloudflare dashboard and the
 database, never in git.

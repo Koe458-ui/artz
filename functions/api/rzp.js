@@ -67,7 +67,7 @@ export async function onRequestPost({ env, request }) {
   const user = await sbUser(env, request);
   if (!user) return json({ error: 'Sign in required' }, 401);
 
-  if (!(await underLimit(env, 'rzp:' + user.id, 30, 60)))
+  if (!(await underLimit(env, 'rzp:' + user.id, 30, 60, true)))
     return json({ error: 'Too many attempts — wait a moment' }, 429);
 
   let body;

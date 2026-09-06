@@ -31,12 +31,17 @@ export function sameOrigin(request, env) {
   return false;
 }
 
+// Only this project's own Supabase hostname.
+//
+// This used to end with `.supabase.co`, which is every Supabase project in the
+// world, not ours -- and anyone can create one. A row whose legacy file_url
+// pointed at an attacker's project would have been fetched by the edge and
+// streamed to the member as if it were ours.
 export function allowedHost(url, sbUrlStr) {
   let u;
   try { u = new URL(url); } catch { return false; }
   if (u.protocol !== 'https:') return false;
-  try { if (u.hostname === new URL(sbUrlStr).hostname) return true; } catch {   }
-  return u.hostname.endsWith('.supabase.co');
+  try { return u.hostname === new URL(sbUrlStr).hostname; } catch { return false; }
 }
 
 export function encodePath(p) {

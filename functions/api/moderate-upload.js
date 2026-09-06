@@ -258,8 +258,8 @@ export async function onRequestPost(context) {
     // Counted before the body is read, so an oversized request costs nothing
     // once the member is already over. Both buckets have to hold.
     const [burstOk, dailyOk] = await Promise.all([
-      underLimit(env, 'mod:b:' + user.id, MOD_BURST.max, MOD_BURST.seconds),
-      underLimit(env, 'mod:d:' + user.id, MOD_DAILY.max, MOD_DAILY.seconds),
+      underLimit(env, 'mod:b:' + user.id, MOD_BURST.max, MOD_BURST.seconds, true),
+      underLimit(env, 'mod:d:' + user.id, MOD_DAILY.max, MOD_DAILY.seconds, true),
     ]);
     if (!burstOk || !dailyOk) {
       return json({

@@ -111,7 +111,7 @@ export async function onRequestPost({ env, request }) {
   const user = await sbUser(env, request);
   if (!user) return json({ error: 'Sign in required' }, 401);
 
-  if (!(await underLimit(env, 'po:' + user.id, 20, 60)))
+  if (!(await underLimit(env, 'po:' + user.id, 20, 60, true)))
     return json({ error: 'Too many attempts — wait a moment' }, 429);
 
   let body;
@@ -449,8 +449,18 @@ export async function onRequestPost({ env, request }) {
         return json({ error: 'The available balance no longer covers this request — nothing was sent' }, 409);
       }
 
-      const batchId = 'dzpo_' + req.id.slice(0, 8) + '_' + Date.now();
+      // Derived from the request id alone, never from the clock. PayPal treats
+      // sender_batch_id and paypal-request-id as idempotency keys, so a second
+      // send for the same request is a no-op at the provider instead of a
+      // second transfer. A Date.now() in here defeated both: every retry minted
+      // a fresh key and PayPal paid again.
+      const batchId = 'dzpo_' + req.id;
       const retiredIds = [];
+
+      // Split in two on purpose. Everything before `sent` is ours to undo;
+      // once PayPal has accepted the batch the money is gone and nothing below
+      // may put the request back in a queue an operator can send from again.
+      let sent = null;
       try {
         const out = await pp(env, '/v1/payments/payouts', {
           method: 'POST',
@@ -473,6 +483,7 @@ export async function onRequestPost({ env, request }) {
         }, 'Payout');
 
         const bid = (out.batch_header && out.batch_header.payout_batch_id) || batchId;
+        sent = bid;
 
         const earned = await sbService(env,
           '/marketplace_earnings?seller_id=eq.' + req.user_id +
@@ -509,6 +520,26 @@ export async function onRequestPost({ env, request }) {
         });
         return json({ ok: true, batchId: bid, confirmed: !confirmable });
       } catch (err) {
+        // PayPal already accepted the batch and the bookkeeping after it failed.
+        // The transfer is real, so the request stays `processing` and keeps its
+        // batch id: an operator reconciles it by hand. Returning it to
+        // `approved` here -- which is what this used to do -- offered the same
+        // money for sending a second time.
+        if (sent) {
+          await sbService(env, '/payout_requests?id=eq.' + req.id, {
+            method: 'PATCH',
+            body: JSON.stringify({
+              batch_id: sent,
+              review_note: 'SENT, BOOKKEEPING INCOMPLETE \u2014 PayPal accepted batch ' + sent +
+                           '. Do not send again; reconcile by hand.',
+            }),
+          }).catch(() => {});
+          return safeError(err,
+            'The transfer was sent but recording it did not finish. It is held for ' +
+            'manual reconciliation and must not be sent again.', 502);
+        }
+
+        // Nothing left our side. Safe to undo and re-queue.
         await sbService(env, '/payout_requests?id=eq.' + req.id, {
           method: 'PATCH',
           body: JSON.stringify({
