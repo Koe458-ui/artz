@@ -52,10 +52,11 @@
   var lastWhy = null;
   var onPrompt = null;
 
-  function why(reason) {
+  function why(reason, detail) {
     lastWhy = reason;
     console.warn('[DigiArtz] No captcha token: ' + reason + '. Sign-in will be refused ' +
-                 'with \u201CCouldn\u2019t verify you\u2019re human\u201D.');
+                 'with \u201CCouldn\u2019t verify you\u2019re human\u201D.' +
+                 (detail ? '\n' + detail : ''));
   }
 
   function host() {
@@ -122,10 +123,11 @@
             },
             'error-callback': function (code) {
               var c = (code === 0 || code) ? String(code) : '';
-              why('Turnstile refused' + (c ? ' with error ' + c : '') +
-                  ' \u2014 check the site key is this widget\u2019s and that the widget lists ' +
-                  'this domain. Code reference: https://developers.cloudflare.com/turnstile/' +
-                  'troubleshooting/client-side-errors/error-codes/');
+              why('the check was refused' + (c ? ' (code ' + c + ')' : ''),
+                  'Turnstile rejected the widget itself, so no token was ever issued. ' +
+                  'Check that TURNSTILE_SITE_KEY in config.js is this widget\u2019s SITE key ' +
+                  'and not its secret, and that the widget lists this hostname. Codes: ' +
+                  'https://developers.cloudflare.com/turnstile/troubleshooting/client-side-errors/error-codes/');
               finish(null);
             },
             'expired-callback': function () { why('the challenge expired before it was used'); finish(null); },

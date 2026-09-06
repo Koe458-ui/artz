@@ -53,7 +53,7 @@ const SHELL_URLS = [
   '/js/badwords-list-a.js?v=3',
   '/js/badwords-list-b.js?v=3',
   '/js/badwords.js?v=5',
-  '/js/captcha.js?v=6',
+  '/js/captcha.js?v=7',
 
   '/js/boot.js?v=4',
   '/js/cache.js?v=4',
