@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 //
-// The seven panel stylesheets in index.html carry
+// The eleven panel stylesheets in index.html carry
 // media="print" onload="this.media='all'", which takes them off the
 // render-blocking path without moving them in the cascade. Two things have to
 // stay true for that to be safe, and both are easy to break by accident:
@@ -26,11 +26,22 @@ const ok = (m) => console.log(`ok    ${m}`);
 // Sheets proven safe to defer by scripts/css-critical.mjs (0.0000% pixel
 // difference at 390px and 1440px). Adding to this list means re-running it.
 const PROVEN = new Set(['viewer.css', 'community.css', 'ranking.css', 'profile.css',
-                        'admin.css', 'auth.css', 'upload.css']);
+                        'admin.css', 'auth.css', 'upload.css',
+                        // 2026-09-06: re-measured with scripts/css-critical.mjs, each on
+                        // its own and then all four together. 0.0000% of pixels differ at
+                        // 390px and 1440px in every run, so none of them paints the first
+                        // screen. 62 KB off the render-blocking path, which drops the
+                        // blocking set from 181 KB to 119 KB.
+                        'connect.css', 'panels.css', 'widgets.css', 'select.css']);
 
 // Sheets the first screen paints with. These must never be deferred.
-const CRITICAL = new Set(['base.css', 'hero.css', 'connect.css', 'panels.css',
-                          'widgets.css', 'overrides.css', 'select.css']);
+//
+// This list used to also name connect, panels, widgets and select. That was an
+// assumption rather than a measurement, and the pixel diff disagreed with it --
+// see the note above. The three left are the ones that genuinely paint: base is
+// the foundation, hero IS the first screen, and overrides.css is named that
+// because it deliberately wins over everything above it.
+const CRITICAL = new Set(['base.css', 'hero.css', 'overrides.css']);
 
 const head = html.slice(0, html.indexOf('</head>'));
 const noscript = (head.match(/<noscript>([\s\S]*?)<\/noscript>/g) || []).join('');

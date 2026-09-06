@@ -71,7 +71,13 @@ const srv = createServer(async (req, res) => {
 });
 await new Promise((r) => srv.listen(PORT, '127.0.0.1', r));
 
-const browser = await chromium.launch();
+// Playwright bundles a browser revision and refuses to start if that exact
+// build is missing. On a machine that already has Chromium — a CI image, a
+// container, a system package — point this at it rather than downloading a
+// second copy:  CHROMIUM_PATH=/path/to/chrome node scripts/<this>.mjs
+const CHROMIUM_PATH = process.env.CHROMIUM_PATH || process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || '';
+const LAUNCH = CHROMIUM_PATH ? { executablePath: CHROMIUM_PATH } : {};
+const browser = await chromium.launch(LAUNCH);
 
 async function run(drop) {
   dropping = drop;

@@ -44,6 +44,12 @@
     'device:prefs':      { ttl: 30 * DAY,  swr: 90 * DAY, scope: 'public', store: 'both', sync: true, offline: true },
 
     'ranking':           { ttl: 3 * MIN,   swr: 10 * MIN, scope: 'public', store: 'both', cap: 20, capAt: 1, offline: true },
+      // One member's own standing, so 'private' — full() keys it by uid and a
+      // rank must never be served out of another member's cache. The board it
+      // sits beside is already cached; this was the one call on the ranking
+      // screen going to the database every time, four times over (one per
+      // board) on a 45s tick, and each one is a full aggregation.
+    'ranking:me':        { ttl: 60 * SEC,  swr: 5 * MIN,  scope: 'private', store: 'memory', cap: 8, capAt: 1 },
 
     'communities':       { ttl: 3 * MIN,   swr: 10 * MIN, scope: 'public', store: 'both', cap: 20, capAt: 1, offline: true },
 

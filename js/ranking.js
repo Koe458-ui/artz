@@ -249,10 +249,21 @@
       if (!c) return;
       if (openPage) { box.classList.add('tap'); box.onclick = openPage; }
 
-      try {
+      // get_rank_me ranks the whole site to return one row, so it costs the same
+      // as the board beside it. tick() re-runs this for all four boards every
+      // 45s; cached, the tick now answers from memory and a rank is at most a
+      // minute stale, which is what the board it sits next to already was.
+      var cache = window.dzCached ? window.dzCached() : null;
+      var load  = async function () {
         var r = await c.rpc('get_rank_me', { board: b.key });
         if (r.error) throw r.error;
-        var d = (r.data && r.data[0]) || null;
+        return (r.data && r.data[0]) || null;
+      };
+
+      try {
+        var d = cache
+          ? await cache.getOrSet('rank:me:' + b.key, load, 'ranking:me')
+          : await load();
         if (!d) { box.appendChild(el('span', 'rkMinePos', 'UNRANKED')); return; }
         box.appendChild(el('span', 'rkMinePos',
           '#' + num(d.rnk) + ' OF ' + num(d.total) + ' \u00B7 ' + valueOf(b, d)));

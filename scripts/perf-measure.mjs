@@ -214,7 +214,13 @@ function report(r, label) {
 }
 
 const srv = await serve();
-const browser = await chromium.launch();
+// Playwright bundles a browser revision and refuses to start if that exact
+// build is missing. On a machine that already has Chromium — a CI image, a
+// container, a system package — point this at it rather than downloading a
+// second copy:  CHROMIUM_PATH=/path/to/chrome node scripts/<this>.mjs
+const CHROMIUM_PATH = process.env.CHROMIUM_PATH || process.env.PLAYWRIGHT_CHROMIUM_EXECUTABLE || '';
+const LAUNCH = CHROMIUM_PATH ? { executablePath: CHROMIUM_PATH } : {};
+const browser = await chromium.launch(LAUNCH);
 try {
   const cold = await measure(browser, { warm: false });
   report(cold, `COLD LOAD — ${MOBILE ? 'mobile (4x CPU throttle, Slow 4G)' : 'desktop, no throttling'}`);
