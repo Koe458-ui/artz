@@ -1,18 +1,30 @@
 # Things only an operator can do
 
-Four security items are outside what a database connection or a repository
+Some security items are outside what a database connection or a repository
 checkout can reach. They are listed here because "we could not do it from the
 audit environment" is a reason to write it down, not a reason to drop it.
 
 Each one says what it is, why it cannot be automated from here, and exactly what
 to click or run.
 
+**Updated 2026-09-06.** The remediation pass closed eight findings in code and in
+four applied migrations — the per-member limit on `/api/moderate-upload`,
+`visibility` in the five SELECT policies, the `resources`/`artworks` column
+grants, `rank_scores` revoked from `anon`, the notification-link guard at both
+ends, and `get_artist_progress` honouring the privacy flags. What follows is what
+is left, and it is all console work or work that needs live traffic.
+
+Two corrections to this file, both of which would have cost someone an hour:
+the repository is **private**, not public — item 1 below said otherwise — and
+the CI job named `sql` no longer exists. Requiring it as a status check would
+have left `main` permanently unmergeable, waiting for a job that never runs.
+
 ---
 
 ## 1. Branch protection on `main` — HIGH
 
 `main` has none. No required review, no required status check, force-push not
-blocked — and `main` is what Cloudflare Pages deploys. So the ten CI jobs
+blocked — and `main` is what Cloudflare Pages deploys. So the nine CI jobs
 advise and gate nothing: a pull request with every check red can be merged, and
 history on the branch that becomes production can be rewritten.
 
@@ -25,9 +37,24 @@ route to repository settings from here.
 - Require a pull request before merging — **1 approval**, or 0 if you are
   routinely the only committer. Even at 0, the PR requirement is what makes the
   status checks below able to block.
-- Require status checks to pass. Add all ten: `precache`, `cachebust`,
-  `overlays`, `sections`, `cache`, `security`, `csp`, `sql`, `syntax`, and the
-  emitted-module step inside `syntax`.
+- Require status checks to pass. There are **nine**, and GitHub lists them by
+  their display name, not their job id:
+
+  | job id | shows up in the ruleset as |
+  |---|---|
+  | `precache` | service worker precaches what index.html loads |
+  | `cachebust` | a changed stylesheet or script carries a new ?v= |
+  | `overlays` | every dialog renders over the page, not in it |
+  | `sections` | one table of panels, one writer for the address bar |
+  | `cache` | cache keeps one member's data out of another's session |
+  | `security` | the security controls still refuse what they refused |
+  | `deferredcss` | no first-screen stylesheet has been pushed off the critical path |
+  | `csp` | the report-only policy still names every inline script |
+  | `syntax` | changed javascript parses |
+
+  There is no `sql` job — it was removed in `306de06` when the migrations left
+  this repository. `deferredcss` was missing from the old list. The emitted-module
+  check is a step inside `syntax` and is not separately selectable.
 - Block force pushes.
 - Do **not** tick "Allow specified actors to bypass" for yourself. A rule you
   can walk past is a rule that will be walked past on the day it matters.
@@ -101,6 +128,37 @@ neither appears, both can go and the CSP becomes genuinely strict.
 
 ---
 
+## 5. The other repository — UNKNOWN, and the highest-value thing on this list
+
+Earlier revisions of `security/SECURITY.md` state: *"The repository is **public**,
+with one write collaborator besides the owner and one fork."* That does not
+describe this repository. `Koe458-ui/artz` was created 2026-09-05T18:09:06Z, is
+private, has **zero** forks and exactly one collaborator — the owner. Confirmed
+against the GitHub API, not inferred.
+
+So the sentence was true of something. Either it described an earlier repository
+that still exists, or it was carried over from a template and was never true. The
+difference matters: if a public copy of this codebase exists, then the schema
+baseline, every RLS policy, every guard, every rate limit and this entire audit
+trail are public — and its fork is outside your control, because a fork survives
+the deletion of its parent.
+
+**Why not automated:** the fork, if it exists, is under an account this session
+cannot see. Repository scope here is `Koe458-ui/artz` and nothing else.
+
+**Do this:** search GitHub for `digiartz`, for `DigiArtz` and for distinctive
+strings from the codebase — `dz_market_file_grant`, `koe-originals`,
+`tmqzqlrpjpydiftlrzmj` are all specific enough to be conclusive. Check every
+account you have ever pushed this code from. If a public copy exists: delete or
+privatise it, then deal with the fork separately (GitHub does not remove forks
+when the parent goes — one of them gets promoted to root). Then rotate nothing,
+because no secret was ever committed to this history — 203 blobs were scanned
+across every branch and every one of them was clean.
+
+Nothing else on this list is worth doing before this one.
+
+---
+
 ## Not doing, and why
 
 **Removing `'unsafe-inline'` / `'unsafe-eval'` from the enforcing CSP — yet.**
@@ -112,8 +170,18 @@ enforces nothing and reports to `/api/csp-report`. Read the reports, then
 remove whichever relaxation the data says is unused. That is the one step
 still outstanding here, and it needs live traffic rather than a decision.
 
-**Making the repository private.** It is public, and that is a choice rather
-than a defect: no secret has ever been committed, and the security of this
-system does not rest on anyone not reading it. Worth knowing that it means
-attackers read every policy, every guard and every rate limit — which is the
-correct assumption to design under anyway.
+**Purging the deleted migrations from git history.** Commit `64139f7` removed ten
+migration files, including the 5,769-line schema baseline. `git rm` is not
+deletion: every blob is still reachable with a plain `git cat-file`, and the whole
+schema — every policy, every SECURITY DEFINER body, every grant — comes back out
+in one command.
+
+Left alone deliberately. This repository is **private**, has no forks and one
+collaborator, so those blobs are readable by exactly the people who can already
+read the working tree. Rewriting history would force-push `main`, invalidate every
+existing clone, and still not remove the objects from GitHub's side without
+deleting and recreating the repository. The cost is real and the exposure is not.
+
+That reasoning depends entirely on the repository staying private. If it is ever
+made public, the history goes with it — purge first, and treat that as a
+prerequisite rather than a follow-up.

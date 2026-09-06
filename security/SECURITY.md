@@ -4,6 +4,91 @@ Summary of the security review and the changes made.
 
 ---
 
+## Remediation — 2026-09-06
+
+A third pass went at the system from outside — live catalogue, full git history,
+GitHub API — and then fixed what it found. Ten findings; eight are closed, two
+are decisions rather than defects.
+
+Nothing was rated critical. No path to database compromise, account takeover or
+admin escalation was found: RLS is on every table, no write policy is
+unconditional, `email` is withheld at the column grant, `role` is unwritable
+behind both a grant and five triggers, and the bucket MIME allowlists exclude
+html, svg and pdf. The real exposure was **spend**, not data.
+
+### Fixed
+
+| | What was wrong | Where |
+|---|---|---|
+| **H-1** | `/api/moderate-upload` had no per-member limit. One Gemini vision call per image, six 10 MB images per request, billed per call — and it runs *before* the upload, so smart-function's `upload_events` throttle never saw it. The only bound was the edge address bucket, which is shared, rotatable, and fails open. | `functions/api/moderate-upload.js` |
+| **M-1** | `rank_scores()` — no arguments, no `LIMIT`, a full aggregation over five tables — was executable by `anon` at `/rest/v1/rpc/`, a host the edge limiter never sees. Revoked; it is an internal helper of three SECURITY DEFINER callers, exactly like the helpers `20260909000000` revoked. The boards themselves are now metered per address. | migration |
+| **M-2** | `visibility` was a rule the client kept and the database did not. Every reader in `js/` narrows to `published` for non-owners — `js/profile.js` even carries a comment saying RLS does not — so `?visibility=neq.published` walked around all of it. Draft and scheduled work, and private jobs, were readable by anyone. | migration, 5 policies |
+| **M-3** | `resources` gave `anon` its `file_storage_bucket`, `file_storage_path`, `file_url` and `preview_storage_path`; `resources` and `artworks` both gave out `mod_token`; `artworks` gave out `storage_path`. `marketplace_items` already withheld the same set, so the correct shape was written down next door. `file_url` mattered most: `lib/download.js` streams it as the legacy fallback, so a row pointing at `/object/public/` was a free download that never met the sign-in check, the daily quota or the counter. | migration + 3 selects |
+| **L-1** | `dz_admin_notify` stored whatever URL it was handed; `js/auth.js` gave it to `location.href` unread. Staff-only — but `p_users = NULL` broadcasts to everyone, and `script-src` still carries `'unsafe-inline'`, so one staff account reached every member with a `javascript:` link. Closed at both ends. | `js/auth.js` + migration |
+| **L-5** | `get_user_liked_artworks` and `get_user_bookmarked_artworks` gate the *list* on `likes_public` / `bookmarks_public`. `get_artist_progress` returned the *count* of the same tables to anyone. The flag hid the items and published the tally. | migration |
+
+Three of those selects — the public resources grid, the profile list and search —
+were asking for columns they never rendered, which is *why* the grants stayed
+open. `secview` now decides whether to show the download button from `file_name`,
+which the same write sets and which is not private.
+
+### How it was verified
+
+Not by the tool's success message. Each migration was re-read from the catalogue
+and then exercised against live data inside transactions that were rolled back:
+
+- draft and scheduled artworks flipped in place, read back as `anon`: 25 → 23,
+  with link-only still visible. Rolled back.
+- `get_rank_board` still returns rows as `anon`; `rank_scores` no longer
+  executable by either role.
+- `get_artist_progress` for a member with both flags off: `anon` sees
+  `likes_given = 0, bookmarks_given = 0`, the owner sees `9` and `5`, and both
+  see `xp = 262, level = 7`. A public level that changed with the viewer would
+  have been a worse bug than the one being fixed.
+- `dz_admin_notify` refuses `javascript:`, `https://`, `//host`, `/\host` and
+  `data:`, and still accepts `/artwork/<id>` and a NULL url.
+
+All nine CI jobs pass. `check-cachebust` caught the thing worth catching: five
+scripts changed and `/js/*` is served `immutable, max-age=31536000`, so each one
+needed a new `?v=` in all three places that name it — `index.html`, `sw.js`
+`SHELL_URLS`, and `js/lazy.js` for the lazily-loaded one.
+
+### Not fixed, deliberately
+
+**L-4 — `'unsafe-inline'` / `'unsafe-eval'` in `script-src`.** Unchanged. The
+report-only policy already tests the exact target state and reports to
+`/api/csp-report`; removing either relaxation on a guess risks checkout and ads,
+and this environment cannot reach the site to test. Read the reports, then
+remove whichever the data says is unused. See `OPERATOR-ACTIONS.md` §4.
+
+**L-2 — the deleted migrations are still in git history.** All ten blobs,
+including the 5,769-line baseline, come back with one `git cat-file`. Left alone
+because this repository is private, unforked, and has one collaborator, so the
+blobs are readable by exactly the people who can read the working tree. The
+reasoning depends on it staying private. See `OPERATOR-ACTIONS.md`.
+
+**M-4 and L-3** are console settings — leaked-password protection (the advisor
+still fires) and branch protection on `main`. Neither is reachable from here:
+`api.supabase.com` is blocked by egress policy and the GitHub MCP surface has no
+branch-protection endpoint. `OPERATOR-ACTIONS.md` §1–2.
+
+### One correction to the record
+
+This file previously stated that the repository is public, with one write
+collaborator and one fork. `Koe458-ui/artz` is **private**, created
+2026-09-05T18:09:06Z, with **zero** forks and one collaborator — confirmed
+against the GitHub API. So that sentence described something else. If a public
+copy of this codebase still exists, everything here is public and its fork is
+outside anyone's control. That is now `OPERATOR-ACTIONS.md` §5, and it is the
+highest-value item on the list.
+
+No secret was found in the working tree or in history: 203 blobs across every
+branch, scanned against JWT, `sb_secret_`, `rzp_live_`, `sk_live_`, `AIzaSy`,
+AWS, GitHub, PEM, Slack, SendGrid, npm and GitLab shapes. The publishable key in
+`config.example.js` is the anon key and belongs there.
+
+---
+
 ## Audit — 2026-09-05 (second pass: database, GitHub, dependencies)
 
 The first pass read the JavaScript. This one went at the database the way an
