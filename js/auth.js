@@ -741,6 +741,18 @@
     notifBusy = false;
   }
 
+  // A notification's target is written by staff, through dz_admin_notify, which
+  // stores the URL it is handed. Nothing between there and the address bar
+  // looked at it. Only an in-site path is allowed through: 'javascript:' would
+  // run against this origin (script-src still carries 'unsafe-inline', so CSP
+  // would not stop it), and an absolute URL is an open redirect wearing our
+  // notification bell. '//host' and '/\host' are protocol-relative to a browser,
+  // so a single leading slash is not enough on its own.
+  function notifSafeUrl(u){
+    var s = String(u == null ? '' : u).trim();
+    return /^\/(?![\/\\])[^\s]*$/.test(s) ? s : '';
+  }
+
   // read first, then take the reader where the notification points
   async function notifGo(id){
     var n = notifById(id);
@@ -753,7 +765,8 @@
     if(n.community_id && typeof window.cmOpenCommunity === 'function'){
       closeNotifPage(); cmOpenCommunity('c:' + n.community_id); return;
     }
-    var url = n.target_url || (n.artwork_id ? '/artwork/' + n.artwork_id : null);
+    var url = notifSafeUrl(n.target_url) ||
+              (n.artwork_id ? '/artwork/' + n.artwork_id : null);
     if(!url) return;
     closeNotifPage();
     var art = url.match(/^\/artwork\/([^/]+)\/?$/);

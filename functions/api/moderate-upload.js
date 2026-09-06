@@ -1,8 +1,20 @@
-import { SB_URL_FALLBACK, SB_ANON_FALLBACK } from '../lib/sb.js';
+import { SB_URL_FALLBACK, SB_ANON_FALLBACK, underLimit } from '../lib/sb.js';
 import { json } from '../lib/http.js';
 
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_FILES = 6;
+
+// This is the most expensive thing the site can be asked to do: one Gemini
+// vision call per image, up to MAX_FILES of MAX_BYTES each, billed per call.
+// The edge limiter in _middleware only buckets on the connecting address, and
+// an address is shared and rotatable, so on its own it bounds the blast radius
+// of one network rather than of one member. These two are counted on user.id,
+// on a token Supabase has actually verified, which is the only identifier the
+// caller cannot change. The burst allows a normal multi-image upload session;
+// the daily figure is what an enthusiastic member needs in a day and is far
+// below what an automated caller would want.
+const MOD_BURST = { max: 12, seconds: 600 };
+const MOD_DAILY = { max: 120, seconds: 86400 };
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
 // A rejection has to be confident. Below this is the model hedging, and a hedge must never cost an artist their upload.
 export const REJECT_CONFIDENCE = 0.75;
@@ -242,6 +254,21 @@ export async function onRequestPost(context) {
     if (!userRes.ok) return json({ error: 'Session expired — sign in again.' }, 401);
     const user = await userRes.json();
     if (!user.id) return json({ error: 'Invalid session.' }, 401);
+
+    // Counted before the body is read, so an oversized request costs nothing
+    // once the member is already over. Both buckets have to hold.
+    const [burstOk, dailyOk] = await Promise.all([
+      underLimit(env, 'mod:b:' + user.id, MOD_BURST.max, MOD_BURST.seconds),
+      underLimit(env, 'mod:d:' + user.id, MOD_DAILY.max, MOD_DAILY.seconds),
+    ]);
+    if (!burstOk || !dailyOk) {
+      return json({
+        reason: 'rate',
+        error: burstOk
+          ? 'You have reached today’s upload-check limit — try again tomorrow.'
+          : 'Too many upload checks just now — wait a few minutes and try again.',
+      }, 429, { 'Retry-After': burstOk ? '3600' : '600' });
+    }
 
     const form = await request.formData();
     const files = form.getAll('files').filter(f => f instanceof File);

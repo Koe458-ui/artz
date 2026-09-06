@@ -122,7 +122,7 @@
         if(want('resources')){
           jobs.push(sb.from('resources')
             .select('id,user_id,title,summary,description,resource_type,category,tags,'+
-                    'file_url,file_name,file_ext,file_size,file_count,preview_url,license,'+
+                    'file_name,file_ext,file_size,file_count,preview_url,license,'+
                     'featured,download_count,created_at')
             .eq('status','approved').eq('visibility','published').ilike('title',pattern)
             .order('created_at',{ascending:false}).limit(30)

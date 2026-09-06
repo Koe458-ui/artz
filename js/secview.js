@@ -256,7 +256,9 @@
   function vwSecRail(sec, kind, id, r){
     if(sec === 'jobs') return '';
     var dl = sec === 'blog' ? (r.cover_url ? imgResize(r.cover_url, 1600) : '')
-           : sec === 'resources' ? (r.file_storage_path ? '1' : '')
+             // "is there a file" — file_name is set by the same write that sets
+             // the storage path, and unlike the path it is not private
+           : sec === 'resources' ? (r.file_name ? '1' : '')
            : '';
     // title is dropped into a single-quoted JS string inside an onclick, where a backslash ends it as surely as a quote
     var title = String(r.title || '').replace(/['\\]/g, '');
@@ -773,7 +775,7 @@
         '<div class="dzvFileMeta">'+esc(h.bytes(r.file_size))+
           (r.file_count ? ' \u00b7 '+esc(String(r.file_count))+' file'+(r.file_count===1?'':'s') : '')+
           ' \u00b7 '+esc(String(r.download_count||0))+' downloads</div></div>'+
-        (r.file_storage_path ? '<button type="button" class="vwFileDl" '+
+        (r.file_name ? '<button type="button" class="vwFileDl" '+
           'onclick="dzVwDownload(\''+kind+'\',\''+id+'\',\'\')" '+
           'aria-label="Download this file" title="Download this file">'+vwSvg('dl')+'</button>' : '')+
         '</div>'+

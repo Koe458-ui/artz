@@ -10,7 +10,7 @@
       eq:{ visibility:'published' },
       order:[['featured',false],['created_at',false]],
       select:'id,user_id,title,summary,description,resource_type,category,subcategory,tags,'+
-             'file_storage_path,file_name,file_ext,file_size,file_count,dimensions,preview_url,'+
+             'file_name,file_ext,file_size,file_count,dimensions,preview_url,'+
              'license,commercial_use,attribution_required,modification_allowed,'+
              'software,compatible_software,compatible_versions,whats_included,instructions,'+
              'version,external_links,safety_notes,featured,download_count,updated_at,created_at'

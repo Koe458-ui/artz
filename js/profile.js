@@ -572,7 +572,7 @@
     resources: {
       table:'resources', host:'pfResGrid', empty:'pfResEmpty', loaded:'resLoaded', rows:'resRows',
       select:function(){
-        return 'id,user_id,title,description,category,tags,file_storage_path,file_name,file_ext,file_size,preview_url,license,software,download_count,created_at';
+        return 'id,user_id,title,description,category,tags,file_name,file_ext,file_size,preview_url,license,software,download_count,created_at';
       },
       html:function(rows){ return rows.map(pfDzCard('resources')).join(''); }
     },
