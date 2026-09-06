@@ -1,4 +1,4 @@
-/* Hero. Editorial: one left column, a headline carrying the fold, one line of prose, a solid action and a quiet link */
+/* Hero. Editorial: one centred column, a headline carrying the fold, one line of prose, a solid action and a quiet link */
 #heroPitch{
   position:relative;
   background:var(--bg);
@@ -6,7 +6,9 @@
           var(--shellPad)
           clamp(2rem,6vw,5rem);
 }
-.hpInner{max-width:min(100%,1280px);margin:0;}
+.hpInner{max-width:min(100%,1280px);margin-inline:auto;text-align:center;}
+.hpInner .hpHead,
+.hpInner .hpSub{margin-left:auto;margin-right:auto;}
 
   /* The headline is the fold. Tight leading and tracking; text-wrap:balance keeps the rag from stranding a word */
 .hpHead,
@@ -51,7 +53,7 @@
   text-wrap:pretty;
 }
 
-.hpActions{display:flex;align-items:center;gap:clamp(1.25rem,3vw,2rem);flex-wrap:wrap;}
+.hpActions{display:flex;align-items:center;justify-content:center;gap:clamp(1.25rem,3vw,2rem);flex-wrap:wrap;}
 
 .hpCta{
   display:inline-flex;align-items:center;justify-content:center;gap:var(--sp-3);cursor:pointer;

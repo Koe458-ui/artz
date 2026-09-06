@@ -33,7 +33,7 @@ const SHELL_URLS = [
   '/icon-192.png?v=4',
 
   '/css/base.css?v=47',
-  '/css/hero.css?v=165',
+  '/css/hero.css?v=166',
   '/css/viewer.css?v=53',
   '/css/community.css?v=41',
   '/css/connect.css?v=19',
