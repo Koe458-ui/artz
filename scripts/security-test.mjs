@@ -287,5 +287,33 @@ for (const f of ['functions/api/rzp.js', 'functions/api/paypal.js',
   truthy('the gallery query is bounded', /\.limit\(GAL_MAX\)/.test(src));
 }
 
+
+{
+  const src = readFileSync('functions/api/moderation/recheck.js', 'utf8');
+  truthy('the sweep also re-reads what was published',
+         /status=eq\.approved&mod_verified_at=is\.null/.test(src));
+  truthy('a verified row is stamped so the sweep moves on',
+         /mod_verified_at: new Date\(\)\.toISOString\(\)/.test(src));
+  truthy('a verify verdict is applied to an approved row, not a pending one',
+         /const was = mode === 'verify' \? 'approved' : 'pending';/.test(src));
+  truthy('a published url that is not an image at all is demoted',
+         /PUBLISHED_IMAGE_UNREADABLE/.test(src));
+  truthy('queued rows are drained before verify rows',
+         src.indexOf("filter(w => w.mode === 'queued')") <
+         src.indexOf("filter(w => w.mode === 'verify')"));
+}
+
+{
+  const sql = readFileSync('security/2026-09-audit-fixes.sql', 'utf8');
+  truthy('the migration arms the section gate',
+         /set sections_enforced = true/.test(sql));
+  truthy('the migration adds the verify marker to all four tables',
+         (sql.match(/add column if not exists mod_verified_at timestamptz/g) || []).length === 4);
+  truthy('a member cannot stamp their own row as verified',
+         /NEW\.mod_verified_at := OLD\.mod_verified_at;/.test(sql));
+  truthy('the marker trigger is attached to the content tables',
+         /create trigger zz_protect_mod_verified before insert or update/.test(sql));
+}
+
 console.log(failed ? `\n${failed} check(s) failed` : '\nall checks passed');
 process.exit(failed ? 1 : 0);

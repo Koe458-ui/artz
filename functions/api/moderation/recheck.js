@@ -45,10 +45,26 @@ export async function onRequestPost(context) {
   if (waiting.length === 0) return json({ processed: 0, more: false, down: false }, 200);
 
   for (let n = 0; n < Math.min(MAX_ATTEMPTS, waiting.length); n++) {
-    const { queue, row } = waiting[n];
+    const { queue, row, mode } = waiting[n];
     const more = waiting.length > n + 1;
 
     const image = await loadImage(row[queue.image]);
+
+    if (!image.ok && mode === 'verify') {
+      // What is published is not a readable image. A content-type that is not
+      // an image at all is the shape the ticket weakness would produce, so that
+      // one is demoted. The rest -- a fetch that failed, an empty body, an
+      // oversized one -- are indistinguishable from a bad minute at the CDN, so
+      // they are stamped and left alone rather than left to sit at the head of
+      // the queue forever, blocking every row behind them.
+      if (String(image.reason || '').startsWith('type ')) {
+        await demote(env, context, queue, row, image.reason);
+        return json({ processed: 1, more, down: false }, 200);
+      }
+      await markVerified(env, queue, row);
+      continue;
+    }
+
     if (!image.ok) continue;  // unreadable head; try the next one rather than stall
 
     const cfg = queue.resource
@@ -61,7 +77,7 @@ export async function onRequestPost(context) {
       // still down; nothing changes and everything keeps its place in the queue
     if (call.deferred) return json({ processed: 0, down: true, more: true }, 200);
 
-    await apply(env, context, queue, row, verdict, call);
+    await apply(env, context, queue, row, verdict, call, mode);
 
       // deliberately opaque: caller is whoever had the site open, not the uploader — says a tick happened, no more
     return json({ processed: 1, more, down: false }, 200);
@@ -70,28 +86,84 @@ export async function onRequestPost(context) {
   return json({ processed: 0, skipped: true, more: waiting.length > MAX_ATTEMPTS }, 200);
 }
 
-// oldest pending rows from every queue, merged into one upload order
+// Two kinds of work, drained by the same tick.
+//
+//   'queued'  — status='pending'. The moderator was unreachable when this was
+//               uploaded, so it has never been judged. Judging it publishes it.
+//
+//   'verify'  — status='approved' and never re-read. The approval ticket the
+//               insert presented is signed over the member's id and nothing
+//               else, so it says "this member passed a check", not "this row
+//               is what passed". One clean check could therefore approve a row
+//               whose image_url points at something else entirely, and the
+//               image the site actually serves was never the image the
+//               moderator saw. This pass closes that by moderating what got
+//               published, from its public url, and demoting what fails.
+//
+// Queued rows come first: nothing they hold is public yet, and a member is
+// waiting on the verdict.
 async function pending(env) {
-  const heads = await Promise.all(QUEUES.map(async (queue) => {
+  const heads = await Promise.all(QUEUES.flatMap((queue) => {
     const cols = ['id', 'user_id', 'created_at', queue.image].join(',');
-    const rows = await sbService(env,
-      `/${queue.table}?status=eq.pending&select=${cols}` +
-      `&order=created_at.asc&limit=${MAX_ATTEMPTS + 1}`, { method: 'GET' });
-    return (Array.isArray(rows) ? rows : []).map(row => ({ queue, row }));
+    const ask = (filter, mode) => sbService(env,
+      `/${queue.table}?${filter}&select=${cols}` +
+      `&order=created_at.asc&limit=${MAX_ATTEMPTS + 1}`, { method: 'GET' })
+      .then(rows => (Array.isArray(rows) ? rows : []).map(row => ({ queue, row, mode })));
+
+    return [
+      ask('status=eq.pending', 'queued'),
+      ask('status=eq.approved&mod_verified_at=is.null', 'verify'),
+    ];
   }));
 
-  return heads.flat().sort((a, b) =>
-    String(a.row.created_at).localeCompare(String(b.row.created_at)));
+  const all = heads.flat();
+  const byAge = (a, b) => String(a.row.created_at).localeCompare(String(b.row.created_at));
+  return [
+    ...all.filter(w => w.mode === 'queued').sort(byAge),
+    ...all.filter(w => w.mode === 'verify').sort(byAge),
+  ];
 }
 
-async function apply(env, context, queue, row, verdict, call) {
+// A published row whose image cannot be judged as an image at all.
+async function demote(env, context, queue, row, why) {
+  await sbService(env,
+    `/${queue.table}?id=eq.${encodeURIComponent(row.id)}&status=eq.approved`,
+    { method: 'PATCH', body: JSON.stringify({
+      status: 'rejected',
+      mod_verified_at: new Date().toISOString(),
+    }) });
+
+  context.waitUntil(sbService(env, '/moderation_logs', {
+    method: 'POST',
+    headers: { prefer: 'return=minimal' },
+    body: JSON.stringify({
+      user_id: row.user_id,
+      allowed: false,
+      code: 'PUBLISHED_IMAGE_UNREADABLE',
+      rating: 'SAFE',
+      confidence: null,
+      audit: { verify: true, table: queue.table, row_id: row.id, reason: why },
+    }),
+  }).catch(() => {}));
+}
+
+// Stamped so the sweep does not come back to it every tick.
+function markVerified(env, queue, row) {
+  return sbService(env,
+    `/${queue.table}?id=eq.${encodeURIComponent(row.id)}&status=eq.approved`,
+    { method: 'PATCH',
+      body: JSON.stringify({ mod_verified_at: new Date().toISOString() }) }).catch(() => {});
+}
+
+async function apply(env, context, queue, row, verdict, call, mode = 'queued') {
   const rating = (verdict.rating === 'MATURE') ? 'MATURE' : 'SAFE';
   const MSG = queue.resource ? RESOURCE_MESSAGES : MESSAGES;
 
   const audit = {
     model: env.GEMINI_MODEL || 'gemini-flash-latest',
     checked_at: new Date().toISOString(),
-    queued: true,
+    queued: mode === 'queued',
+    verify: mode === 'verify',
     images: [{
       i: 0,
       allow: !!verdict.allow,
@@ -117,9 +189,15 @@ async function apply(env, context, queue, row, verdict, call) {
     }
   }
 
+  // Either way the row has now been judged on what it actually serves, so it
+  // never needs the verify pass again -- a pass stops it being picked up, and a
+  // rejection takes it out of the approved set the pass reads.
+  patch.mod_verified_at = new Date().toISOString();
+
     // filtered on the status it still has, so two racing ticks cannot both apply a verdict
+  const was = mode === 'verify' ? 'approved' : 'pending';
   await sbService(env,
-    `/${queue.table}?id=eq.${encodeURIComponent(row.id)}&status=eq.pending`,
+    `/${queue.table}?id=eq.${encodeURIComponent(row.id)}&status=eq.${was}`,
     { method: 'PATCH', body: JSON.stringify(patch) });
 
   context.waitUntil(sbService(env, '/moderation_logs', {
@@ -131,7 +209,8 @@ async function apply(env, context, queue, row, verdict, call) {
       code: call.pass ? (queue.resource ? 'RESOURCE_OK' : 'ARTWORK_OK') : call.code,
       rating,
       confidence: verdict.confidence ?? null,
-      audit: { queued: true, table: queue.table, row_id: row.id, images: audit.images }
+      audit: { queued: mode === 'queued', verify: mode === 'verify',
+               table: queue.table, row_id: row.id, images: audit.images }
     })
   }).catch(() => {}));
 }

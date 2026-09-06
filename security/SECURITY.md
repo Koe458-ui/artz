@@ -1023,6 +1023,48 @@ this file would have read a green light for a gate that was open.
 subscription and quota check, not a moderation check; job postings are covered
 only by the `dz_content_guard` word filter.
 
+### The ticket says who, not what
+
+The approval ticket is signed over `uid.exp.jti`. It carries no fact about the
+image it approved, so it proves "this member passed a check in the last ten
+minutes", not "this row is the thing that passed". A member could therefore
+submit a clean image, take the ticket, and insert a row pointing somewhere else.
+
+Binding the ticket to the content does not fix this on its own, and it is worth
+being clear about why, because it looks like it should. The image the site
+serves is a `__f1600.webp` derivative that the *browser* produces and uploads
+**after** the check. There is nothing at insert time to compare a signature
+against: the bytes the moderator saw never reach storage, and the bytes that do
+reach storage were never moderated. Signing the storage path has the same hole,
+since the object is written after the ticket is issued.
+
+So the check happens where the truth is — on what actually got published.
+`functions/api/moderation/recheck.js` already downloads a row's public image and
+moderates it, which is how the pending queue drains. It now also walks approved
+rows whose `mod_verified_at` is null, moderates the image the site is really
+serving, and demotes anything that fails. `mod_verified_at` is pinned by
+`zz_protect_mod_verified` so a member cannot stamp their own row and skip it.
+
+**Residual, accepted:** a bad row is public for the minutes between publishing
+and its turn in the sweep (one row per six-second tick). Closing that gap
+entirely means generating the public derivative server-side from the moderated
+bytes — Supabase image transformations — so nothing client-produced is ever
+served. That is the right end state and is not done here; it needs the paid
+transformation add-on and a rewrite of both upload paths.
+
+### Why the enforcing CSP still carries `unsafe-inline` and `unsafe-eval`
+
+Unchanged deliberately. The hashed policy that would replace them ships beside
+it as `Content-Security-Policy-Report-Only`, and `check-csp-hashes.mjs` keeps
+those hashes honest, but nothing has yet read the collected reports to say which
+of the two relaxations is load-bearing — `unsafe-inline` for whatever GTM and
+AdSense inject, `unsafe-eval` most likely for the Razorpay or PayPal SDK.
+Promoting the policy on a guess breaks checkout, which is a worse outcome than
+the gap it closes. Read `/api/csp-report` output first, drop whichever
+relaxation nothing needs, then promote. Until then the site has no CSP-based
+XSS mitigation and leans on output escaping, which the audit checked and found
+consistent.
+
 The secret is a credential: it belongs in the Cloudflare dashboard and the
 database, never in git.
 

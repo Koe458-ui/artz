@@ -67,7 +67,83 @@ create policy "media delete own folder"
 
 
 -- ---------------------------------------------------------------------------
--- 3. Verification. Run after the two statements above.
+-- 3. Let the moderation sweep re-read what was published.        [Audit H-2]
+-- ---------------------------------------------------------------------------
+-- The approval ticket is signed over the member's id, an expiry and a nonce --
+-- not over the thing it approved. It therefore says "this member passed a
+-- check", not "this row is what passed", and a member could pass a clean image
+-- and then insert a row whose image_url points somewhere else. The bytes the
+-- moderator saw and the bytes the site serves were never tied together.
+--
+-- Binding the ticket to the content cannot fix that on its own: the public
+-- image is a derivative the browser produces and uploads after the check, so
+-- there is nothing at insert time to compare against. What does fix it is
+-- reading what actually got published. functions/api/moderation/recheck.js
+-- already downloads a row's public image and moderates it -- that is how the
+-- pending queue drains -- so it now also walks approved rows that have never
+-- been re-read, and demotes any whose published image fails.
+--
+-- This column is the marker for "already re-read". Null means the sweep has
+-- not looked at this row yet, which is why every existing approved row gets
+-- checked once after this runs.
+alter table public.artworks          add column if not exists mod_verified_at timestamptz;
+alter table public.blog_posts        add column if not exists mod_verified_at timestamptz;
+alter table public.resources         add column if not exists mod_verified_at timestamptz;
+alter table public.marketplace_items add column if not exists mod_verified_at timestamptz;
+
+-- A member must not be able to stamp their own row as already verified -- that
+-- would take it straight back out of the sweep's sight and hand back the very
+-- bypass this closes.
+--
+-- Done with a trigger rather than a column grant, matching protect_privileged_cols
+-- and dz_status_gate next door. Revoking the column would mean revoking INSERT
+-- and UPDATE at table level and re-granting every other column by name, which
+-- silently breaks the moment someone adds a column; pinning the value costs
+-- nothing and cannot lock anyone out of a publish.
+create or replace function public.dz_protect_mod_verified()
+returns trigger
+language plpgsql
+security definer
+set search_path to 'public', 'pg_temp'
+as $fn$
+begin
+  -- No jwt is the sweep itself, running as the service role.
+  if auth.uid() is null then return NEW; end if;
+  if TG_OP = 'INSERT' then
+    NEW.mod_verified_at := null;
+  else
+    NEW.mod_verified_at := OLD.mod_verified_at;
+  end if;
+  return NEW;
+end $fn$;
+
+revoke all on function public.dz_protect_mod_verified() from public, anon, authenticated;
+
+do $$
+declare t text;
+begin
+  foreach t in array array['artworks', 'blog_posts', 'resources', 'marketplace_items']
+  loop
+    execute format('drop trigger if exists zz_protect_mod_verified on public.%I', t);
+    execute format(
+      'create trigger zz_protect_mod_verified before insert or update on public.%I '
+      'for each row execute function public.dz_protect_mod_verified()', t);
+  end loop;
+end $$;
+
+-- Only the sweep finds unverified rows, and it does so constantly.
+create index if not exists artworks_unverified_idx
+  on public.artworks (created_at) where status = 'approved' and mod_verified_at is null;
+create index if not exists blog_posts_unverified_idx
+  on public.blog_posts (created_at) where status = 'approved' and mod_verified_at is null;
+create index if not exists resources_unverified_idx
+  on public.resources (created_at) where status = 'approved' and mod_verified_at is null;
+create index if not exists marketplace_items_unverified_idx
+  on public.marketplace_items (created_at) where status = 'approved' and mod_verified_at is null;
+
+
+-- ---------------------------------------------------------------------------
+-- 4. Verification. Run after the statements above.
 -- ---------------------------------------------------------------------------
 --   Expect: 'enforcing: artworks + sections'
 --
@@ -83,6 +159,31 @@ create policy "media delete own folder"
 --  where schemaname = 'storage' and tablename = 'objects'
 --    and policyname = 'media delete own folder';
 --
+--   Expect: four rows, one per table.
+--
+-- select table_name from information_schema.columns
+--  where table_schema = 'public' and column_name = 'mod_verified_at'
+--  order by table_name;
+--
+--   Expect: four triggers named zz_protect_mod_verified.
+--
+-- select c.relname from pg_trigger t join pg_class c on c.oid = t.tgrelid
+--  where t.tgname = 'zz_protect_mod_verified' and not t.tgisinternal
+--  order by c.relname;
+--
+--   The backlog the sweep will work through (every row published before this
+--   ran). It drains at one row per tick; expect it to reach zero, and expect
+--   the count to stay near zero afterwards.
+--
+-- select 'artworks' t, count(*) from public.artworks
+--   where status = 'approved' and mod_verified_at is null
+-- union all select 'blog_posts', count(*) from public.blog_posts
+--   where status = 'approved' and mod_verified_at is null
+-- union all select 'resources', count(*) from public.resources
+--   where status = 'approved' and mod_verified_at is null
+-- union all select 'marketplace_items', count(*) from public.marketplace_items
+--   where status = 'approved' and mod_verified_at is null;
+--
 --   Smoke test, as a normal member, after deploying:
 --     - publish a marketplace listing through the site  -> status 'approved'
 --     - POST /rest/v1/blog_posts directly with
@@ -95,6 +196,15 @@ create policy "media delete own folder"
 -- ---------------------------------------------------------------------------
 -- update private.mod_config set sections_enforced = false where id = true;
 -- drop policy if exists "media delete own folder" on storage.objects;
+--
+-- The verify sweep stops as soon as the deploy is rolled back, because nothing
+-- reads mod_verified_at then. The column and its trigger are harmless if left:
+--   drop trigger if exists zz_protect_mod_verified on public.artworks;
+--   drop trigger if exists zz_protect_mod_verified on public.blog_posts;
+--   drop trigger if exists zz_protect_mod_verified on public.resources;
+--   drop trigger if exists zz_protect_mod_verified on public.marketplace_items;
+--   drop function if exists public.dz_protect_mod_verified();
+-- Dropping the column itself is not necessary and loses which rows were checked.
 
 
 -- ===========================================================================
