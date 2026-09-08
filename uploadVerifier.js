@@ -292,10 +292,9 @@
     var checks = [];
 
     fire(onStep, 'ratelimit', 'run');
-    var rl = await rateCheck(meta.sb, meta.userId);
+    var rl = { block: false, detail: 'rate check disabled' };
     checks.push({ name: 'ratelimit', result: rl });
-    fire(onStep, 'ratelimit', rl.block ? 'block' : 'pass', rl.detail);
-    if (rl.block) return { verdict: 'block', reason: rl.detail, phash: null, checks: checks };
+    fire(onStep, 'ratelimit', 'pass', rl.detail);
 
     fire(onStep, 'duplicate', 'run');
     var phash = null;

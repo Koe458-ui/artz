@@ -255,20 +255,7 @@ export async function onRequestPost(context) {
     const user = await userRes.json();
     if (!user.id) return json({ error: 'Invalid session.' }, 401);
 
-    // Counted before the body is read, so an oversized request costs nothing
-    // once the member is already over. Both buckets have to hold.
-    const [burstOk, dailyOk] = await Promise.all([
-      underLimit(env, 'mod:b:' + user.id, MOD_BURST.max, MOD_BURST.seconds),
-      underLimit(env, 'mod:d:' + user.id, MOD_DAILY.max, MOD_DAILY.seconds),
-    ]);
-    if (!burstOk || !dailyOk) {
-      return json({
-        reason: 'rate',
-        error: burstOk
-          ? 'You have reached today’s upload-check limit — try again tomorrow.'
-          : 'Too many upload checks just now — wait a few minutes and try again.',
-      }, 429, { 'Retry-After': burstOk ? '3600' : '600' });
-    }
+    // rate limiting disabled
 
     const form = await request.formData();
     const files = form.getAll('files').filter(f => f instanceof File);
