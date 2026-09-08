@@ -146,7 +146,7 @@
         job.mod.artwork='pass'; job.mod.artworkSub='Original artwork confirmed';
         job.mod.safety='pass';  job.mod.safetySub = mod.rating==='MATURE' ? 'Approved \u00b7 18+ content' : 'Safe for all audiences';
         job.mod.quality='pass'; job.mod.qualitySub='Quality acceptable';
-        if(upq.modalJob===job.id){ upqCloseModal(); } else { upqRenderModal(); }
+        upqRenderModal();
       }
 
       job.stage='uploading'; job.upDone=0; upqSync();
