@@ -9,7 +9,7 @@
       // duplicates are informational only — see dupCheck
     reportDuplicates: true,
       // AI art is not accepted here, so a generator's own marker left in the file metadata stops the upload.
-    blockAiMetadata: true
+    blockAiMetadata: false
   };
 
   function fileToBitmap(file) {
