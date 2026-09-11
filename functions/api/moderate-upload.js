@@ -4,7 +4,7 @@ import { json } from '../lib/http.js';
 const MAX_BYTES = 10 * 1024 * 1024;
 const MAX_FILES = 6;
 
-// This is the most expensive thing the site can be asked to do: one Gemini
+// This is the most expensive thing the site can be asked to do: one ChatGPT
 // vision call per image, up to MAX_FILES of MAX_BYTES each, billed per call.
 // The edge limiter in _middleware only buckets on the connecting address, and
 // an address is shared and rotatable, so on its own it bounds the blast radius
