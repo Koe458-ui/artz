@@ -89,7 +89,7 @@
     { k: 'trainedalgorithmicmedia',label: 'C2PA AI credential' }
   ];
 
-    // Audit trail only, never blocking — Gemini decides these on the image. Photoshop and Lightroom write a C2PA
+    // Audit trail only, never blocking — ChatGPT decides these on the image. Photoshop and Lightroom write a C2PA
     // manifest for ordinary human edits, and the loose phrases match an artist's own "not AI generated" tag.
   var SOFT_SIGS = [
       // Photoshop stamps these on a hand-painted file with one generative-fill cleanup, so it says nothing about how much
