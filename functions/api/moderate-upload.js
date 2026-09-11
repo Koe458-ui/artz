@@ -277,7 +277,7 @@ export async function onRequestPost(context) {
 
     const verdicts = await Promise.all(files.map(async f => {
       const b64 = toBase64(await f.arrayBuffer());
-      return moderateWithGemini(env, b64, f.type, cfg);
+      return moderateWithChatGPT(env, b64, f.type, cfg);
     }));
 
     let allowed = true;
@@ -358,7 +358,7 @@ export async function onRequestPost(context) {
       reason,
       token: modToken,
       audit: {
-        model: env.GEMINI_MODEL || 'gemini-flash-latest',
+        model: env.OPENAI_MODEL || 'gpt-4o-mini',
         checked_at: new Date().toISOString(),
         images: audit
       }
@@ -368,7 +368,7 @@ export async function onRequestPost(context) {
   }
 }
 
-  // One Gemini verdict into pass/fail, deliberately lopsided: only a confident specific rejection stops an upload
+  // One moderator verdict into pass/fail, deliberately lopsided: only a confident specific rejection stops an upload
 export function decide(v, isResource) {
   const okCode = isResource ? 'RESOURCE_OK' : 'ARTWORK_OK';
 
@@ -397,60 +397,70 @@ export function decide(v, isResource) {
   return { pass: false, code };
 }
 
-export async function moderateWithGemini(env, b64, mimeType, cfg) {
+export async function moderateWithChatGPT(env, b64, mimeType, cfg) {
   cfg = cfg || { resource: false, prompt: MODERATION_PROMPT, categories: CATEGORIES };
-  const model = env.GEMINI_MODEL || 'gemini-flash-latest';
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${env.GEMINI_API_KEY}`;
+  const model = env.OPENAI_MODEL || 'gpt-4o-mini';
+  const url = 'https://api.openai.com/v1/chat/completions';
 
   const props = cfg.resource
     ? {
-        allow: { type: 'BOOLEAN' },
-        resource: { type: 'BOOLEAN' },
-        rating: { type: 'STRING', enum: ['SAFE', 'MATURE', 'ADULT'] },
-        ai_generated: { type: 'BOOLEAN' },
-        quality: { type: 'STRING', enum: ['GOOD', 'BAD'] },
-        category: { type: 'STRING', enum: cfg.categories },
-        reason: { type: 'STRING' },
-        confidence: { type: 'NUMBER' }
+        allow: { type: 'boolean' },
+        resource: { type: 'boolean' },
+        rating: { type: 'string', enum: ['SAFE', 'MATURE', 'ADULT'] },
+        ai_generated: { type: 'boolean' },
+        quality: { type: 'string', enum: ['GOOD', 'BAD'] },
+        category: { type: 'string', enum: cfg.categories },
+        reason: { type: 'string' },
+        confidence: { type: 'number' }
       }
     : {
-        allow: { type: 'BOOLEAN' },
-        artwork: { type: 'BOOLEAN' },
-        ai_generated: { type: 'BOOLEAN' },
-        rating: { type: 'STRING', enum: ['SAFE', 'MATURE', 'ADULT'] },
-        quality: { type: 'STRING', enum: ['GOOD', 'BAD'] },
-        category: { type: 'STRING', enum: cfg.categories },
-        reason: { type: 'STRING' },
-        confidence: { type: 'NUMBER' }
+        allow: { type: 'boolean' },
+        artwork: { type: 'boolean' },
+        ai_generated: { type: 'boolean' },
+        rating: { type: 'string', enum: ['SAFE', 'MATURE', 'ADULT'] },
+        quality: { type: 'string', enum: ['GOOD', 'BAD'] },
+        category: { type: 'string', enum: cfg.categories },
+        reason: { type: 'string' },
+        confidence: { type: 'number' }
       };
   const required = cfg.resource
     ? ['allow', 'resource', 'rating', 'ai_generated', 'quality', 'category', 'reason', 'confidence']
     : ['allow', 'artwork', 'ai_generated', 'rating', 'quality', 'category', 'reason', 'confidence'];
 
   const body = {
-    contents: [{
-      parts: [
-        { inline_data: { mime_type: mimeType, data: b64 } },
-        { text: cfg.prompt }
-      ]
-    }],
-    generationConfig: {
-      temperature: 0,
-      responseMimeType: 'application/json',
-      responseSchema: { type: 'OBJECT', properties: props, required: required }
-    },
-    safetySettings: [
-      { category: 'HARM_CATEGORY_SEXUALLY_EXPLICIT', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_HATE_SPEECH', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_HARASSMENT', threshold: 'BLOCK_NONE' },
-      { category: 'HARM_CATEGORY_DANGEROUS_CONTENT', threshold: 'BLOCK_NONE' }
-    ]
+    model,
+    temperature: 0,
+    messages: [
+      {
+        role: 'user',
+        content: [
+          { type: 'text', text: cfg.prompt },
+          { type: 'image_url', image_url: { url: `data:${mimeType};base64,${b64}` } }
+        ]
+      }
+    ],
+    response_format: {
+      type: 'json_schema',
+      json_schema: {
+        name: 'moderation_verdict',
+        strict: true,
+        schema: {
+          type: 'object',
+          properties: props,
+          required,
+          additionalProperties: false
+        }
+      }
+    }
   };
 
   try {
     const res = await fetch(url, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${env.OPENAI_API_KEY}`
+      },
       body: JSON.stringify(body)
     });
     if (!res.ok) {
@@ -459,13 +469,13 @@ export async function moderateWithGemini(env, b64, mimeType, cfg) {
 
     const data = await res.json();
 
-    if (data.promptFeedback?.blockReason) {
+    if (data.choices?.[0]?.finish_reason === 'content_filter') {
       return { ok: true, allow: false, artwork: false, resource: false, ai_generated: false,
                rating: 'ADULT', quality: 'BAD', category: 'PROHIBITED_CONTENT',
                reason: 'Blocked by provider safety system.', confidence: 1 };
     }
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text;
+    const text = data.choices?.[0]?.message?.content;
     if (!text) return { ok: false, reason: 'Moderation returned no verdict — try again.' };
 
     const v = JSON.parse(text.replace(/```json|```/g, '').trim());
