@@ -3,7 +3,7 @@ import { sbUser, sbSvc, sbService, underLimit } from '../../lib/sb.js';
 import {
   MODERATION_PROMPT, CATEGORIES, MESSAGES,
   RESOURCE_PROMPT, RESOURCE_CATEGORIES, RESOURCE_MESSAGES,
-  decide, moderateWithGemini, toBase64
+  decide, moderateWithChatGPT, toBase64
 } from '../moderate-upload.js';
 
 // One upload per call, oldest first. An unreachable moderator keeps an upload pending; this drains that queue in order
@@ -55,7 +55,7 @@ export async function onRequestPost(context) {
       ? { resource: true,  prompt: RESOURCE_PROMPT,   categories: RESOURCE_CATEGORIES }
       : { resource: false, prompt: MODERATION_PROMPT, categories: CATEGORIES };
 
-    const verdict = await moderateWithGemini(env, image.b64, image.type, cfg);
+    const verdict = await moderateWithChatGPT(env, image.b64, image.type, cfg);
     const call = decide(verdict, queue.resource);
 
       // still down; nothing changes and everything keeps its place in the queue
@@ -89,7 +89,7 @@ async function apply(env, context, queue, row, verdict, call) {
   const MSG = queue.resource ? RESOURCE_MESSAGES : MESSAGES;
 
   const audit = {
-    model: env.GEMINI_MODEL || 'gemini-flash-latest',
+    model: env.OPENAI_MODEL || 'gpt-4o-mini',
     checked_at: new Date().toISOString(),
     queued: true,
     images: [{
