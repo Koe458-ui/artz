@@ -1,0 +1,76 @@
+DAAI (DIGITAL ART ARTIFICIAL INTELLIGENCE)
+A moderation ai that helps moderation image flow and answer questions related to art .
+
+It is currently in training phase 
+
+flow chart 
+
+GitHub (ver 1 work flow )
+│
+├── DigiArtz
+│   └── Public website
+│
+└── DigiArtz-AI-Moderation
+    ├── AI model
+    ├── Training
+    ├── Inference API
+    └── Admin Console
+
+Deployment workflow (ver 1)
+DigiArtz users
+      │
+      ▼
+digiartz.net
+      │
+      ▼
+DigiArtz backend
+      │
+      ▼
+AI Moderation API
+      │
+      ▼
+AI Model
+
+
+Admin
+      │
+      ▼
+Private Moderation Console
+
+DAAI in website workflow (ver 1)
+DigiArtz user uploads image
+        ↓
+Normal upload validation
+        ↓
+AI moderation model
+        ↓
+ALLOW / REVIEW / REJECT
+        ↓
+Store image + moderation result
+        ↓
+Training dataset
+        ↓
+Scheduled/triggered training
+        ↓
+New model version
+        ↓
+Evaluation
+        ↓
+Deploy only if it passes
+
+Train workflow (ver 1)
+Upload image
+     ↓
+Store it
+     ↓
+Collect enough data
+     ↓
+Train a new model
+     ↓
+Test new model
+     ↓
+Deploy new version
+
+private URL
+DAAI.digiartz.net
+daai.digiartz.net
