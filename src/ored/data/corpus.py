@@ -162,7 +162,7 @@ def generate_corpus(cfg: Config, force: bool = False) -> Dict[str, CorpusStats]:
 
     stats: Dict[str, CorpusStats] = {}
     for split in SPLITS:
-        rng = random.Random(cfg.seed + hash(split) % 10_000)
+        rng = random.Random(cfg.seed + SPLITS.index(split))
         pairs = pairs_by_split[split]
         repeats = corpus_cfg.arithmetic_repeats if split == "train" else 1
 
