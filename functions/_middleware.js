@@ -418,6 +418,7 @@ export async function onRequest(context) {
   try { pathname = new URL(request.url).pathname; } catch {   }
 
   if (pathname.startsWith('/legal/')) return origin;
+  if (pathname === '/ored' || pathname.startsWith('/ored/')) return origin;
 
   // These two do not depend on each other: resolve() looks up whatever this URL
   // names, fetchArtworks() always asks for the same 60 rows for the grid. Run

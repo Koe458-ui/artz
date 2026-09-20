@@ -1,0 +1,35 @@
+run_name: bit_adder_mlp
+task: bit_addition
+seed: 1337
+deterministic: true
+
+data:
+  n_bits: 4
+  raw_path: data/raw/bit_addition.csv
+  split:
+    train: 0.70
+    val: 0.15
+    test: 0.15
+  batch_size: 16
+  shuffle_train: true
+
+model:
+  name: mlp
+  hidden_sizes: [64, 64]
+  activation: tanh
+  dropout: 0.0
+
+training:
+  epochs: 400
+  learning_rate: 0.01
+  optimizer: adam
+  weight_decay: 0.0
+  loss: bce_with_logits
+  grad_clip: 1.0
+  early_stopping_patience: 150
+  log_every: 20
+  device: auto
+  resume: ""
+
+paths:
+  checkpoint_dir: checkpoints

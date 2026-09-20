@@ -1,0 +1,48 @@
+name: ored
+
+on:
+  push:
+    branches: ['**']
+    paths: ['ored/model/**', '.github/workflows/ored.yml']
+  pull_request:
+    paths: ['ored/model/**', '.github/workflows/ored.yml']
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: ored/model
+
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.10', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies (CPU-only torch)
+        run: |
+          python -m pip install --upgrade pip
+          pip install torch --index-url https://download.pytorch.org/whl/cpu
+          pip install -r requirements-dev.txt
+
+      - name: Run tests
+        run: pytest -q
+
+      - name: Smoke-test the Step 1 pipeline end to end
+        run: |
+          python scripts/generate_dataset.py
+          python scripts/train.py --set training.epochs=20 --set run_name=ci_smoke
+          python scripts/evaluate.py --checkpoint checkpoints/ci_smoke/best.pt --show-errors 0
+          python scripts/infer.py --checkpoint checkpoints/ci_smoke/best.pt --a 9 --b 6 --quiet

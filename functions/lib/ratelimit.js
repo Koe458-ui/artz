@@ -10,6 +10,7 @@ const LIMITS = [
   ['/api/moderation',        30],
   ['/api/moderate-upload',   20],
   ['/api/ops',               30],
+  ['/api/ored',              20],
   ['/api/csp-report',        30],
   ['/api/store',             60],
   ['/api/download',         120],
@@ -18,7 +19,7 @@ const LIMITS = [
   ['/api/',                  90]
 ];
 
-const NO_LIMIT = ['/api/rzp-webhook', '/api/paypal-webhook', '/api/moderate-upload'];
+const NO_LIMIT = ['/api/rzp-webhook', '/api/paypal-webhook'];
 
 export function limitFor(pathname) {
   for (const skip of NO_LIMIT) if (pathname.startsWith(skip)) return null;
