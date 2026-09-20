@@ -1,5 +1,5 @@
-import { sbUrl, sbAnon, sbUser, underLimit } from '../lib/sb.js';
-import { json, safeError, sameOrigin } from '../lib/http.js';
+import { sbUrl, sbAnon, sbSvc, sbUser, sbService, underLimit } from '../lib/sb.js';
+import { UUID_RE, json, safeError, sameOrigin } from '../lib/http.js';
 
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_HISTORY_TURNS = 20;
@@ -45,6 +45,40 @@ async function ask(env, payload) {
   return { reply, model_version: text(body.model_version, 64) };
 }
 
+async function owns(env, conversationId, userId, title) {
+  await sbService(env, '/ored_conversations', {
+    method: 'POST',
+    headers: { prefer: 'resolution=ignore-duplicates,return=minimal' },
+    body: JSON.stringify({ id: conversationId, user_id: userId, title: title }),
+  });
+  const rows = await sbService(env,
+    `/ored_conversations?select=id&id=eq.${conversationId}&user_id=eq.${userId}&limit=1`);
+  return Array.isArray(rows) && rows.length === 1;
+}
+
+async function remember(env, conversationId, userId, message, answer) {
+  if (!sbSvc(env) || !UUID_RE.test(conversationId) || !UUID_RE.test(userId)) return;
+  try {
+    const title = message.replace(/\s+/g, ' ').trim().slice(0, 80);
+    if (!(await owns(env, conversationId, userId, title))) return;
+    await sbService(env, '/ored_messages', {
+      method: 'POST',
+      headers: { prefer: 'return=minimal' },
+      body: JSON.stringify([
+        { conversation_id: conversationId, role: 'user', content: message },
+        {
+          conversation_id: conversationId,
+          role: 'assistant',
+          content: answer.reply,
+          model_version: answer.model_version || null,
+        },
+      ]),
+    });
+  } catch (err) {
+    console.error('[ored] history not written :: ' + ((err && err.message) || String(err)));
+  }
+}
+
 const ACTIONS = {
   state: {
     auth: false,
@@ -73,6 +107,9 @@ const ACTIONS = {
       });
 
       if (!answer) return json({ error: 'Ored could not answer that right now' }, 502);
+
+      await remember(env, text(body.conversation_id, 64), user.id, message, answer);
+
       return json({ ok: true, ...answer }, 200);
     },
   },
