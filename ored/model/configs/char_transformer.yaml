@@ -1,0 +1,55 @@
+run_name: char_transformer
+task: language_model
+seed: 1337
+deterministic: true
+
+data:
+  tokenizer: char
+  block_size: 128
+  stride: 64
+  batch_size: 32
+  shuffle_train: true
+  corpus:
+    dir: data/raw/corpus
+    sentence_lines: 12000
+    max_operand: 30
+    arithmetic_repeats: 10
+    pair_split:
+      train: 0.70
+      val: 0.15
+      test: 0.15
+    val_test_fraction: 0.15
+
+model:
+  name: transformer
+  d_model: 128
+  n_layer: 4
+  n_head: 4
+  d_ff: 512
+  dropout: 0.1
+  tie_weights: true
+
+training:
+  epochs: 8
+  learning_rate: 0.001
+  optimizer: adamw
+  weight_decay: 0.01
+  loss: cross_entropy
+  scheduler: cosine
+  warmup_steps: 200
+  min_lr_ratio: 0.1
+  grad_clip: 1.0
+  early_stopping_patience: 4
+  log_every: 1
+  device: auto
+  resume: ""
+
+generation:
+  max_new_tokens: 400
+  temperature: 0.8
+  top_k: 0
+  top_p: 0.0
+  prompt: ""
+
+paths:
+  checkpoint_dir: checkpoints
