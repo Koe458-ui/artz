@@ -18,7 +18,8 @@ https://digiartz.net
 
 ## 👥 Team
 The DigiArtz Team — digiartz.net
-albaze and koe
+
+Albaze , Deepak and Koe
 
 
 
