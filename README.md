@@ -818,6 +818,50 @@ solved in one forward pass.
 
 ---
 
+## Code style — no comments, no docstrings
+
+**Do not add comments or docstrings to this code.** Not to new code, not to
+code you are editing, not "just this once, it is subtle". The rule has no
+exceptions, and it is a deliberate choice rather than an oversight:
+
+- An explanation sitting next to code is written once and then rots. Nobody
+  updates it when the code changes, so it quietly turns into a confident lie.
+- Explanations belong here, in the README, where they can be written as prose,
+  with diagrams and measured numbers, and where a reader who wants to
+  understand the project will actually look for them.
+- Code that needs a comment to be followed usually needs a better name or a
+  smaller function instead. Banning the comment forces that fix.
+
+So the code carries none. Every file in `src/`, `scripts/` and `tests/` is
+written to be read on its own: explicit names, small functions, no cleverness.
+If something genuinely needs explaining, explain it in this README and name
+the file it applies to.
+
+Check it at any time:
+
+```bash
+python - <<'PY'
+import ast, io, subprocess, tokenize
+
+files = subprocess.check_output(["git", "ls-files", "*.py"], text=True).split()
+comments = docstrings = 0
+for path in files:
+    source = open(path, encoding="utf-8").read()
+    comments += sum(1 for token in tokenize.generate_tokens(io.StringIO(source).readline)
+                    if token.type == tokenize.COMMENT)
+    docstrings += sum(
+        1 for node in ast.walk(ast.parse(source))
+        if isinstance(node, (ast.Module, ast.FunctionDef, ast.AsyncFunctionDef, ast.ClassDef))
+        and ast.get_docstring(node) is not None
+    )
+print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
+PY
+```
+
+Measured on the current tree: **54 files, 0 comments, 0 docstrings.**
+
+---
+
 ## Principles
 
 1. **No pretrained weights, no external AI APIs.** PyTorch provides tensors,
@@ -825,9 +869,10 @@ solved in one forward pass.
    checkpoint here was produced by our own training loop on our own data.
 2. **Nothing hidden behind abstractions.** The training loop is a readable
    `for` loop. You can put a breakpoint anywhere and inspect real tensors.
-3. **The code carries no comments.** Explanations live here, in the README,
-   where they can be read as prose. The code is written to be readable on its
-   own: explicit names, small functions, no cleverness.
+3. **The code carries no comments and no docstrings, ever.** Explanations
+   live here, in the README, where they can be read as prose and kept true.
+   This is a rule for anyone touching the code, not a description of how it
+   happens to look today — see *Code style* above.
 4. **Honest measurement.** Held-out data, disjoint splits enforced on disk, a
    metric that is unforgiving (all 5 bits or nothing), and mistakes printed
    rather than hidden behind an average.
