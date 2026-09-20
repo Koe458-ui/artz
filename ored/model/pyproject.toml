@@ -25,6 +25,7 @@ ored-train = "ored.training.trainer:main"
 ored-evaluate = "ored.evaluation.evaluator:main"
 ored-infer = "ored.inference.predictor:main"
 ored-generate = "ored.inference.generate_cli:main"
+ored-export-learning = "ored.learning.export_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
