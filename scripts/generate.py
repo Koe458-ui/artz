@@ -1,6 +1,6 @@
 import _bootstrap
 
-from ored.evaluation.evaluator import main
+from ored.inference.generate_cli import main
 
 if __name__ == "__main__":
     raise SystemExit(main())

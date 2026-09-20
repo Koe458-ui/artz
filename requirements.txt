@@ -1,18 +1,5 @@
-# ---------------------------------------------------------------------------
-# Ored.ai — Step 1 dependencies.
-#
-# Deliberately minimal. No pretrained models, no external AI APIs.
-# Everything the model knows, it learns from our own data via our own training
-# loop.
-# ---------------------------------------------------------------------------
-
-# The neural-network framework: tensors, autograd (automatic differentiation),
-# layers and optimizers. This is the only "AI" dependency, and it ships no
-# knowledge of its own -- it is maths plumbing.
 torch>=2.2,<3.0
 
-# Numerical arrays. Used for dataset generation and metric bookkeeping.
 numpy>=1.24,<3.0
 
-# Human-readable configuration files (configs/*.yaml).
 PyYAML>=6.0,<7.0

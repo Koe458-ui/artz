@@ -1,25 +1,4 @@
-#!/usr/bin/env python3
-"""A hands-on demonstration of backpropagation, with the maths written out.
-
-Run it:  python scripts/explain_backprop.py
-
-This script trains nothing useful. Its only purpose is to show -- on numbers
-small enough to check with a pencil -- that:
-
-  1. a forward pass is multiply-and-add,
-  2. the loss is one number,
-  3. the gradient of that number with respect to a weight can be derived by
-     hand with the chain rule,
-  4. PyTorch's .backward() computes exactly the same numbers,
-  5. a finite-difference check ("nudge the weight, see how the loss moves")
-     agrees with both,
-  6. taking one optimizer step lowers the loss.
-
-If you understand this file, you understand what src/ored/training/trainer.py
-is doing 12 times per epoch on a bigger network.
-"""
-
-import _bootstrap  # noqa: F401
+import _bootstrap
 
 import torch
 
@@ -41,18 +20,15 @@ Three parameters: w1, w2, b. We choose their values by hand so every number
 below can be verified with a pencil.
 """)
 
-    # requires_grad=True tells PyTorch: "this is a parameter -- track every
-    # operation involving it, so I can ask for dLoss/dThis later."
-    w = torch.tensor([0.5, -1.0], requires_grad=True)   # the weights
-    b = torch.tensor(0.25, requires_grad=True)          # the bias
+    w = torch.tensor([0.5, -1.0], requires_grad=True)
+    b = torch.tensor(0.25, requires_grad=True)
 
-    x = torch.tensor([2.0, 3.0])   # the input  (not a parameter: fixed data)
-    y = torch.tensor(1.0)          # the target (the correct answer)
+    x = torch.tensor([2.0, 3.0])
+    y = torch.tensor(1.0)
 
     logger.info(f"weights w = {w.tolist()}    bias b = {b.item()}")
     logger.info(f"input   x = {x.tolist()}    target y = {y.item()}")
 
-    # ---------------------------------------------------------------- forward
     logger.info(section("2. FORWARD PASS"))
     y_hat = (w * x).sum() + b
     logger.info(f"""
@@ -63,9 +39,8 @@ below can be verified with a pencil.
 The model says {y_hat.item()}. The truth is {y.item()}. It is wrong, and we now
 need a single number saying *how* wrong.""")
 
-    # ------------------------------------------------------------------- loss
     logger.info(section("3. LOSS"))
-    loss = (y_hat - y) ** 2   # squared error
+    loss = (y_hat - y) ** 2
     error = (y_hat - y).item()
     logger.info(f"""
     loss = (y_hat - y)^2 = ({y_hat.item()} - {y.item()})^2 = {loss.item()}
@@ -73,7 +48,6 @@ need a single number saying *how* wrong.""")
 Squaring does two jobs: it makes the loss positive regardless of the direction
 of the error, and it punishes large errors disproportionately.""")
 
-    # -------------------------------------------------------------- by hand
     logger.info(section("4. THE GRADIENT, DERIVED BY HAND"))
     logger.info(f"""
 We want dLoss/dw1: "if w1 grows slightly, what happens to the loss?"
@@ -102,9 +76,8 @@ backpropagation; deeper networks just chain more of these factors together.""")
         "b": 2 * error,
     }
 
-    # -------------------------------------------------------------- autograd
     logger.info(section("5. THE SAME GRADIENT, FROM .backward()"))
-    loss.backward()   # walks the recorded graph in reverse, filling .grad
+    loss.backward()
     logger.info(f"""
     w.grad = {w.grad.tolist()}
     b.grad = {b.grad.item()}
@@ -119,7 +92,6 @@ chain rule, just automatically and for millions of parameters at a time.""")
     assert abs(w.grad[1].item() - manual["w2"]) < 1e-6
     assert abs(b.grad.item() - manual["b"]) < 1e-6
 
-    # ------------------------------------------------- finite-difference check
     logger.info(section("6. AN INDEPENDENT CHECK: JUST NUDGE THE WEIGHT"))
     eps = 1e-4
     with torch.no_grad():
@@ -141,7 +113,6 @@ this weight". (We do not train this way -- it would need two forward passes per
 weight, so 3,018 passes for our 1,509-parameter MLP instead of one backward
 pass.)""")
 
-    # ------------------------------------------------------------ the update
     logger.info(section("7. THE WEIGHT UPDATE"))
     learning_rate = 0.01
     logger.info(f"""
@@ -151,7 +122,7 @@ other way:
     w <- w - learning_rate * dLoss/dw     (learning_rate = {learning_rate})""")
 
     before = (w.detach().clone(), b.detach().clone())
-    with torch.no_grad():   # updating weights is not itself a tracked operation
+    with torch.no_grad():
         w -= learning_rate * w.grad
         b -= learning_rate * b.grad
 
@@ -170,7 +141,6 @@ other way:
 One step, one batch, one tiny improvement. Training is this repeated thousands
 of times -- and that is literally all it is.""")
 
-    # ----------------------------------------------------------- 20 more steps
     logger.info(section("8. REPEAT 20 TIMES"))
     w2 = torch.tensor([0.5, -1.0], requires_grad=True)
     b2 = torch.tensor(0.25, requires_grad=True)
@@ -185,7 +155,7 @@ of times -- and that is literally all it is.""")
                 f"{w2[0].item():>10.4f}{w2[1].item():>10.4f}{b2.item():>10.4f}"
             )
         if w2.grad is not None:
-            w2.grad.zero_()          # exactly what optimizer.zero_grad() does
+            w2.grad.zero_()
             b2.grad.zero_()
         step_loss.backward()
         with torch.no_grad():

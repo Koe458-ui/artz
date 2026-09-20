@@ -10,6 +10,8 @@ generated ourselves, using a training loop we wrote ourselves.
 
 ---
 
+# Step 1 — the foundation
+
 ## What Step 1 is (and what it is not)
 
 **Step 1 builds the foundation: a complete, working, end-to-end machine
@@ -24,10 +26,10 @@ To prove the pipeline genuinely works rather than merely executing, the model
 learns a real, checkable task: **adding two 4-bit binary numbers**.
 
 **This is not a general-purpose AI.** It is not a chatbot, it does not
-understand language, and it has no knowledge of the world. It is a 5,061-number
+understand the world, and it cannot answer a question. It is a 5,061-number
 network that has learned exactly one thing. Saying so plainly is the point:
 Step 1's value is the *infrastructure*, proven correct by a task small enough
-to verify by hand.
+to verify by hand. (Step 2, below, adds a language model — still not a chatbot.)
 
 ### The result
 
@@ -169,8 +171,9 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-48 tests covering encoding round-trips, split disjointness, gradient flow,
-loss decrease, checkpoint reloading and reproducibility.
+114 tests covering encoding round-trips, split disjointness, gradient flow,
+loss decrease, checkpoint reloading, reproducibility, causal masking, tokenizer
+round-trips, sampling filters and the LR schedule.
 
 ---
 
@@ -326,12 +329,24 @@ which is why they live in separate files here.
 From `src/ored/training/trainer.py`:
 
 ```python
-self.optimizer.zero_grad(set_to_none=True)   # forget the previous batch's gradients
-logits = self.model(inputs)                  # FORWARD PASS  → a prediction
-loss = self.criterion(logits, targets)       # LOSS          → one number: how wrong
-loss.backward()                              # BACKPROP      → slope for every weight
-self.optimizer.step()                        # UPDATE        → nudge each weight downhill
+self.optimizer.zero_grad(set_to_none=True)
+loss, extra, batch_size = self.task.compute_loss(self.model, batch, self.device)
+loss.backward()
+nn.utils.clip_grad_norm_(self.model.parameters(), self.cfg.training.grad_clip)
+self.optimizer.step()
 ```
+
+Line by line:
+
+1. `zero_grad` — forget the previous batch's gradients. PyTorch *accumulates*
+   into `.grad` by default, so without this they pile up and the updates are
+   nonsense. The most common beginner bug.
+2. `compute_loss` — the forward pass and the loss together. One scalar comes
+   back, still attached to the autograd graph.
+3. `backward()` — backpropagation. Fills in `.grad` for every parameter. **No
+   weight has changed yet**; this step only computes slopes.
+4. `clip_grad_norm_` — a safety rail so one bad batch cannot wreck the weights.
+5. `step()` — the only line that changes the model.
 
 Everything else in the project is infrastructure around those five lines.
 
@@ -429,45 +444,66 @@ Ored.ai/
 │       ├── last.pt             # final epoch, for resuming
 │       └── history.json        # per-epoch metrics
 │
+├── .github/workflows/ci.yml    # runs the test suite on every push
+│
 ├── scripts/                    # thin CLI entry points
 │   ├── _bootstrap.py           # lets scripts run without `pip install`
-│   ├── generate_dataset.py
-│   ├── train.py
-│   ├── evaluate.py
-│   ├── infer.py
+│   ├── generate_dataset.py     # Step 1 data
+│   ├── generate_corpus.py      # Step 2 text corpus
+│   ├── train.py                # both steps, selected by --config
+│   ├── evaluate.py             # both steps, routed by the checkpoint
+│   ├── infer.py                # Step 1 prediction
+│   ├── generate.py             # Step 2 text generation
 │   └── explain_backprop.py     # the maths, by hand, verified
 │
 ├── src/ored/
 │   ├── config.py               # YAML → validated dataclasses, CLI overrides
 │   ├── data/
-│   │   ├── generate.py         # builds the dataset + assigns splits
+│   │   ├── generate.py         # bit-addition dataset + splits
 │   │   ├── preprocessing.py    # int ↔ bit-vector encoding
-│   │   └── dataset.py          # Dataset + DataLoader (batching)
+│   │   ├── dataset.py          # Dataset + DataLoader (batching)
+│   │   ├── corpus.py           # text corpus, disjoint operand splits
+│   │   ├── tokenizer.py        # char tokenizer + registry
+│   │   └── text_dataset.py     # sequence windows, shift-by-one targets
 │   ├── models/
 │   │   ├── base.py             # the interface every model implements
-│   │   ├── mlp.py              # the network
-│   │   └── registry.py         # name → class, so Step 2 just registers more
+│   │   ├── mlp.py              # Step 1 network
+│   │   ├── transformer.py      # Step 2 network, attention from scratch
+│   │   ├── bigram.py           # the baseline
+│   │   └── registry.py         # name → class
 │   ├── training/
-│   │   ├── trainer.py          # the training loop
+│   │   ├── trainer.py          # the training loop (task-agnostic)
+│   │   ├── tasks.py            # what the model is asked to do
+│   │   ├── schedules.py        # cosine LR with warmup
 │   │   └── metrics.py          # bit accuracy, exact-match accuracy
 │   ├── evaluation/
-│   │   └── evaluator.py        # held-out scoring + error analysis
+│   │   ├── evaluator.py        # Step 1 scoring + error analysis
+│   │   ├── lm_evaluator.py     # Step 2 bpc, samples, held-out arithmetic
+│   │   └── text_metrics.py     # grammaticality, arithmetic grading
 │   ├── inference/
-│   │   └── predictor.py        # checkpoint → prediction (no trainer imports)
+│   │   ├── predictor.py        # checkpoint → prediction
+│   │   ├── generator.py        # sampling: temperature, top-k, top-p
+│   │   └── generate_cli.py     # the generation command line
 │   └── utils/
 │       ├── seed.py             # reproducibility
 │       ├── logging_utils.py    # console output
 │       ├── checkpoint.py       # save/load
 │       └── weight_stats.py     # measuring how far weights moved
 │
-└── tests/                      # 48 tests
+└── tests/                      # 114 tests
     ├── conftest.py
     ├── test_config.py
     ├── test_preprocessing.py
     ├── test_dataset.py
     ├── test_model.py
     ├── test_training.py
-    └── test_inference.py
+    ├── test_inference.py
+    ├── test_tokenizer.py
+    ├── test_text_dataset.py
+    ├── test_transformer.py
+    ├── test_generation.py
+    ├── test_schedules.py
+    └── test_tasks.py
 ```
 
 ### Where checkpoints are stored
@@ -584,35 +620,201 @@ It is a proof that the *pipeline* is correct. That is Step 1's entire job.
 | 48 automated tests | ✅ |
 | A model that measurably learns (0% → 100% exact-match) | ✅ |
 
-### Step 2 — not built yet
+### Step 2 — built (see below)
 
-Deliberately out of scope. The seams are ready for each of these:
+Step 1's seams held: Step 2 added a language model by writing a new dataset, a
+new model class and a new task, and the trainer itself did not need to change.
 
-1. **Sequences instead of fixed-size vectors.** Every real AI task — text,
-   audio, time series — has variable length. This means padding, masking, and a
-   model that processes one step at a time. The current `Dataset` returns fixed
-   `(8,)` vectors; that is the first thing to generalise.
-2. **A tokenizer.** Before a model can read text it needs a vocabulary:
-   characters first (simple, ~100 symbols), then subwords. This is a new
-   `src/ored/data/tokenizer.py` and the reason `data/processed/` exists.
-3. **A character-level language model.** Start with an RNN or a small
-   Transformer trained on a plain text file to predict the next character.
-   Register it in `models/registry.py` — the trainer will not need to change.
-4. **Generation.** Language models do not classify, they sample. This means
-   temperature, top-k sampling, and a generation loop in `inference/`.
-5. **Real training infrastructure.** Learning-rate schedules, gradient
-   accumulation, mixed precision, resuming from `last.pt`, and TensorBoard
-   or Weights & Biases logging.
-6. **Larger datasets.** Streaming data that does not fit in memory, proper
-   caching in `data/processed/`, and dataset versioning.
-7. **CI.** Run `pytest` on every push, so a refactor cannot silently break the
-   pipeline.
+---
 
-**What deliberately stays the same:** the config system, the model registry,
-the checkpoint format, the seeding, the train/validate/checkpoint loop, and the
-separation between training and inference. Those were the point of Step 1 —
-Step 2 should be able to add a language model by writing a new dataset and a
-new model class, and touching almost nothing else.
+# Step 2 — a character-level language model
+
+Step 1 handled **fixed-size vectors → classification**. Step 2 generalises
+every seam to **variable-length sequences → next-token prediction**, and adds a
+decoder-only Transformer written from scratch — self-attention included, no
+`nn.Transformer`.
+
+## The corpus
+
+Generated by us (`scripts/generate_corpus.py`), nothing downloaded. Two kinds
+of line, interleaved:
+
+```
+the small cat watches the red dog .
+anna gives the blue ball to ben .
+13 + 8 = 21
+```
+
+The sentences come from a fixed grammar. The arithmetic ties back to Step 1 —
+but where Step 1 learned addition from bit vectors, Step 2 must learn it **as
+text, one character at a time**, with no notion of a number.
+
+The 961 operand pairs are split train/val/test **before any line is written**,
+so a sum in the test corpus never appears in the training corpus. A test
+asserts this by searching the training text for every held-out sum.
+
+## Results
+
+| Measure | Uninformed | Bigram baseline | **Transformer** |
+|---|---|---|---|
+| Bits per character (val) | 5.36 | 2.56 | **0.607** |
+| Parameters | — | 1,681 | 814,976 |
+
+| Generated-text quality | Result |
+|---|---|
+| Well-formed lines | **92.9%** |
+| Valid sentences | 24 / 56 |
+| Spelling errors | 0 |
+| **Arithmetic on held-out pairs** | **5.6%** |
+
+Training: 8 epochs, ~5 minutes on a laptop CPU.
+
+### What worked
+
+The **language structure was learned**. From nothing but characters, the model
+learned to spell every word in the vocabulary correctly, to place articles and
+adjectives in valid positions, to end lines with ` .` and a newline, and to use
+plural verbs after "and". 92.9% of generated lines parse against the grammar.
+
+Sample output:
+
+```
+the blue house hears the young bird .
+finn hears the young dog .
+dan and cora want the house .
+11 + 17 = 21
+iris gives the big box to hugo .
+```
+
+### What did not work — and why it matters
+
+**The arithmetic failed: 5.6% on held-out pairs.** Look at the sample above —
+`11 + 17 = 21` is wrong. The model writes sums in the right *format*, with a
+plausible *magnitude*, and the wrong *answer*.
+
+The diagnostic that explains it: accuracy on pairs the model **did** see during
+training, ten times each, is **1.7%** — lower than on held-out pairs. So this
+is not a generalisation failure. The model never fit the arithmetic at all.
+
+That points at the cause. In the training corpus, sentences are ~83% of the
+characters, and the genuinely unpredictable part of a sum (its answer digits)
+is only ~3–4% of all tokens. Cross-entropy averages over every position
+equally, so the optimiser buys far more loss reduction by perfecting sentences
+than by learning to carry. The model is doing exactly what it was asked to do;
+the objective simply does not care much about arithmetic.
+
+A second, compounding reason: generating `35` left-to-right means emitting the
+tens digit **first**, which requires already knowing the carry out of the units.
+The model must compute the whole sum before writing a single character of it.
+
+This is a real, reproducible finding rather than a bug, and it is the honest
+Step 2 result: **the pipeline learns language structure well and arithmetic
+badly.** Fixing it is the first piece of Step 3 work, not a patch to hide.
+
+### Untested hypotheses for the arithmetic failure
+
+Experiments were started but not finished. They are the obvious next step:
+
+1. **Rebalance the corpus** — raise `arithmetic_repeats` and lower
+   `sentence_lines` so sums carry real weight in the loss.
+2. **More distinct pairs** — `max_operand: 50` gives 2,601 pairs instead of
+   961, which is more evidence for the *rule* rather than more repetition.
+3. **More capacity and more epochs** — 6 layers, `d_model` 192, 12+ epochs.
+4. **Reversed answer digits** — write `13 + 8 = 12` meaning 21 reversed, so the
+   sum becomes computable left-to-right with a running carry.
+
+## Running Step 2
+
+```bash
+python scripts/generate_corpus.py
+python scripts/train.py --config configs/char_transformer.yaml
+python scripts/evaluate.py --checkpoint checkpoints/char_transformer/best.pt
+
+python scripts/generate.py --prompt "the "
+python scripts/generate.py --complete "17 + 9 = "
+python scripts/generate.py --arithmetic
+python scripts/generate.py --temperature 1.2 --top-k 10 --tokens 600
+```
+
+The baseline, for comparison:
+
+```bash
+python scripts/train.py --config configs/char_bigram.yaml
+```
+
+## How the Transformer works
+
+```
+ids            (B, T)              token ids
+  |  token embedding + position embedding
+x              (B, T, 128)
+  |  4 x TransformerBlock
+x              (B, T, 128)
+  |  LayerNorm + linear head
+logits         (B, T, vocab_size)  one score per possible next character,
+                                   at every position
+```
+
+**Query, Key, Value.** Each token produces three vectors: a query ("what am I
+looking for"), a key ("what do I contain") and a value ("what I pass on").
+Position `i` compares its query against every earlier key by dot product,
+softmaxes those scores into weights that sum to 1, and outputs the weighted
+average of the values. Attention is a **content-addressed lookup**, learned
+rather than programmed.
+
+**Scaling by √d_head.** A dot product of `d_head` random numbers grows with
+`d_head`. Unscaled, scores get large, softmax saturates into a spike, and its
+gradient nearly vanishes — learning stalls.
+
+**Causal masking is the whole game.** The model predicts the next token at
+*every* position at once. If position 5 could see position 6 it would read the
+answer off its own input: training loss would collapse and the model would
+generate nonsense, because at generation time the future does not exist. Scores
+at `j > i` are set to `-inf` before the softmax, making their weight exactly
+zero. `tests/test_transformer.py` verifies this numerically — change a token at
+position *t*, and every output before *t* must be bit-identical.
+
+**Residuals and pre-norm.** `x = x + sublayer(x)` means each block learns a
+*correction*, giving gradients a direct path backwards. LayerNorm goes *before*
+the sublayer, leaving the residual path clean.
+
+**One window = many training signals.** Input and target are the same tokens
+shifted by one, so a 128-token window is 128 separate prediction problems
+solved in one forward pass.
+
+## Step 2 / Step 3 boundary
+
+### Step 2 — built and working
+
+| Built | Status |
+|---|---|
+| Corpus generator with disjoint operand splits | ✅ |
+| Character tokenizer, registry, exact round-trip, saved in checkpoints | ✅ |
+| Sequence dataset with shift-by-one targets, stride windows | ✅ |
+| Decoder-only Transformer written from scratch | ✅ |
+| Causal masking, verified numerically | ✅ |
+| Bigram baseline for comparison | ✅ |
+| `Task` abstraction — one trainer serves both steps | ✅ |
+| Cosine LR schedule with warmup | ✅ |
+| Resume from checkpoint (weights + optimizer state) | ✅ |
+| Sampling: temperature, top-k, top-p, greedy | ✅ |
+| Grammar, spelling and arithmetic metrics | ✅ |
+| CI workflow | ✅ |
+| 114 tests | ✅ |
+| Language structure learned (0.607 bpc, 92.9% well-formed) | ✅ |
+| Arithmetic learned | ❌ **5.6% — open problem** |
+
+### Step 3 — not built
+
+1. **Fix the arithmetic** (see the four hypotheses above). This is the first job.
+2. **Subword tokenization (BPE)** — the tokenizer interface is ready for it.
+3. **Real text** — a larger corpus that does not fit in memory, streaming, and
+   caching in `data/processed/`.
+4. **Evaluation during training** — sample and score every N epochs, so quality
+   is visible on the loss curve rather than only at the end.
+5. **Efficiency** — gradient accumulation, mixed precision, `torch.compile`.
+6. **KV caching for generation** — right now every new token re-runs the whole
+   context, which is O(n²) work for O(n) output.
 
 ---
 
@@ -623,9 +825,9 @@ new model class, and touching almost nothing else.
    checkpoint here was produced by our own training loop on our own data.
 2. **Nothing hidden behind abstractions.** The training loop is a readable
    `for` loop. You can put a breakpoint anywhere and inspect real tensors.
-3. **Comments explain *why*, not *what*.** `optimizer.zero_grad()` is obvious;
-   *why gradients accumulate by default and what breaks without that line* is
-   not, so that is what the comment says.
+3. **The code carries no comments.** Explanations live here, in the README,
+   where they can be read as prose. The code is written to be readable on its
+   own: explicit names, small functions, no cleverness.
 4. **Honest measurement.** Held-out data, disjoint splits enforced on disk, a
    metric that is unforgiving (all 5 bits or nothing), and mistakes printed
    rather than hidden behind an average.

@@ -1,5 +1,3 @@
-"""Inference must work from a checkpoint alone, with no trainer in sight."""
-
 from __future__ import annotations
 
 import pytest

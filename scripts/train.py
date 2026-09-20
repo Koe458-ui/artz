@@ -1,7 +1,4 @@
-#!/usr/bin/env python3
-"""Entry point: see ored.training.trainer for the implementation and the explanations."""
-
-import _bootstrap  # noqa: F401  (adds src/ to sys.path)
+import _bootstrap
 
 from ored.training.trainer import main
 

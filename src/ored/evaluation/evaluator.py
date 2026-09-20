@@ -1,15 +1,3 @@
-"""Evaluation: the honest scoreboard.
-
-Training already reports validation numbers, but validation influenced the
-run -- we used it to pick the "best" checkpoint. The **test** split influenced
-nothing at all. It is the only unbiased estimate of how the model behaves on
-input it has never encountered in any form.
-
-This script also prints the individual mistakes. Aggregate accuracy tells you
-*how much* the model is wrong; the error list tells you *how* it is wrong,
-which is what actually guides the next improvement.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -40,7 +28,6 @@ def evaluate_checkpoint(
     device: str = "auto",
     show_errors: int = 10,
 ) -> Dict[str, Dict[str, float]]:
-    """Load a checkpoint and score it on the requested splits."""
     splits = splits or ["train", "val", "test"]
     resolved_device = resolve_device(device)
 
@@ -71,7 +58,6 @@ def evaluate_checkpoint(
         inputs = dataset.inputs.to(resolved_device)
         targets = dataset.targets.to(resolved_device)
 
-        # The whole split fits in one batch here, so one forward pass is enough.
         logits = model(inputs)
 
         results[split] = {
@@ -85,7 +71,6 @@ def evaluate_checkpoint(
             f"{results[split]['bit_acc']:>10.1%}{results[split]['exact_acc']:>12.1%}"
         )
 
-        # Collect the wrong answers for this split.
         predicted_bits = (logits > 0).to(torch.int64).cpu()
         wrong_rows = (predicted_bits != targets.cpu().to(torch.int64)).any(dim=1).nonzero().flatten()
         lines = []
@@ -124,8 +109,6 @@ def evaluate_checkpoint(
             if len(errors) > show_errors:
                 logger.info(f"  ... and {len(errors) - show_errors} more")
 
-        # Which bit position does the model struggle with? Bit 0 is the
-        # most-significant bit of the sum.
         _log_per_bit_accuracy(model, datasets, splits, resolved_device)
 
     return results
@@ -133,13 +116,6 @@ def evaluate_checkpoint(
 
 @torch.no_grad()
 def _log_per_bit_accuracy(model, datasets, splits, device) -> None:
-    """Break accuracy down by output bit position.
-
-    Useful diagnostics: the least-significant bit of a sum is a pure XOR of the
-    input bits (no carry involved), so it is the easiest. Accuracy usually
-    drops toward the most-significant bits, because those depend on carries
-    propagating through everything below them.
-    """
     logger.info("")
     logger.info("Per-bit accuracy (bit 0 = most significant, i.e. the 16s place):")
     for split in splits:
@@ -152,15 +128,34 @@ def _log_per_bit_accuracy(model, datasets, splits, device) -> None:
 
 
 def main(argv: Optional[List[str]] = None) -> int:
-    parser = argparse.ArgumentParser(description="Evaluate a trained Ored.ai checkpoint.")
+    parser = argparse.ArgumentParser(
+        description="Evaluate a trained Ored.ai checkpoint (any task).")
     parser.add_argument("--checkpoint", default=DEFAULT_CHECKPOINT)
     parser.add_argument("--splits", nargs="*", default=["train", "val", "test"])
     parser.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
     parser.add_argument("--show-errors", type=int, default=10,
                         help="how many wrong answers to print per split (0 = none)")
+    parser.add_argument("--samples", type=int, default=3,
+                        help="language models: how many text samples to score")
+    parser.add_argument("--temperature", type=float, default=0.8,
+                        help="language models: sampling temperature for the samples")
     args = parser.parse_args(argv)
 
-    evaluate_checkpoint(args.checkpoint, args.splits, args.device, args.show_errors)
+    payload = load_checkpoint(args.checkpoint, map_location="cpu")
+    task = config_from_dict(payload["config"]).task
+
+    if task == "language_model":
+        from ored.evaluation.lm_evaluator import evaluate_language_model
+
+        evaluate_language_model(
+            args.checkpoint,
+            splits=args.splits,
+            device=args.device,
+            n_samples=args.samples,
+            temperature=args.temperature,
+        )
+    else:
+        evaluate_checkpoint(args.checkpoint, args.splits, args.device, args.show_errors)
     return 0
 
 

@@ -1,22 +1,3 @@
-"""Dataset generation.
-
-The repository started empty, so we create our own data. For 4-bit inputs
-there are exactly 16 x 16 = 256 possible examples, and we enumerate all of
-them -- the complete universe of this task.
-
-The split matters more than it looks
-------------------------------------
-We assign each example to train / val / test *here*, once, and write the
-assignment into the CSV. That has two consequences:
-
-1. The model trains on ~179 examples and is tested on ~39 it has never seen.
-   Getting those right is only possible by learning how binary addition
-   *works* (bitwise sum plus carry propagation). A lookup table memorised
-   from the training rows cannot answer them.
-2. The split is stored on disk, so re-running training later cannot
-   accidentally leak a test example into training and flatter the results.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -35,7 +16,6 @@ CSV_FIELDS = ["split", "a", "b", "sum", "a_bits", "b_bits", "sum_bits"]
 
 
 def build_examples(n_bits: int) -> List[Dict[str, object]]:
-    """Enumerate every (a, b) pair and its true sum."""
     max_value = 2**n_bits
     rows: List[Dict[str, object]] = []
     for a in range(max_value):
@@ -48,7 +28,6 @@ def build_examples(n_bits: int) -> List[Dict[str, object]]:
                     "sum": total,
                     "a_bits": bits_to_string(int_to_bits(a, n_bits)),
                     "b_bits": bits_to_string(int_to_bits(b, n_bits)),
-                    # n_bits + 1 because the carry out of the top bit needs room
                     "sum_bits": bits_to_string(int_to_bits(total, n_bits + 1)),
                 }
             )
@@ -61,15 +40,13 @@ def assign_splits(
     val_frac: float,
     seed: int,
 ) -> List[Dict[str, object]]:
-    """Shuffle the examples with a fixed seed, then slice them into splits."""
-    rng = random.Random(seed)          # a local RNG: does not disturb global state
+    rng = random.Random(seed)
     order = list(range(len(rows)))
     rng.shuffle(order)
 
     n_total = len(rows)
     n_train = int(round(train_frac * n_total))
     n_val = int(round(val_frac * n_total))
-    # Whatever is left over goes to test, so the counts always add up exactly.
     n_test = n_total - n_train - n_val
     if n_test <= 0:
         raise ValueError("split fractions leave no examples for the test set")
@@ -85,7 +62,6 @@ def assign_splits(
 
 
 def generate_dataset(cfg: Config, force: bool = False) -> Path:
-    """Create the CSV dataset described by ``cfg`` and return its path."""
     path = Path(cfg.data.raw_path)
     if path.exists() and not force:
         logger.info(f"dataset already exists: {path}  (use --force to regenerate)")

@@ -1,5 +1,3 @@
-"""The network itself: shapes, parameter counts, and that gradients flow."""
-
 from __future__ import annotations
 
 import pytest
@@ -15,7 +13,6 @@ def test_forward_shape(tiny_cfg):
 
 
 def test_parameter_count_matches_the_arithmetic():
-    """8->32->32->5 = (8*32+32) + (32*32+32) + (32*5+5) = 1509."""
     model = MLP(input_size=8, output_size=5, hidden_sizes=[32, 32])
     expected = (8 * 32 + 32) + (32 * 32 + 32) + (32 * 5 + 5)
     assert model.num_parameters() == expected == 1509
@@ -27,13 +24,10 @@ def test_biases_start_at_zero_and_weights_do_not():
         if name.endswith("bias"):
             assert torch.all(param == 0)
         else:
-            # Random init: neurons must not all be identical, or they would
-            # receive identical gradients forever.
             assert param.std().item() > 0
 
 
 def test_gradients_reach_every_parameter():
-    """If any parameter has no gradient, part of the network cannot learn."""
     model = MLP(input_size=8, output_size=5, hidden_sizes=[16, 16])
     x = torch.rand(8, 8)
     loss = torch.nn.BCEWithLogitsLoss()(model(x), torch.rand(8, 5).round())
@@ -48,7 +42,7 @@ def test_gradients_reach_every_parameter():
 def test_wrong_input_shape_is_rejected():
     model = MLP(input_size=8, output_size=5, hidden_sizes=[8])
     with pytest.raises(ValueError):
-        model(torch.zeros(4, 7))     # 7 features, not 8
+        model(torch.zeros(4, 7))
 
 
 def test_unknown_activation_is_rejected():

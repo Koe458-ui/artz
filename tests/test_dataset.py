@@ -1,7 +1,3 @@
-"""Dataset correctness, including the thing that quietly ruins ML projects:
-a leak between the training set and the test set.
-"""
-
 from __future__ import annotations
 
 import pytest
@@ -16,11 +12,10 @@ def test_generates_every_possible_pair():
     rows = build_examples(n_bits=3)
     assert len(rows) == 8 * 8
     pairs = {(row["a"], row["b"]) for row in rows}
-    assert len(pairs) == 64            # no duplicates
+    assert len(pairs) == 64
 
 
 def test_labels_are_actually_correct():
-    """The dataset must contain real arithmetic, not our assumption of it."""
     for row in build_examples(n_bits=4):
         assert row["sum"] == row["a"] + row["b"]
         assert bits_to_int(row["sum_bits"]) == row["sum"]
@@ -32,7 +27,6 @@ def test_splits_are_disjoint_and_complete(tiny_dataset):
     by_split = {name: {(r["a"], r["b"]) for r in rows if r["split"] == name}
                 for name in SPLIT_NAMES}
 
-    # No example may appear in two splits -- otherwise "test accuracy" is a lie.
     assert by_split["train"] & by_split["val"] == set()
     assert by_split["train"] & by_split["test"] == set()
     assert by_split["val"] & by_split["test"] == set()
@@ -44,7 +38,7 @@ def test_generation_is_deterministic(tiny_cfg, tmp_path):
     first = load_rows(tiny_cfg.data.raw_path)
     generate_dataset(tiny_cfg, force=True)
     second = load_rows(tiny_cfg.data.raw_path)
-    assert first == second        # same seed -> same split
+    assert first == second
 
 
 def test_tensor_shapes_and_dtypes(tiny_dataset):
@@ -55,7 +49,6 @@ def test_tensor_shapes_and_dtypes(tiny_dataset):
     assert x.shape == (tiny_dataset.data.input_size,)
     assert y.shape == (tiny_dataset.data.output_size,)
     assert x.dtype == torch.float32 and y.dtype == torch.float32
-    # Bit vectors contain only 0.0 and 1.0.
     assert set(x.tolist()) <= {0.0, 1.0}
 
 
@@ -66,7 +59,6 @@ def test_dataloader_batches(tiny_dataset):
     assert inputs.shape[1] == tiny_dataset.data.input_size
     assert targets.shape[1] == tiny_dataset.data.output_size
 
-    # Every example must be visited exactly once per epoch.
     seen = sum(batch[0].shape[0] for batch in loaders["train"])
     assert seen == len(datasets["train"])
 

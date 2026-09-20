@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ored"
 version = "0.1.0"
-description = "Ored.ai -- an AI built from scratch. Step 1: the foundation."
+description = "Ored.ai -- an AI built from scratch, no pretrained weights."
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }
@@ -18,12 +18,13 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest>=8.0"]
 
-# Console entry points, available after `pip install -e .`
 [project.scripts]
 ored-generate-dataset = "ored.data.generate:main"
+ored-generate-corpus = "ored.data.corpus:main"
 ored-train = "ored.training.trainer:main"
 ored-evaluate = "ored.evaluation.evaluator:main"
 ored-infer = "ored.inference.predictor:main"
+ored-generate = "ored.inference.generate_cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]

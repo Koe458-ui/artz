@@ -1,8 +1,3 @@
-"""The encode/decode layer must be exactly invertible.
-
-If this is wrong, everything downstream trains happily on nonsense.
-"""
-
 from __future__ import annotations
 
 import pytest
@@ -38,7 +33,7 @@ def test_round_trip_every_value():
 
 def test_out_of_range_is_rejected():
     with pytest.raises(ValueError):
-        int_to_bits(16, 4)          # 16 needs 5 bits
+        int_to_bits(16, 4)
     with pytest.raises(ValueError):
         int_to_bits(-1, 4)
 
@@ -50,12 +45,11 @@ def test_encode_shapes_and_values():
     assert x.tolist() == [1, 0, 0, 1, 0, 1, 1, 0]
 
     y = encode_target(15, n_bits=4)
-    assert y.shape == (5,)          # one extra bit for the carry
+    assert y.shape == (5,)
     assert y.tolist() == [0, 1, 1, 1, 1]
 
 
 def test_target_has_room_for_the_largest_sum():
-    """15 + 15 = 30 must fit; this is why the output is n_bits + 1 wide."""
     assert encode_target(30, n_bits=4).tolist() == [1, 1, 1, 1, 0]
 
 
@@ -65,7 +59,6 @@ def test_logits_threshold_at_zero():
 
 
 def test_decode_prediction():
-    # bits 0,1,1,1,1 -> 15
     logits = torch.tensor([-4.0, 3.0, 2.0, 5.0, 1.0])
     value, bits, probabilities = decode_prediction(logits, n_bits=4)
     assert bits == [0, 1, 1, 1, 1]

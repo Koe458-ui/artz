@@ -1,5 +1,3 @@
-"""The training loop: does it actually learn, and does it save what it learned?"""
-
 from __future__ import annotations
 
 import json
@@ -12,7 +10,6 @@ from ored.utils.weight_stats import snapshot_parameters, summarise_weight_change
 
 
 def test_loss_decreases(tiny_dataset):
-    """The single most important test in the project."""
     cfg = tiny_dataset
     cfg.training.epochs = 30
     trainer = Trainer(cfg)
@@ -24,7 +21,6 @@ def test_loss_decreases(tiny_dataset):
 
 
 def test_weights_actually_change(tiny_dataset):
-    """Learning means the parameter tensors moved. Prove it numerically."""
     trainer = Trainer(tiny_dataset)
     before = snapshot_parameters(trainer.model)
     trainer.fit()
@@ -36,7 +32,6 @@ def test_weights_actually_change(tiny_dataset):
 
 
 def test_one_step_lowers_the_loss_for_that_batch(tiny_dataset):
-    """Zoom all the way in: forward, loss, backward, step -- and check."""
     trainer = Trainer(tiny_dataset)
     inputs, targets = next(iter(trainer.loaders["train"]))
 
@@ -61,11 +56,10 @@ def test_checkpoints_are_written_and_reloadable(tiny_dataset):
         path = tiny_dataset.checkpoint_dir / name
         assert path.exists(), f"{name} was not written"
 
-        payload = load_checkpoint(path)        # uses weights_only=True
+        payload = load_checkpoint(path)
         assert "model_state" in payload
         assert payload["config"]["data"]["n_bits"] == tiny_dataset.data.n_bits
 
-        # The saved weights must match the live model exactly.
         if name == "last.pt":
             for key, tensor in trainer.model.state_dict().items():
                 assert torch.allclose(payload["model_state"][key], tensor)
@@ -81,7 +75,6 @@ def test_history_json_is_written(tiny_dataset):
 
 
 def test_same_seed_gives_identical_results(tiny_dataset):
-    """Reproducibility is a feature, and this is how we keep it honest."""
     first = Trainer(tiny_dataset).fit()["history"]
     second = Trainer(tiny_dataset).fit()["history"]
     assert [round(r["train_loss"], 10) for r in first] == \

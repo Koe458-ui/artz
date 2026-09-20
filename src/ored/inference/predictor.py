@@ -1,21 +1,3 @@
-"""Inference: using the trained weights to answer a new question.
-
-Inference is deliberately independent of training. Nothing in this file
-imports the trainer, the optimizer or the loss function -- because none of
-them exist at this point. A deployed model is a checkpoint plus this code.
-
-The three rules of inference
-----------------------------
-1. **Rebuild the same architecture, then load the weights.** The checkpoint
-   stores the config precisely so we can reconstruct the identical network
-   shape; ``load_state_dict`` then copies the learned numbers into it. Weights
-   only make sense in the network they were trained in.
-2. **``model.eval()``.** Switches layers like Dropout into inference
-   behaviour. Skipping this silently degrades predictions.
-3. **``torch.no_grad()``.** We are not learning, so there is no need to record
-   an autograd graph. It saves memory and time.
-"""
-
 from __future__ import annotations
 
 import argparse
@@ -39,14 +21,13 @@ DEFAULT_CHECKPOINT = "checkpoints/bit_adder_mlp/best.pt"
 
 @dataclass
 class Prediction:
-    """One model answer, in every form you might want it."""
 
     a: int
     b: int
-    predicted: int           # the number the model produced
+    predicted: int
     predicted_bits: List[int]
-    probabilities: List[float]   # per-bit confidence, 0..1
-    expected: Optional[int] = None   # the true answer, when we know it
+    probabilities: List[float]
+    expected: Optional[int] = None
 
     @property
     def correct(self) -> Optional[bool]:
@@ -56,12 +37,6 @@ class Prediction:
 
     @property
     def confidence(self) -> float:
-        """Confidence in the *whole* answer: the least confident bit.
-
-        A 5-bit answer is only as trustworthy as its shakiest bit, so we report
-        the minimum rather than the average -- the average would hide one
-        coin-flip bit behind four certain ones.
-        """
         return min(max(p, 1.0 - p) for p in self.probabilities)
 
     def format(self) -> str:
@@ -75,7 +50,6 @@ class Prediction:
 
 
 class Predictor:
-    """A trained model, ready to answer questions."""
 
     def __init__(self, model: torch.nn.Module, cfg: Config, device: torch.device,
                  checkpoint_info: Dict[str, Any]) -> None:
@@ -85,10 +59,8 @@ class Predictor:
         self.checkpoint_info = checkpoint_info
         self.n_bits = cfg.data.n_bits
 
-        # Rule 2: inference behaviour, not training behaviour.
         self.model.eval()
 
-    # -- construction ---------------------------------------------------
     @classmethod
     def from_checkpoint(
         cls,
@@ -98,13 +70,9 @@ class Predictor:
         resolved_device = resolve_device(device)
         payload = load_checkpoint(path, map_location=resolved_device)
 
-        # Rebuild the exact architecture the weights were trained in...
         cfg = config_from_dict(payload["config"])
         model = build_model(cfg).to(resolved_device)
 
-        # ...then pour the learned numbers into it. strict=True makes a
-        # mismatch in names or shapes a loud error rather than a silent
-        # half-loaded model.
         model.load_state_dict(payload["model_state"], strict=True)
 
         info = {
@@ -116,10 +84,8 @@ class Predictor:
         }
         return cls(model, cfg, resolved_device, info)
 
-    # -- prediction -----------------------------------------------------
-    @torch.no_grad()  # Rule 3
+    @torch.no_grad()
     def predict(self, a: int, b: int) -> Prediction:
-        """Predict a + b. Raises if the inputs do not fit the trained width."""
         limit = 2**self.n_bits - 1
         for name, value in (("a", a), ("b", b)):
             if not 0 <= value <= limit:
@@ -128,13 +94,8 @@ class Predictor:
                     f"{self.n_bits}-bit inputs, so both numbers must be in 0..{limit}."
                 )
 
-        # Encode exactly as during training -- any mismatch here produces
-        # confident nonsense. Preprocessing must be shared between training and
-        # inference, which is why it lives in its own module.
         x = torch.from_numpy(encode_pair(a, b, self.n_bits)).to(self.device)
 
-        # The model always expects a batch dimension, so a single example is
-        # shaped (1, 8) rather than (8,). unsqueeze(0) adds that dimension.
         logits = self.model(x.unsqueeze(0))[0]
 
         value, bits, probabilities = decode_prediction(logits, self.n_bits)
@@ -144,7 +105,7 @@ class Predictor:
             predicted=value,
             predicted_bits=bits,
             probabilities=probabilities,
-            expected=a + b,   # we happen to know the truth for this task
+            expected=a + b,
         )
 
     def predict_many(self, pairs: Sequence[Tuple[int, int]]) -> List[Prediction]:
@@ -163,7 +124,6 @@ class Predictor:
 
 
 def load_predictor(path: str | Path = DEFAULT_CHECKPOINT, device: str = "auto") -> Predictor:
-    """Shorthand used by scripts and tests."""
     return Predictor.from_checkpoint(path, device)
 
 
@@ -204,14 +164,11 @@ def main(argv: Optional[List[str]] = None) -> int:
         pairs.append((int(left), int(right)))
 
     if not pairs and not args.interactive:
-        # A sensible default so the script does something useful bare.
         pairs = [(0, 0), (1, 1), (3, 4), (9, 6), (7, 8), (15, 15)]
         if not args.quiet:
             logger.info("(no pair given -- showing a default sample)")
 
     for a, b in pairs:
-        # A bad number from the command line deserves a readable message, not
-        # a stack trace.
         try:
             logger.info(predictor.predict(a, b).format())
         except ValueError as exc:

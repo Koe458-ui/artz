@@ -1,131 +1,35 @@
-# ===========================================================================
-# Ored.ai -- Step 1 experiment configuration.
-#
-# Every number that influences the result lives here, not in the code.
-# Change a value, re-run training, compare. That is the whole point of having
-# a configuration system: experiments must be reproducible and diffable.
-#
-# Override any value from the command line without editing this file:
-#   python scripts/train.py --set training.epochs=50 --set model.hidden_sizes=[64,64]
-# ===========================================================================
-
-# Human-readable name for this experiment. Checkpoints are written to
-# checkpoints/<run_name>/
 run_name: bit_adder_mlp
-
-# ---------------------------------------------------------------------------
-# Reproducibility
-# ---------------------------------------------------------------------------
-# A neural network starts from *random* weights and sees data in a *random*
-# order. Fixing the seed makes those random choices identical on every run, so
-# two training runs of the same config produce the same numbers. Without this,
-# you can never tell whether a change helped or you just got lucky.
+task: bit_addition
 seed: 1337
-
-# torch can pick faster-but-nondeterministic algorithms. On CPU this costs
-# nothing, so we keep it deterministic.
 deterministic: true
 
-# ---------------------------------------------------------------------------
-# Data
-# ---------------------------------------------------------------------------
 data:
-  # Each input number is this many bits wide. 4 bits -> values 0..15.
-  # The sum of two 4-bit numbers needs 5 bits (max 15 + 15 = 30).
   n_bits: 4
-
-  # Where the generated dataset lives.
   raw_path: data/raw/bit_addition.csv
-
-  # How the 256 possible examples are split. Must sum to 1.0.
-  # train: the model learns from these.
-  # val:   the model never trains on these; used to detect overfitting and to
-  #        decide which checkpoint is "best".
-  # test:  touched only once, at the very end, by scripts/evaluate.py.
   split:
     train: 0.70
     val: 0.15
     test: 0.15
-
-  # Examples per gradient update. Small batches -> more, noisier updates.
   batch_size: 16
-
-  # Reshuffle the training data every epoch so the model never sees the same
-  # ordering twice (prevents it from learning the order instead of the task).
   shuffle_train: true
 
-# ---------------------------------------------------------------------------
-# Model
-# ---------------------------------------------------------------------------
 model:
-  # Which architecture to build. Looked up in src/ored/models/registry.py.
-  # Adding a new architecture in Step 2 means registering a new name here.
   name: mlp
-
-  # One number per hidden layer = that layer's width (how many neurons).
-  # [64, 64] means: 8 inputs -> 64 -> 64 -> 5 outputs.
   hidden_sizes: [64, 64]
-
-  # The non-linearity applied after each hidden layer. Without it, stacking
-  # linear layers would collapse into a single linear layer and the model
-  # could never learn carry propagation.
-  #
-  # Measured on this task (test exact-match, 6 seeds):
-  #   tanh -> 100%        relu -> 80-95%
-  # tanh is smooth and saturates toward -1/+1, which suits bit-valued logic;
-  # relu discards everything negative and here it overfits the 179 training
-  # examples instead of generalising. Try `--set model.activation=relu` and
-  # watch the gap between training loss and validation loss open up.
   activation: tanh
-
-  # Dropout randomly zeroes this fraction of hidden activations during
-  # training only (a regulariser). 0.0 = off; this task is small enough that
-  # we do not need it yet.
   dropout: 0.0
 
-# ---------------------------------------------------------------------------
-# Training
-# ---------------------------------------------------------------------------
 training:
-  # One epoch = one full pass over the training set.
   epochs: 400
-
-  # Learning rate: how big a step the optimizer takes along the gradient.
-  # Too high -> the loss bounces and diverges. Too low -> learning crawls.
   learning_rate: 0.01
-
-  # Which optimization algorithm turns gradients into weight updates.
   optimizer: adam
-
-  # Weight decay gently pulls weights toward zero each step, discouraging the
-  # model from memorising the training set.
   weight_decay: 0.0
-
-  # Loss function. bce_with_logits = binary cross-entropy applied to each of
-  # the 5 output bits independently. It expects raw scores ("logits") and
-  # applies the sigmoid internally, which is numerically safer.
   loss: bce_with_logits
-
-  # Clip the total gradient norm to this value before the weight update.
-  # Cheap insurance against a single bad batch blowing up the weights.
-  # Set to 0 to disable.
   grad_clip: 1.0
-
-  # Stop early if validation loss has not improved for this many epochs.
-  # 0 disables early stopping. Generous here: this task shows long plateaus
-  # followed by sudden drops, and stopping during a plateau wastes a run.
   early_stopping_patience: 150
-
-  # Print a progress line every N epochs (epoch 1 and the last epoch are
-  # always printed).
   log_every: 20
-
-  # "cpu" or "cuda". "auto" picks cuda when available, else cpu.
   device: auto
+  resume: ""
 
-# ---------------------------------------------------------------------------
-# Paths
-# ---------------------------------------------------------------------------
 paths:
-  # Checkpoints go to <checkpoint_dir>/<run_name>/{best.pt,last.pt}
   checkpoint_dir: checkpoints

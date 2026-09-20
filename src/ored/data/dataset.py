@@ -1,31 +1,3 @@
-"""Dataset and batching.
-
-Two PyTorch concepts do the work here.
-
-``Dataset``
-    Knows two things only: how many examples exist (``__len__``) and how to
-    produce example *i* as tensors (``__getitem__``). It does not care about
-    batching, shuffling or training.
-
-``DataLoader``
-    Wraps a Dataset and produces **batches**: it picks indices (shuffled or
-    not), fetches those examples, and stacks them into one tensor whose first
-    dimension is the batch.
-
-Why batches?
-------------
-We could compute the gradient using all 179 training examples at once (slow,
-very smooth) or one example at a time (fast, very noisy). A batch of 16 is the
-practical middle: each weight update is informed by 16 examples, so the
-gradient is a reasonable estimate, and we still get ~12 updates per epoch
-instead of 1.
-
-Tensor shapes in this project
------------------------------
-    inputs  : (batch_size, 8)   float32, values 0.0 / 1.0
-    targets : (batch_size, 5)   float32, values 0.0 / 1.0
-"""
-
 from __future__ import annotations
 
 import csv
@@ -43,7 +15,6 @@ SPLIT_NAMES = ("train", "val", "test")
 
 
 def load_rows(path: str | Path) -> List[Dict[str, str]]:
-    """Read the generated CSV into a list of dictionaries."""
     path = Path(path)
     if not path.exists():
         raise FileNotFoundError(
@@ -58,12 +29,6 @@ def load_rows(path: str | Path) -> List[Dict[str, str]]:
 
 
 class BitAdditionDataset(Dataset):
-    """One split (train / val / test) of the binary-addition dataset.
-
-    Every example is pre-encoded into tensors at construction time. The dataset
-    is tiny, so doing the work once up front is both simpler and faster than
-    re-encoding on every access.
-    """
 
     def __init__(self, rows: List[Dict[str, str]], split: str, n_bits: int) -> None:
         if split not in SPLIT_NAMES:
@@ -86,10 +51,8 @@ class BitAdditionDataset(Dataset):
         if not inputs:
             raise ValueError(f"no rows found for split {split!r}")
 
-        # Stack the per-example vectors into one matrix each.
-        # torch.from_numpy shares memory with the numpy array -- no copy.
-        self.inputs = torch.from_numpy(np.stack(inputs))    # (N, 2 * n_bits)
-        self.targets = torch.from_numpy(np.stack(targets))  # (N, n_bits + 1)
+        self.inputs = torch.from_numpy(np.stack(inputs))
+        self.targets = torch.from_numpy(np.stack(targets))
 
     def __len__(self) -> int:
         return self.inputs.shape[0]
@@ -105,7 +68,6 @@ class BitAdditionDataset(Dataset):
 
 
 def build_datasets(cfg: Config) -> Dict[str, BitAdditionDataset]:
-    """Build all three splits from the single CSV file."""
     rows = load_rows(cfg.data.raw_path)
     return {name: BitAdditionDataset(rows, name, cfg.data.n_bits) for name in SPLIT_NAMES}
 
@@ -114,14 +76,6 @@ def build_dataloaders(
     cfg: Config,
     generator: torch.Generator | None = None,
 ) -> Tuple[Dict[str, DataLoader], Dict[str, BitAdditionDataset]]:
-    """Wrap each split in a DataLoader.
-
-    Only the training loader shuffles. Validation and test are evaluated in a
-    fixed order so their numbers are directly comparable between runs, and we
-    use one large batch there because no gradients are involved.
-
-    ``generator`` seeds the shuffling, keeping the batch order reproducible.
-    """
     datasets = build_datasets(cfg)
     loaders = {
         "train": DataLoader(

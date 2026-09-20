@@ -1,28 +1,20 @@
-# ---------------------------------------------------------------------------
-# Ored.ai — files that must never enter version control.
-# ---------------------------------------------------------------------------
-
-# Python virtual environments
 .venv/
 venv/
 env/
 ENV/
 
-# Python bytecode / caches
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
 
-# Packaging / build artefacts
 build/
 dist/
 *.egg-info/
 .eggs/
 pip-wheel-metadata/
 
-# Test & tooling caches
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
@@ -30,8 +22,6 @@ pip-wheel-metadata/
 htmlcov/
 .tox/
 
-# Trained model weights: regenerable, potentially huge. Keep the folder,
-# ignore its contents (see checkpoints/.gitkeep).
 checkpoints/*
 !checkpoints/.gitkeep
 *.pt
@@ -40,19 +30,18 @@ checkpoints/*
 *.safetensors
 *.onnx
 
-# Datasets: regenerable via `python scripts/generate_dataset.py`.
 data/raw/*
 data/processed/*
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/README.md
 
-# Logs and run artefacts
+*.vocab.json
+
 logs/
 runs/
 *.log
 
-# Secrets — never commit these
 .env
 .env.*
 !.env.example
@@ -61,10 +50,8 @@ runs/
 secrets.yaml
 credentials.json
 
-# Notebooks scratch output
 .ipynb_checkpoints/
 
-# OS / editor noise
 .DS_Store
 Thumbs.db
 .idea/
