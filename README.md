@@ -171,7 +171,7 @@ pip install -r requirements-dev.txt
 pytest
 ```
 
-114 tests covering encoding round-trips, split disjointness, gradient flow,
+124 tests covering encoding round-trips, split disjointness, gradient flow,
 loss decrease, checkpoint reloading, reproducibility, causal masking, tokenizer
 round-trips, sampling filters and the LR schedule.
 
@@ -490,7 +490,7 @@ Ored.ai/
 │       ├── checkpoint.py       # save/load
 │       └── weight_stats.py     # measuring how far weights moved
 │
-└── tests/                      # 114 tests
+└── tests/                      # 124 tests
     ├── conftest.py
     ├── test_config.py
     ├── test_preprocessing.py
@@ -574,6 +574,14 @@ what each hyperparameter actually does.
 initialisation and data shuffling. Two runs of the same config produce
 identical losses, and `tests/test_training.py` asserts it. Without this you can
 never tell whether a change helped or you simply got lucky.
+
+Corpus generation seeds each split from its index, not from `hash(split)`:
+Python randomises string hashing per process, so the earlier code produced a
+different corpus on every run despite the fixed seed. Only the generated
+sentences varied — the train/val/test pair split was always deterministic, so
+held-out pairs were never leaked. `tests/test_corpus_reproducible.py` runs
+generation in two processes under different `PYTHONHASHSEED` values and
+compares the bytes.
 
 ---
 
@@ -665,7 +673,7 @@ asserts this by searching the training text for every held-out sum.
 | Well-formed lines | **92.9%** |
 | Valid sentences | 24 / 56 |
 | Spelling errors | 0 |
-| **Arithmetic on held-out pairs** | **5.6%** |
+| **Arithmetic on held-out pairs** | **5.6%** (4.9% on re-run; fixed below) |
 
 Training: 8 epochs, ~5 minutes on a laptop CPU.
 
@@ -711,17 +719,72 @@ This is a real, reproducible finding rather than a bug, and it is the honest
 Step 2 result: **the pipeline learns language structure well and arithmetic
 badly.** Fixing it is the first piece of Step 3 work, not a patch to hide.
 
-### Untested hypotheses for the arithmetic failure
+### The four hypotheses, measured
 
-Experiments were started but not finished. They are the obvious next step:
+All four were run. Each changes one thing against the baseline, trains from
+scratch, and is scored on **train pairs and held-out pairs separately** —
+that pair of numbers is what separates underfitting from failure to
+generalise.
 
-1. **Rebalance the corpus** — raise `arithmetic_repeats` and lower
-   `sentence_lines` so sums carry real weight in the loss.
-2. **More distinct pairs** — `max_operand: 50` gives 2,601 pairs instead of
-   961, which is more evidence for the *rule* rather than more repetition.
-3. **More capacity and more epochs** — 6 layers, `d_model` 192, 12+ epochs.
-4. **Reversed answer digits** — write `13 + 8 = 12` meaning 21 reversed, so the
-   sum becomes computable left-to-right with a running carry.
+| Run | Changed | val bits/char | Train-pair | Held-out |
+|---|---|---|---|---|
+| baseline | — | 0.6053 | 4.5% (30/673) | **4.9%** (7/144) |
+| **H1 rebalance** | `arithmetic_repeats: 60`, `sentence_lines: 3000` | 0.7393 | 64.9% (437/673) | **72.9%** (105/144) |
+| H2 more pairs | `max_operand: 50` | 0.6515 | 23.4% (426/1821) | **23.1%** (90/390) |
+| **H3 capacity** | 6 layers, `d_model` 192, `d_ff` 768, 14 epochs | 0.5924 | 53.9% (363/673) | **60.4%** (87/144) |
+| H4 reversed digits | `reverse_answer: true` | 0.6037 | 4.3% (29/673) | **4.9%** (7/144) |
+
+**Read the bits/char column with care.** Each row generates its own corpus, so
+the validation text differs between rows and the numbers are not racing each
+other. Held-out accuracy *is* comparable for baseline/H1/H3/H4 — same pair
+split, same seed. H2 changes `max_operand`, so its pairs are a different
+population.
+
+Reproduce any row:
+
+```bash
+python scripts/generate_corpus.py --force --set data.corpus.dir=data/raw/corpus_h1 \
+    --set data.corpus.arithmetic_repeats=60 --set data.corpus.sentence_lines=3000
+python scripts/train.py --config configs/char_transformer.yaml --set run_name=h1 \
+    --set data.corpus.dir=data/raw/corpus_h1 \
+    --set data.corpus.arithmetic_repeats=60 --set data.corpus.sentence_lines=3000
+python scripts/evaluate.py --checkpoint checkpoints/h1/best.pt
+```
+
+**H1 works best: 4.9% → 72.9%.** Sums become 40,380 of 43,380 lines, so the
+answer digits finally carry weight in the loss. Well-formed line rate *rose*
+to 97.8% on a quarter as many sentences, so the language did not pay for it.
+
+**H3 works too: 60.4%** — with the corpus untouched. That refutes the
+single-cause story in the section above: if loss weighting were the whole
+explanation, more capacity could not have helped. The baseline was also
+capacity- and epoch-starved. This run changes two things at once (model size
+*and* 14 epochs vs 8), so it does not separate them.
+
+**H2 helps moderately: 23.1%**, and its pairs run to `50 + 50 = 100`, a harder
+three-digit population than the other rows. Train-pair 23.4% versus held-out
+23.1% means it is still underfitting: more evidence for the rule does not help
+a model that is not fitting the rule.
+
+**H4 alone does nothing: 4.9%, identical to the baseline.** Reversed digits fix
+the order of writing — you cannot emit the tens digit before you know the
+carry — but that only binds once a model is trying to compute the sum. The
+baseline is not: it answers `33` to everything (`2 + 18 = 33`, `10 + 13 = 33`,
+`5 + 19 = 33`). H4 does the same in mirror image (`2 + 18 = 63`, `10 + 13 =
+03`). Fixing the write order of a computation that never happens buys nothing.
+
+Every run that *does* learn fails the same way on what is left: the units digit
+is right and the tens digit is off by exactly the carry — H1 gives
+`2 + 18 = 40`, H3 gives `5 + 19 = 35`. H4 is aimed at precisely that residue,
+so the untested question is whether it helps **on top of** H1, not instead of
+it.
+
+### Not yet measured
+
+- **H1 + H2 + H4 combined**, and H1 at 16 epochs. H1 was still improving at
+  epoch 8/8 (val loss `<- best so far` on the final epoch), so 72.9% is a floor.
+- **H3 with capacity and epochs varied separately**, to split the two.
+- **More than one seed per row.** Every number here is a single run.
 
 ## Running Step 2
 
@@ -800,13 +863,14 @@ solved in one forward pass.
 | Sampling: temperature, top-k, top-p, greedy | ✅ |
 | Grammar, spelling and arithmetic metrics | ✅ |
 | CI workflow | ✅ |
-| 114 tests | ✅ |
+| 124 tests | ✅ |
 | Language structure learned (0.607 bpc, 92.9% well-formed) | ✅ |
-| Arithmetic learned | ❌ **5.6% — open problem** |
+| Arithmetic learned | ⚠️ **4.9% baseline → 72.9% rebalanced** |
 
 ### Step 3 — not built
 
-1. **Fix the arithmetic** (see the four hypotheses above). This is the first job.
+1. **Finish the arithmetic.** H1 reaches 72.9% and had not converged; combine
+   it with H2 and H4 and train longer.
 2. **Subword tokenization (BPE)** — the tokenizer interface is ready for it.
 3. **Real text** — a larger corpus that does not fit in memory, streaming, and
    caching in `data/processed/`.
@@ -858,7 +922,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **54 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **56 files, 0 comments, 0 docstrings.**
 
 ---
 
