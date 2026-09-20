@@ -3,6 +3,7 @@ from ored.learning.dataset import DatasetError, DatasetReport, DatasetSpec, expo
 from ored.learning.records import (
     CandidateStatus,
     Conversation,
+    Dataset,
     LearningCandidate,
     Message,
     ModelVersion,
@@ -34,6 +35,7 @@ __all__ = [
     "export",
     "CandidateStatus",
     "Conversation",
+    "Dataset",
     "LearningCandidate",
     "Message",
     "ModelVersion",

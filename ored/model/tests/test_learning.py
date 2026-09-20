@@ -218,3 +218,32 @@ def test_session_states_are_recorded(store):
     session = evaluated(store)
     assert session.status is SessionStatus.EVALUATED
     assert store.sessions(SessionStatus.EVALUATED) == [session]
+
+
+def test_dataset_specs_are_read_from_the_store(store):
+    from ored.learning import Dataset
+
+    store.add_dataset(Dataset(
+        name='bit_addition',
+        kind='tabular',
+        generator='scripts/generate_dataset.py',
+        spec={'rows': 256},
+        samples=[{'split': 'train'}],
+    ))
+    store.add_dataset(Dataset(name='char_corpus', kind='text'))
+
+    assert [d.name for d in store.datasets()] == ['bit_addition', 'char_corpus']
+
+    only = store.datasets('char_corpus')
+    assert len(only) == 1 and only[0].kind == 'text'
+
+    assert store.datasets('nothing_here') == []
+
+
+def test_a_dataset_carries_its_spec_not_a_file_path_alone(store):
+    from ored.learning import Dataset
+
+    store.add_dataset(Dataset(name='bit_addition', spec={'rows': 256}, samples=[{'a': 0}]))
+    found = store.datasets('bit_addition')[0]
+    assert found.spec['rows'] == 256
+    assert found.samples

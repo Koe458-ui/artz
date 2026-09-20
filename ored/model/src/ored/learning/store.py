@@ -5,6 +5,7 @@ from typing import Any, Dict, Iterable, List, Optional, Protocol
 from ored.learning.records import (
     CandidateStatus,
     Conversation,
+    Dataset,
     LearningCandidate,
     Message,
     ModelVersion,
@@ -21,6 +22,8 @@ class StoreError(RuntimeError):
 
 
 class LearningStore(Protocol):
+
+    def datasets(self, name: Optional[str] = None) -> List[Dataset]: ...
 
     def add_conversation(self, conversation: Conversation) -> Conversation: ...
 
@@ -54,12 +57,23 @@ class LearningStore(Protocol):
 class InMemoryStore:
 
     def __init__(self) -> None:
+        self._datasets: Dict[str, Dataset] = {}
         self._conversations: Dict[str, Conversation] = {}
         self._messages: Dict[str, Message] = {}
         self._candidates: Dict[str, LearningCandidate] = {}
         self._examples: Dict[str, TrainingExample] = {}
         self._sessions: Dict[str, TrainingSession] = {}
         self._versions: Dict[str, ModelVersion] = {}
+
+    def add_dataset(self, dataset: Dataset) -> Dataset:
+        self._datasets[dataset.name] = dataset
+        return dataset
+
+    def datasets(self, name: Optional[str] = None) -> List[Dataset]:
+        found = list(self._datasets.values())
+        if name is not None:
+            found = [d for d in found if d.name == name]
+        return sorted(found, key=lambda d: (d.name, d.version))
 
     def add_conversation(self, conversation: Conversation) -> Conversation:
         self._conversations[conversation.id] = conversation
@@ -142,6 +156,7 @@ class InMemoryStore:
 
     def snapshot(self) -> Dict[str, List[Dict[str, Any]]]:
         return {
+            "datasets": [to_row(r) for r in self._datasets.values()],
             "conversations": [to_row(r) for r in self._conversations.values()],
             "messages": [to_row(r) for r in self._messages.values()],
             "candidates": [to_row(r) for r in self._candidates.values()],

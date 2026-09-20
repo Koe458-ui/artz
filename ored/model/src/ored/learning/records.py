@@ -94,6 +94,21 @@ class TrainingExample:
 
 
 @dataclass
+class Dataset:
+
+    id: str = field(default_factory=new_id)
+    name: str = ""
+    kind: str = "text"
+    summary: str = ""
+    generator: str = ""
+    spec: Dict[str, Any] = field(default_factory=dict)
+    samples: List[Dict[str, Any]] = field(default_factory=list)
+    version: int = 1
+    created_at: str = field(default_factory=now)
+    updated_at: str = field(default_factory=now)
+
+
+@dataclass
 class TrainingSession:
 
     id: str = field(default_factory=new_id)
@@ -125,6 +140,7 @@ class ModelVersion:
 
 
 RECORD_TABLES = {
+    Dataset: "ored_datasets",
     Conversation: "ored_conversations",
     Message: "ored_messages",
     LearningCandidate: "ored_learning_candidates",

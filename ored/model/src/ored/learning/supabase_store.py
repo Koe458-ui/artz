@@ -10,6 +10,7 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 from ored.learning.records import (
     CandidateStatus,
     Conversation,
+    Dataset,
     LearningCandidate,
     Message,
     ModelVersion,
@@ -104,6 +105,12 @@ class SupabaseStore:
     def _build(record_type: Type[T], row: Dict[str, Any]) -> T:
         fields = {f for f in record_type.__dataclass_fields__}
         return record_type(**{k: v for k, v in row.items() if k in fields})
+
+    def datasets(self, name: Optional[str] = None) -> List[Dataset]:
+        query = "order=name.asc,version.desc"
+        if name is not None:
+            query = f"name=eq.{urllib.parse.quote(name)}&" + query
+        return self._select(Dataset, query)
 
     def add_conversation(self, conversation: Conversation) -> Conversation:
         return self._insert(Conversation, [conversation])[0]
