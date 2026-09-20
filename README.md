@@ -759,7 +759,8 @@ to 97.8% on a quarter as many sentences, so the language did not pay for it.
 single-cause story in the section above: if loss weighting were the whole
 explanation, more capacity could not have helped. The baseline was also
 capacity- and epoch-starved. This run changes two things at once (model size
-*and* 14 epochs vs 8), so it does not separate them.
+*and* 14 epochs vs 8), so it does not separate them. Separated below, neither
+change does anything on its own: the gain needs both together.
 
 **H2 helps moderately: 23.1%**, and its pairs run to `50 + 50 = 100`, a harder
 three-digit population than the other rows. Train-pair 23.4% versus held-out
@@ -779,12 +780,110 @@ is right and the tens digit is off by exactly the carry — H1 gives
 so the untested question is whether it helps **on top of** H1, not instead of
 it.
 
-### Not yet measured
+### The follow-up runs, measured
 
-- **H1 + H2 + H4 combined**, and H1 at 16 epochs. H1 was still improving at
-  epoch 8/8 (val loss `<- best so far` on the final epoch), so 72.9% is a floor.
-- **H3 with capacity and epochs varied separately**, to split the two.
-- **More than one seed per row.** Every number here is a single run.
+The three open questions above were run. Every row trains from scratch and is
+scored on train pairs and held-out pairs separately, with greedy (argmax)
+decoding, so scoring itself is deterministic.
+
+| Run | Changed | val bits/char | Train-pair | Held-out |
+|---|---|---|---|---|
+| baseline | — | 0.6053 | 4.5% (30/673) | 4.9% (7/144) |
+| H1 at 16 epochs | `arithmetic_repeats: 60`, `sentence_lines: 3000` | 0.7194 | 77.0% (518/673) | **81.9%** (118/144) |
+| H1 + H4 | H1, plus `reverse_answer: true` | 0.7192 | 70.0% (471/673) | **78.5%** (113/144) |
+| **H1 + H2 + H4** | H1, plus `max_operand: 50`, `reverse_answer: true` | 0.8273 | 83.1% (1514/1821) | **83.1%** (324/390) |
+| epochs only | 14 epochs, baseline model and corpus | 0.5989 | 4.9% (33/673) | **1.4%** (2/144) |
+| capacity only | 6 layers, `d_model` 192, `d_ff` 768, 8 epochs | 0.5993 | 5.8% (39/673) | **4.9%** (7/144) |
+| H3 re-run | capacity *and* 14 epochs | 0.5915 | 53.3% (359/673) | **49.3%** (71/144) |
+
+#### Capacity and epochs only work together
+
+H3 changed two things at once. Separated, neither does anything on its own:
+14 epochs at baseline capacity scores 1.4%, and the larger model at 8 epochs
+scores 4.9% — both indistinguishable from the 4.9% baseline. Together they
+score 49.3%. The gain is an interaction, not a main effect of either, so the
+earlier reading that "the baseline was capacity- and epoch-starved" is right
+only in the sense that it was starved of *both at once*.
+
+Note also that the epochs-only and capacity-only runs land at almost identical
+bits/char (0.5989 and 0.5993) while H3's arithmetic is ten times higher at a
+bits/char of 0.5915. **Bits per character barely predicts whether the model
+learned to add.** It is dominated by sentence characters; answer digits are a
+few percent of the tokens.
+
+#### More epochs are not what fixed H1
+
+H1 at a 16-epoch budget reaches 81.9% held out, up from 72.9%. But it stopped
+early at epoch 12 and its best checkpoint is **epoch 8** — the same epoch count
+as the original run. Training longer is therefore not the cause. Train loss
+kept falling while validation loss flattened after epoch 8, which is mild
+overfitting rather than continued learning.
+
+What differs is the **cosine learning-rate schedule**, which is stretched over
+the whole epoch budget. Under a 16-epoch budget the learning rate at epoch 8 is
+still well above its floor, and that trajectory reaches a better model than an
+8-epoch cosine that has already annealed. The earlier claim that 72.9% was "a
+floor" because H1 was still improving at 8/8 does not hold: on validation loss
+H1 plateaus at epoch 8.
+
+#### H4 does not help on top of H1
+
+This was the open question, and the answer is no. Compared at the same operand
+range, the same epoch budget and the same everything else, adding reversed
+answer digits to H1 scores **78.5% against H1's 81.9%** held out, and 70.0%
+against 77.0% on train pairs. Reversing the write order does not fix the carry
+residue once a model is already computing the sum.
+
+The combined H1 + H2 + H4 run scores 83.1%, but that is **not** a like-for-like
+win over H1's 81.9%: it uses `max_operand: 50`, so it is scored on a different
+and harder pair population whose answers run to three digits. Its edge comes
+from H2 supplying more operand pairs, not from H4. Measured honestly:
+**the combination does not beat H1 alone.**
+
+Its one unambiguous result is that train-pair and held-out accuracy are equal
+(83.1% and 83.1%). Whatever it learned, it generalises perfectly to pairs it
+never read.
+
+#### Three seeds, and how much a single run is worth
+
+The best configuration was re-run on three seeds. Changing the seed regenerates
+the corpus as well as the weights, so each row is a full replication of the
+procedure — a fresh operand split *and* a fresh initialisation, not just a
+re-roll of the weights.
+
+| Seed | Train-pair | Held-out |
+|---|---|---|
+| 1337 | 83.1% (1514/1821) | 83.1% (324/390) |
+| 7 | 81.0% (1475/1821) | 80.8% (315/390) |
+| 2024 | 90.3% (1645/1821) | 89.0% (347/390) |
+| **mean** | **84.8%** | **84.3%** (sd 4.2) |
+
+Held-out accuracy ranges from 80.8% to 89.0% — an **8.2-point spread** from
+nothing but the seed.
+
+A second measurement points the same way. Re-running H3 under its own config
+and its own seed reproduced its bits/char (0.5924 → 0.5915) and its train-pair
+accuracy (53.9% → 53.3%) almost exactly, but its held-out accuracy came out
+**49.3% against the 60.4% recorded above** — 71 correct pairs instead of 87.
+`set_seed` seeds Python, NumPy and Torch, but it does not call
+`torch.use_deterministic_algorithms()` and does not pin the thread count, and
+CPU float reductions change order with the number of threads. That is enough to
+move a 144-pair score by eleven points.
+
+So: **a single held-out number in this project carries an error bar of roughly
+±10 points**, and the held-out sets are small enough (144 and 390 pairs) that
+one pair is 0.7% or 0.26%. Differences smaller than that band — including the
+81.9% versus 78.5% gap above — are not evidence of anything. The H4 conclusion
+is stated as "no benefit" rather than "harmful" for exactly this reason.
+
+### Still not measured
+
+- **Whether H2 alone, at 16 epochs, matches the combined run.** H2 is the part
+  of the combination that appears to be carrying it, and it has not been
+  isolated at the longer budget.
+- **Seeds for every other row.** Only the combined configuration has three.
+- **A deterministic training path.** Until `set_seed` pins thread count and
+  deterministic algorithms, re-running a row is not guaranteed to reproduce it.
 
 ## Running Step 2
 
@@ -865,12 +964,13 @@ solved in one forward pass.
 | CI workflow | ✅ |
 | 124 tests | ✅ |
 | Language structure learned (0.607 bpc, 92.9% well-formed) | ✅ |
-| Arithmetic learned | ⚠️ **4.9% baseline → 72.9% rebalanced** |
+| Arithmetic learned | ⚠️ **4.9% baseline → 84.3% rebalanced** (3 seeds, sd 4.2) |
 
 ### Step 3 — not built
 
-1. **Finish the arithmetic.** H1 reaches 72.9% and had not converged; combine
-   it with H2 and H4 and train longer.
+1. **Finish the arithmetic.** The best measured configuration reaches 84.3%
+   held out across three seeds. H4 was ruled out as a contributor; H2 is the
+   part that has not been isolated at a long epoch budget.
 2. **Subword tokenization (BPE)** — the tokenizer interface is ready for it.
 3. **Real text** — a larger corpus that does not fit in memory, streaming, and
    caching in `data/processed/`.
