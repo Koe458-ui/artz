@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 from typing import List, Optional
 
-from ored.data.corpus import load_arithmetic_pairs
+from ored.data.corpus import format_answer, load_arithmetic_pairs
 from ored.evaluation.lm_evaluator import load_language_model
 from ored.inference.generator import complete, generate_text
 from ored.utils.logging_utils import get_logger, section
@@ -81,17 +81,20 @@ def main(argv: Optional[List[str]] = None) -> int:
         return 0
 
     if args.arithmetic:
+        reverse_answer = cfg.data.corpus.reverse_answer
         pairs = load_arithmetic_pairs(cfg.data.corpus.dir)["test"][:args.n]
         if not args.quiet:
             logger.info("These operand pairs were held out of the training corpus, so")
             logger.info("the model has never read the line it is completing.")
+            if reverse_answer:
+                logger.info("This corpus writes answer digits in reverse.")
             logger.info("")
         correct = 0
         for a, b in pairs:
             written = complete(model, tokenizer, f"{a} + {b} = ",
                                cfg.data.block_size, device)
-            expected = a + b
-            ok = written.strip() == str(expected)
+            expected = format_answer(a + b, reverse_answer)
+            ok = written.strip() == expected
             correct += ok
             mark = "OK   " if ok else "WRONG"
             logger.info(f"  {a:>3} + {b:<3} = {written:<6} [{mark}] expected {expected}")

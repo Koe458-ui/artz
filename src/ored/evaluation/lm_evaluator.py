@@ -99,7 +99,7 @@ def evaluate_arithmetic(
         written = complete(model, tokenizer, prompt, cfg.data.block_size, device,
                            max_new_tokens=6)
         completions.append((a, b, written))
-    return score_arithmetic(completions)
+    return score_arithmetic(completions, reverse_answer=cfg.data.corpus.reverse_answer)
 
 
 def evaluate_language_model(
@@ -152,7 +152,8 @@ def evaluate_language_model(
             for line in text.strip().split("\n")[:14]:
                 logger.info(f"  {line}")
 
-    quality = score_text("\n".join(samples), grammar)
+    quality = score_text("\n".join(samples), grammar,
+                         reverse_answer=cfg.data.corpus.reverse_answer)
     logger.info("")
     logger.info(f"lines generated   : {quality.total_lines}")
     logger.info(f"valid sentences   : {quality.grammatical_lines}")
@@ -166,18 +167,32 @@ def evaluate_language_model(
         for line in quality.examples_bad:
             logger.info(f"  {line}")
 
-    logger.info(section("ARITHMETIC ON HELD-OUT PAIRS"))
+    logger.info(section("ARITHMETIC"))
+    if cfg.data.corpus.reverse_answer:
+        logger.info("This corpus writes answer digits in reverse, so 13 + 8 = 12 is")
+        logger.info("correct. Answers are un-reversed before they are scored.")
+        logger.info("")
+
+    seen = evaluate_arithmetic(model, tokenizer, cfg, resolved,
+                               split="train", limit=arithmetic_limit)
     arithmetic = evaluate_arithmetic(model, tokenizer, cfg, resolved,
                                      split="test", limit=arithmetic_limit)
-    logger.info("Every pair below was excluded from the training corpus: the model")
-    logger.info("has never read the line it is being asked to complete.")
+
+    header = f"{'pairs':<22}{'tested':>9}{'correct':>10}{'accuracy':>11}"
+    logger.info(header)
+    logger.info("-" * len(header))
+    logger.info(f"{'train (seen ' + str(cfg.data.corpus.arithmetic_repeats) + 'x)':<22}"
+                f"{seen.total:>9,}{seen.correct:>10,}{seen.accuracy:>11.1%}")
+    logger.info(f"{'test (held out)':<22}"
+                f"{arithmetic.total:>9,}{arithmetic.correct:>10,}{arithmetic.accuracy:>11.1%}")
     logger.info("")
-    logger.info(f"pairs tested : {arithmetic.total}")
-    logger.info(f"correct      : {arithmetic.correct}")
-    logger.info(f"ACCURACY     : {arithmetic.accuracy:.1%}")
+    logger.info("Held-out pairs were excluded from the training corpus: the model has")
+    logger.info("never read the line it is being asked to complete. The train row is")
+    logger.info("the diagnostic -- low there means the model never fit the arithmetic")
+    logger.info("at all, which is underfitting rather than failure to generalise.")
     if arithmetic.mistakes:
         logger.info("")
-        logger.info("Mistakes:")
+        logger.info("Mistakes on held-out pairs:")
         for line in arithmetic.mistakes:
             logger.info(f"  {line}")
 
@@ -190,4 +205,5 @@ def evaluate_language_model(
         "splits": split_results,
         "text_quality": quality,
         "arithmetic": arithmetic,
+        "arithmetic_train": seen,
     }

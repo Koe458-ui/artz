@@ -36,6 +36,8 @@ class CorpusConfig:
 
     arithmetic_repeats: int = 10
 
+    reverse_answer: bool = False
+
     pair_split: SplitConfig = field(default_factory=SplitConfig)
 
     val_test_fraction: float = 0.15

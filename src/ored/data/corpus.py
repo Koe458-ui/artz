@@ -74,8 +74,17 @@ def make_sentence(rng: random.Random) -> str:
     return line
 
 
-def make_arithmetic(a: int, b: int) -> str:
-    return f"{a} + {b} = {a + b}"
+def format_answer(total: int, reverse_answer: bool) -> str:
+    text = str(total)
+    return text[::-1] if reverse_answer else text
+
+
+def read_answer(written: str, reverse_answer: bool) -> str:
+    return written[::-1] if reverse_answer else written
+
+
+def make_arithmetic(a: int, b: int, reverse_answer: bool = False) -> str:
+    return f"{a} + {b} = {format_answer(a + b, reverse_answer)}"
 
 
 def split_pairs(
@@ -106,10 +115,11 @@ def build_corpus_text(
     pairs: Sequence[Tuple[int, int]],
     repeats: int,
     rng: random.Random,
+    reverse_answer: bool = False,
 ) -> str:
     lines = [make_sentence(rng) for _ in range(sentence_lines)]
     for _ in range(repeats):
-        lines.extend(make_arithmetic(a, b) for a, b in pairs)
+        lines.extend(make_arithmetic(a, b, reverse_answer) for a, b in pairs)
 
     rng.shuffle(lines)
     return "\n".join(lines) + "\n"
@@ -156,7 +166,8 @@ def generate_corpus(cfg: Config, force: bool = False) -> Dict[str, CorpusStats]:
         pairs = pairs_by_split[split]
         repeats = corpus_cfg.arithmetic_repeats if split == "train" else 1
 
-        text = build_corpus_text(sentence_counts[split], pairs, repeats, rng)
+        text = build_corpus_text(sentence_counts[split], pairs, repeats, rng,
+                                 corpus_cfg.reverse_answer)
         path = directory / f"{split}.txt"
         path.write_text(text, encoding="utf-8")
 
@@ -172,6 +183,13 @@ def generate_corpus(cfg: Config, force: bool = False) -> Dict[str, CorpusStats]:
 
     (directory / "grammar.json").write_text(
         json.dumps(grammar_spec(), indent=2), encoding="utf-8"
+    )
+    (directory / "corpus_meta.json").write_text(
+        json.dumps({"reverse_answer": corpus_cfg.reverse_answer,
+                    "max_operand": corpus_cfg.max_operand,
+                    "arithmetic_repeats": corpus_cfg.arithmetic_repeats,
+                    "sentence_lines": corpus_cfg.sentence_lines}, indent=2),
+        encoding="utf-8",
     )
     (directory / "arithmetic_pairs.json").write_text(
         json.dumps({k: [list(p) for p in v] for k, v in pairs_by_split.items()}, indent=2),

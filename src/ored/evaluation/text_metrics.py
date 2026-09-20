@@ -29,6 +29,11 @@ def build_template_patterns(grammar: Dict[str, object]) -> List[re.Pattern]:
 ARITHMETIC_LINE = re.compile(r"^(\d+) \+ (\d+) = (\d+)$")
 
 
+def format_expected(total: int, reverse_answer: bool) -> str:
+    text = str(total)
+    return f"{text[::-1]} (= {text} reversed)" if reverse_answer else text
+
+
 @dataclass
 class TextQuality:
 
@@ -52,7 +57,8 @@ class TextQuality:
         return self.arithmetic_correct / self.arithmetic_lines if self.arithmetic_lines else 0.0
 
 
-def score_text(text: str, grammar: Dict[str, object], keep_examples: int = 5) -> TextQuality:
+def score_text(text: str, grammar: Dict[str, object], keep_examples: int = 5,
+               reverse_answer: bool = False) -> TextQuality:
     patterns = build_template_patterns(grammar)
     lines = text.split("\n")
     if len(lines) > 2:
@@ -68,11 +74,14 @@ def score_text(text: str, grammar: Dict[str, object], keep_examples: int = 5) ->
         match = ARITHMETIC_LINE.match(line)
         if match:
             quality.arithmetic_lines += 1
-            a, b, claimed = (int(g) for g in match.groups())
+            a, b = int(match.group(1)), int(match.group(2))
+            written = match.group(3)
+            claimed = int(written[::-1] if reverse_answer else written)
             if a + b == claimed:
                 quality.arithmetic_correct += 1
             elif len(quality.examples_bad) < keep_examples:
-                quality.examples_bad.append(f"{line}   (should be {a + b})")
+                expected = format_expected(a + b, reverse_answer)
+                quality.examples_bad.append(f"{line}   (should be {expected})")
             continue
 
         if any(pattern.match(line) for pattern in patterns):
@@ -101,22 +110,24 @@ class ArithmeticResult:
 def score_arithmetic(
     completions: Sequence[Tuple[int, int, str]],
     keep_mistakes: int = 8,
+    reverse_answer: bool = False,
 ) -> ArithmeticResult:
     result = ArithmeticResult()
     for a, b, completion in completions:
         result.total += 1
         expected = a + b
+        shown = format_expected(expected, reverse_answer)
         cleaned = completion.strip()
 
         if not cleaned.isdigit():
             result.parse_failures += 1
             if len(result.mistakes) < keep_mistakes:
-                result.mistakes.append(f"{a} + {b} = {cleaned!r}  (not a number; expected {expected})")
+                result.mistakes.append(f"{a} + {b} = {cleaned!r}  (not a number; expected {shown})")
             continue
 
-        if int(cleaned) == expected:
+        if int(cleaned[::-1] if reverse_answer else cleaned) == expected:
             result.correct += 1
         elif len(result.mistakes) < keep_mistakes:
-            result.mistakes.append(f"{a} + {b} = {cleaned}  (expected {expected})")
+            result.mistakes.append(f"{a} + {b} = {cleaned}  (expected {shown})")
 
     return result
