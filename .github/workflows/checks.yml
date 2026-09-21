@@ -109,6 +109,5 @@ jobs:
             node --check "$f" || { echo "::error file=$f::does not parse"; exit 1; }
           done
           node --check sw.js
-          node --check uploadVerifier.js
       - name: the modules the edge writes parse too
         run: node scripts/check-emitted.mjs

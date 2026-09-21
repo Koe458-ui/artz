@@ -48,13 +48,16 @@
        lands, so nothing has anything to animate. The `.open` rules are all a class
        more specific than these, so opening still wins.
        Anything added to those sheets with a hidden base state belongs here too. */
-    .upPop,.cropPop,.upGdPop,#upqBackdrop{position:fixed;inset:0;opacity:0;pointer-events:none;}
-    .upGdPop,#upqBackdrop{visibility:hidden;}
+    .upPop,.cropPop,.upGdPop,#upqBackdrop,#legalBackdrop{position:fixed;inset:0;opacity:0;pointer-events:none;}
+    .upGdPop,#upqBackdrop,#legalBackdrop{visibility:hidden;}
     #pfUpMod{opacity:1;transform:translateX(100%);visibility:hidden;}
-    #rankHub,#rankPage,#fgSearchPage,#cmBrowsePage,#cmInfoPage,#cmChatPanel{
+    #rankHub,#rankPage,#fgSearchPage,#cmBrowsePage,#cmInfoPage,#cmChatPanel,
+    #profilePage,#pfEditPage,#admPage,#pfMyWorkPage,#notifPage,#subPage,
+    #authMod,#themePage,#communityPage{
       position:fixed;inset:0;transform:translateX(100%);
     }
-    #cmChatPanel{visibility:hidden;}
+    #cmChatPanel,#communityPage,#subPage,#profilePage,#admPage,#notifPage,
+    #pfMyWorkPage,#authMod,#pfEditPage{visibility:hidden;}
   </style>
   <script data-cf-beacon='{"token": "aa4b7177387e4f689739a5fdf44cbffa"}' defer="" src="https://static.cloudflareinsights.com/beacon.min.js">
   </script>
@@ -1094,7 +1097,7 @@
         <button class="upBtnSec" id="pfDraftBtn" onclick="updrSave()">💾 Save Draft</button>
         <button class="upBtnPri" id="pfUpBtn" onclick="doPfUp()">📤 Upload Artwork</button>
       </div>
-      <p class="dzHint" style="margin-top:.9rem">Uploads are reviewed before they appear publicly.</p>
+      <p class="dzHint" style="margin-top:.9rem">Uploads go live as soon as they finish transferring.</p>
      </div>
 
      <div class="upSide">
@@ -1997,8 +2000,8 @@
   <script defer src="/js/badwords.js?v=5"></script>
   <script defer src="/js/captcha.js?v=7"></script>
   <script defer src="/config.js"></script>
-  <script defer src="/uploadVerifier.js"></script>
-  <script defer src="/js/app-core.js?v=60"></script>
+  <script defer src="/js/imagehash.js?v=1"></script>
+  <script defer src="/js/app-core.js?v=61"></script>
   <script defer src="/js/protect.js?v=4"></script>
   <script defer src="/js/gallery.js?v=112"></script>
   <script defer src="/js/fghead.js?v=11"></script>
@@ -2007,13 +2010,13 @@
   <script defer src="/js/profile.js?v=33"></script>
   <script defer src="/js/albums.js?v=32"></script>
   <script defer src="/js/drafts.js?v=14"></script>
-  <script defer src="/js/upqueue.js?v=10"></script>
+  <script defer src="/js/upqueue.js?v=11"></script>
   <script defer src="/js/avatar.js?v=9"></script>
   <script defer src="/js/pfedit.js?v=26"></script>
   <script defer src="/js/mywork.js?v=32"></script>
   <script defer src="/js/startup.js?v=12"></script>
   <script defer src="/js/search.js?v=31"></script>
-  <script defer src="/js/feed.js?v=22"></script>
+  <script defer src="/js/feed.js?v=23"></script>
   <script defer src="/js/herosearch.js?v=10"></script>
 
  <div id="rippleHost"></div>
@@ -2407,7 +2410,7 @@
   <script defer src="/js/antrack.js?v=2"></script>
   <script defer src="/js/engagement.js?v=12"></script>
 
-  <script defer src="/js/sections.js?v=143"></script>
+  <script defer src="/js/sections.js?v=144"></script>
   <script defer src="/js/heropitch.js?v=5"></script>
   <script defer src="/js/routes.js?v=4"></script>
 

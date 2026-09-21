@@ -2966,13 +2966,11 @@
   }
 
   var dzV = {
-    title:'', safety:'', safetySub:'', transfer:'', publish:'', failReason:null, held:false,
+    title:'', transfer:'', publish:'', failReason:null,
     recvLabel:'File & preview received',
-    noun:'upload',
     reset:function(t){
-      this.title=t||'Upload'; this.safety='run'; this.safetySub='';
+      this.title=t||'Upload';
       this.transfer=''; this.publish=''; this.publishSub=''; this.failReason=null;
-      this.held=false;
     },
     open:function(t, recv){
       this.reset(t);
@@ -2995,8 +2993,8 @@
       if(!t||!b) return;
       var trk=(typeof upqTrackRow==='function') ? upqTrackRow
               : function(st,n,sub){ return '<div>'+esc(n)+'</div>'; };
-      var failed=!!this.failReason, held=!!this.held, html='';
-      t.textContent = failed ? 'VERIFICATION FAILED' : 'VERIFICATION STATUS';
+      var failed=!!this.failReason, html='';
+      t.textContent = failed ? 'UPLOAD FAILED' : 'UPLOAD STATUS';
       if(failed){
         html+='<div class="upqFailBox"><div class="upqFailIco">!</div>'+
           '<div><div class="upqFailTitle">\u201C'+esc(this.title||'Untitled')+'\u201D was not published</div>'+
@@ -3004,21 +3002,17 @@
       }
       html+=trk('pass','Upload received','',false);
       html+=trk('pass', this.recvLabel || 'File & preview received', '', false);
-      html+=trk(this.safety,'Content safety check', held ? 'Waiting for the review to run' : this.safetySub, false);
       html+=trk(this.transfer,'Secure transfer','',false);
       var pubSub = (this.publish==='pass') ? (this.publishSub || 'It\u2019s live') : '';
       var sched  = /^Scheduled/.test(this.publishSub || '');
       html+=trk(this.publish,'Publish', pubSub, true);
       if(failed){
-        html+='<div class="upqFin fail">Verification stopped \u2014 nothing was published</div>';
+        html+='<div class="upqFin fail">Upload stopped \u2014 nothing was published</div>';
         html+='<div class="upqFailNote">Any transferred file has been removed. Fix the issue above and publish again whenever you\u2019re ready.</div>';
-      } else if(held){
-        html+='<div class="upqFin busy">Review is currently unavailable \u2014 your '+esc(this.noun)+' is waiting in the queue</div>';
-        html+='<div class="upqFailNote">Moderation is temporarily down. \u201C'+esc(this.title||'Untitled')+'\u201D has been saved and will go through the review automatically as soon as it is back, in the order it was uploaded. You do not need to upload it again \u2014 it will appear once it passes.</div>';
       } else if(this.publish==='pass'){
-        html+='<div class="upqFin ok">'+(sched ? 'All checks passed \u2014 '+esc(this.publishSub) : 'All checks passed \u2014 it\u2019s live')+'</div>';
+        html+='<div class="upqFin ok">'+(sched ? 'Done \u2014 '+esc(this.publishSub) : 'Done \u2014 it\u2019s live')+'</div>';
       } else {
-        html+='<div class="upqFin busy">Reviewing your upload now\u2026</div>';
+        html+='<div class="upqFin busy">Publishing your upload now\u2026</div>';
       }
       b.innerHTML=html;
     }
@@ -3045,8 +3039,6 @@
 
     var btn = document.getElementById('dzSubmit-'+sec);
     var s = st(sec), row = {user_id: currentUser.id, tags: s.tags, status:'approved'};
-      // Reassigned below once the content check has run: an upload the moderator could not see is written pending.
-    function dzHoldRow(){ if(held) row.status = 'pending'; }
 
     var miss = FORMS[sec].fields.filter(function(fd){
       if(!fd.req || !dzCondShow(sec, fd)) return false;
@@ -3062,58 +3054,16 @@
     if(bad){ dzFieldFail(sec, bad.k, bad.msg); return; }
 
     if(btn){ btn.disabled = true; btn.textContent = 'Publishing…'; }
-    var modImg = null, modMode = null, modRecv = 'File & preview received';
-    if(sec === 'resources'){   modImg = st(sec).files.preview; modMode = 'resource'; }
-    else if(sec === 'marketplace'){ modImg = st(sec).files.preview; modMode = 'marketplace'; }
-    else if(sec === 'blog'){   modImg = st(sec).files.cover;   modMode = 'artwork'; modRecv = 'Cover image received'; }
-    var moderated = !!modImg;
-    var held = false;
+    var trackImg = null, trackRecv = 'File & preview received';
+    if(sec === 'resources' || sec === 'marketplace'){ trackImg = st(sec).files.preview; }
+    else if(sec === 'blog'){ trackImg = st(sec).files.cover; trackRecv = 'Cover image received'; }
+    var tracked = !!trackImg;
       // Every object this submit puts in storage, so a submit that fails on the way to the database takes them back out —
       // the failure panel says so. Declared out here because the catch reads it however early the throw came.
     var landedFiles = [];
     try{
-      if(moderated){
-        dzV.open(val(sec,'title') || SEC[sec].noun, modRecv);
-
-        if(window.UploadVerifier && typeof UploadVerifier.scanAIMeta === 'function'){
-          var aiHits = [];
-          try{ aiHits = (await UploadVerifier.scanAIMeta(modImg)) || []; }catch(e){ aiHits = []; }
-          if(aiHits.length){
-            dzV.step('safety','fail','AI markers: ' + aiHits.slice(0,2).join(', '));
-            throw new Error('The image looks AI-generated (' + aiHits.slice(0,2).join(', ') + ').' +
-              (modMode === 'artwork'
-                ? ' DigiArtz does not accept AI art — please upload artwork you made yourself.'
-                : ' DigiArtz resources need a real preview of the asset — a 3D render is fine, AI-generated art is not.'));
-          }
-        }
-
-        var mFd = new FormData();
-        mFd.append('files', modImg);
-        mFd.append('mode', modMode);
-        var mSess = (await sb.auth.getSession()).data.session;
-        var mRes = await fetch('/api/moderate-upload', {
-          method:'POST',
-          headers:{ 'authorization':'Bearer ' + (mSess ? mSess.access_token : '') },
-          body: mFd
-        });
-        var mod = await mRes.json().catch(function(){ return null; });
-        if(!mRes.ok || !mod){
-          dzV.step('safety','fail','Review service unavailable');
-          throw new Error((mod && mod.error) || 'Content check failed — please try again.');
-        }
-        if(mod.deferred){
-            // Moderator unreachable. Upload is kept and written pending; the queue picks it up when moderation is back.
-          held = true;
-          dzV.noun = SEC[sec].noun || 'upload';
-          dzV.held = true;
-          dzV.step('safety','', '');
-        } else if(!mod.allowed){
-          var devNote = (typeof isDev !== 'undefined' && isDev && mod.code) ? ('Code: ' + mod.code) : '';
-          dzV.step('safety','fail', devNote);
-          throw new Error(mod.reason || 'This upload did not pass the content check.');
-        } else {
-          dzV.step('safety','pass', mod.rating === 'MATURE' ? 'Approved · 18+' : 'Safe for all audiences');
-        }
+      if(tracked){
+        dzV.open(val(sec,'title') || SEC[sec].noun, trackRecv);
         dzV.step('transfer','run');
       }
 
@@ -3334,10 +3284,8 @@
       }
 
       var when = dzSchPicked();
-        // Same as the artwork queue: publish_due_scheduled_sections writes the row in as approved, so unreviewed must not take that path
-      if(when && held) throw new Error('Moderation is temporarily unavailable, so this cannot be scheduled right now. Publish it now and it will be reviewed automatically as soon as moderation is back, or try scheduling again shortly.');
       if(when){
-        if(moderated){ dzV.step('transfer','pass'); dzV.step('publish','run'); }
+        if(tracked){ dzV.step('transfer','pass'); dzV.step('publish','run'); }
         var payload = {}; for(var pk in row){ if(pk!=='status') payload[pk]=row[pk]; }
         var paths = [];
         ['file_storage_path','preview_storage_path','cover_storage_path'].forEach(function(k){ if(row[k]) paths.push(row[k]); });
@@ -3351,18 +3299,16 @@
           }) : null
         }).select('id').single();
         if(sres.error) throw sres.error;
-        if(moderated){ dzV.step('publish','pass','Scheduled for '+dzFmtWhen(when)); setTimeout(function(){ dzV.close(); }, 1400); }
+        if(tracked){ dzV.step('publish','pass','Scheduled for '+dzFmtWhen(when)); setTimeout(function(){ dzV.close(); }, 1400); }
         showToast('Scheduled for '+dzFmtWhen(when));
         if(sec === 'jobs') dzJobQuotaForget();
         dzResetForm(sec);
         return;
       }
 
-      if(moderated){ dzV.step('transfer','pass'); dzV.step('publish','run'); }
-      dzHoldRow();
+      if(tracked){ dzV.step('transfer','pass'); dzV.step('publish','run'); }
       var res = await sb.from(SEC[sec].table).insert(row).select('id').single();
       if(res.error) throw res.error;
-      if(held && typeof window.dzModQueueKick === 'function') window.dzModQueueKick();
 
       if(pendingSell.length && res.data && res.data.id){
         var sellRows = pendingSell.map(function(x, i){
@@ -3391,8 +3337,7 @@
         }
       }
 
-      if(moderated && !held){ dzV.step('publish','pass'); setTimeout(function(){ dzV.close(); }, 1400); }
-      else if(held){ dzV.step('publish',''); dzV.render(); }
+      if(tracked){ dzV.step('publish','pass'); setTimeout(function(){ dzV.close(); }, 1400); }
       showToast('Published');
       if(sec === 'jobs') dzJobQuotaForget();
       dzResetForm(sec);
@@ -3405,7 +3350,7 @@
         catch(sweep){ console.error('publish cleanup:', (sweep && sweep.message) || sweep); }
       }
       if(sec === 'jobs') dzJobQuotaForget();
-      if(moderated){ dzV.fail((err && err.message) ? err.message : 'Could not publish'); }
+      if(tracked){ dzV.fail((err && err.message) ? err.message : 'Could not publish'); }
       else { showToast((err && err.message) ? err.message : 'Could not publish'); }
     }finally{
       if(btn){ btn.disabled = false; btn.textContent = '📤 Publish'; }

@@ -13,8 +13,7 @@ window.ZEO_DATA = {
     { id: "navigation",icon: "🧭", label: "Getting Around",         description: "Find your way and reach any section.",       prompt: "What are you trying to find or reach?" },
     { id: "account",   icon: "🔑", label: "Account & Login",        description: "Sign up, log in, passwords, sign-out.",      prompt: "What's happening with your account?" },
     { id: "profile",   icon: "👤", label: "Profile & Customizing",  description: "Avatar, banner, bio, links, username.",      prompt: "What do you want to change on your profile?" },
-    { id: "upload",    icon: "🎨", label: "Uploading Art",          description: "Post art, checks, multi-image, tags.",     prompt: "What do you need help with for your artwork?" },
-    { id: "moderation",icon: "✅", label: "Upload Checks & Rejections", description: "Why a piece failed the check and how to fix it.", prompt: "What did the checker say about your upload?" },
+    { id: "upload",    icon: "🎨", label: "Uploading Art",          description: "Post art, multi-image, tags.",             prompt: "What do you need help with for your artwork?" },
     { id: "gallery",   icon: "🖼️", label: "Viewing & Interacting",  description: "Download, share, like, comment, report.",    prompt: "What would you like to do with an artwork?" },
     { id: "resources", icon: "🧰", label: "Resources",              description: "Brushes, textures, fonts, 3D, templates.",     prompt: "What do you need help with in Resources?" },
     { id: "blog",      icon: "📝", label: "Blog",                   description: "Write and read community posts.",             prompt: "What would you like to do on the Blog?" },
@@ -298,31 +297,29 @@ If a name is taken, try a small variation. Your username is how others find and 
 4. Choose the category and the software you used
 5. Tap Upload Artwork
 
-The popup closes right away — your piece appears at the top of your gallery as a blurred card while it's checked and published in the background. You can queue another upload immediately, no waiting.`
+The popup closes right away — your piece appears at the top of your gallery as a blurred card while it uploads and publishes in the background. You can queue another upload immediately, no waiting.`
       },
       {
-        question: "What do Checking, Uploading and Live mean?",
+        question: "What do Uploading and Live mean?",
         answer:
 `Every new piece moves through a quick pipeline, shown on its blurred card:
 
-1. CHECKING — automatic verification (spam rate, duplicates, AI markers)
-2. UPLOADING — your image is transferred securely
-3. ALMOST DONE — the piece is being published
-4. LIVE ✓ — a green check flashes and the real card takes over
+1. UPLOADING — your image is transferred securely
+2. ALMOST DONE — the piece is being published
+3. LIVE ✓ — a green check flashes and the real card takes over
 
-Tap the blurred card anytime to open the full step-by-step status. It usually takes just a few seconds.`
+There is no review step in between: your artwork goes live the moment it finishes publishing. Tap the blurred card anytime to open the full step-by-step status. It usually takes just a few seconds.`
       },
       {
-        question: "Why did my check fail?",
+        question: "Why did my upload fail?",
         answer:
-`If a piece fails checking, a popup tells you the exact reason:
+`Uploads are not reviewed, so a failure is a technical one. The popup tells you the exact reason:
 
-1. Duplicate — the same or a very similar image is already on DigiArtz
-2. AI markers — the file's metadata shows it came from an AI generator
-3. Rate limit — too many uploads in a short time; wait a bit and retry
-4. Merit below 80 — uploads pause until your merit recovers (+2/day)
+1. Merit below 80 — uploads pause until your merit recovers (+2/day)
+2. The file could not be transferred — connection dropped, or the image is too large
+3. You were signed out mid-upload — sign back in and try again
 
-Nothing is published on a failed check, and any transferred file is removed from storage automatically. Fix the issue and upload again whenever you're ready.`
+Nothing is published on a failed upload, and any transferred file is removed from storage automatically. Fix the issue and upload again whenever you're ready.`
       },
       {
         question: "Can I add more than one image?",
@@ -363,79 +360,13 @@ Edits save instantly; deleting also removes the image file from storage.`
         answer:
 `If an upload won't go through:
 
-1. If a "Check failed" popup appeared, it shows the exact reason — see "Why did my check fail?"
+1. If an "Upload failed" popup appeared, it shows the exact reason — see "Why did my upload fail?"
 2. Otherwise check your internet connection
 3. Make sure the file is an image and not too large
 4. Confirm you're logged in, reload, and try once more
 5. Still failing? Contact DigiArtzsupport@gmail.com with the file details
 
 A failed upload never leaves a half-published piece — storage is cleaned up automatically.`
-      }
-    ],
-
-    moderation: [
-      {
-        question: "Why was my upload rejected?",
-        answer:
-`Every image is auto-checked the moment you upload — that's your artwork, the cover on a Blog post, and the preview on a Resource or Marketplace listing.
-
-1. If something's off, the card tells you the exact reason (like "AI-generated preview" or "screenshot detected")
-2. Nothing gets published on a failed check — no half-posted piece is ever left behind
-3. Any file already transferred is wiped from storage automatically
-4. Fix what it flagged and upload again — there's no penalty for a rejected attempt
-
-Pick the message you saw from this topic and I'll explain it.`
-      },
-      {
-        question: "It says my image looks AI-generated",
-        answer:
-`This one depends on where you're posting:
-
-• DigiArtz does not accept AI art anywhere. Artworks have to be made by you, and generator markers left in a file's metadata (Stable Diffusion, ComfyUI, Midjourney, NovelAI, Firefly and the like) will stop an upload on their own.
-• In Resources and the Marketplace, the preview also has to be a real preview of the actual asset. A 3D render from Blender, Maya, Cinema4D or ZBrush counts as real — an AI-generated image does not.
-• Hand-drawn, painted, vector, pixel and 3D work is never AI art, however polished it looks. If your own piece was flagged by mistake, re-export it (some editors leave stray markers behind) and try again.
-
-So if an upload was turned away as AI-generated, replace it with work you made yourself — or, for a resource, a genuine photo or render of the asset — and upload again.`
-      },
-      {
-        question: "It says photo, selfie, screenshot or document",
-        answer:
-`Artworks accepts original art only — not camera photos or captures. These get turned away:
-
-• Photos — selfies, people, pets, food, products, vehicles, buildings, landscapes, cities, streets
-• Screenshots — chat, game, app, social, or screen recordings
-• Documents — IDs, passports, licences, bank / medical / school / legal papers, receipts, bills, invoices, payslips
-• QR codes or barcodes as the main subject
-
-A painting or render OF a landscape is fine — a photograph of one isn't. Upload the artwork itself and you're set.`
-      },
-      {
-        question: "It says adult, gore or prohibited content",
-        answer:
-`Here's how the rating works:
-
-• SAFE and MATURE are both allowed — that includes artistic nudity and suggestive or swimsuit art
-• ADULT (explicit sexual content) is rejected
-• A short always-blocked list — child sexual content, bestiality, extreme gore, extremist or illegal content — is refused no matter what
-
-If a SAFE or MATURE piece got flagged by mistake, that's a rare miss — try again, and if it still won't pass, reach out at DigiArtzsupport@gmail.com.`
-      },
-      {
-        question: "Is fan art allowed?",
-        answer:
-`Yes. Hand-drawn, painted or digitally made art of existing anime, game, movie or cartoon characters is accepted.
-
-The only thing rejected is a direct repost of official media — unedited anime or game screencaps, official posters or movie stills, or scanned published manga pages. Make it your own and it's welcome here.`
-      },
-      {
-        question: "The check keeps failing or errored",
-        answer:
-`If you're getting an error instead of a specific reason:
-
-1. It's built to fail safe — when the checker can't get a clear answer it stops the upload rather than guess, so just try again
-2. Give it a moment if you've posted several pieces quickly (there's a short rate limit)
-3. If your merit has dropped below 80, uploads pause until it recovers (+2 a day)
-4. Still stuck after a retry? Email DigiArtzsupport@gmail.com with the file details`
       }
     ],
 
@@ -529,7 +460,7 @@ Open Explore → Resources in the top bar to browse them, and tap any card to se
         answer:
 `1. Open Upload → Share a Resource in the top bar
 2. Attach the resource file — ZIP, RAR, 7z, PSD, ABR, brushset, Procreate, CLIP, fonts, PDF or 3D (OBJ/FBX/BLEND), up to 200MB
-3. Add the required preview image so people can see what it is (this gets auto-checked)
+3. Add the required preview image so people can see what it is
 4. Fill in a title, description, category, licence and what you made it with
 5. Add tags and post
 
@@ -569,7 +500,7 @@ Open Explore → Blog in the top bar to read posts, and tap any one to read it i
 3. Write your post (at least 40 characters) and, if you like, a one-line excerpt for the list
 4. Pick a category, add tags, and publish
 
-Posts go live right away. A cover image, if you add one, is checked the same way artwork is.`
+Posts go live right away, cover image and all.`
       },
       {
         question: "Do I need an image for a post?",
@@ -614,7 +545,7 @@ Already bought it? Opening it again just re-downloads — you're never charged t
 4. Set a title, description, category, price and currency (USD, EUR, GBP, INR or JPY) — leave the price at 0 to list it free
 5. Choose a licence, add tags, and post
 
-The preview is auto-checked, so make sure it shows the real product.`
+Make sure the preview shows the real product.`
       },
       {
         question: "How do payments work?",
