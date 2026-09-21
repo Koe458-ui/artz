@@ -9,6 +9,8 @@ from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
 
 from ored.learning.records import (
     CandidateStatus,
+    Checkpoint,
+    CheckpointKind,
     Conversation,
     Dataset,
     LearningCandidate,
@@ -164,3 +166,18 @@ class SupabaseStore:
         if status is not None:
             query = f"status=eq.{status.value}&" + query
         return self._select(ModelVersion, query)
+
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        if not checkpoint.object_path:
+            raise StoreError("a checkpoint must name the object it was uploaded to")
+        return self._insert(Checkpoint, [checkpoint])[0]
+
+    def checkpoints(self, kind: Optional[CheckpointKind] = None) -> List[Checkpoint]:
+        query = "order=created_at.asc"
+        if kind is not None:
+            query = f"kind=eq.{kind.value}&" + query
+        return self._select(Checkpoint, query)
+
+    def drop_checkpoint(self, checkpoint_id: str) -> None:
+        path = f"/{self._table(Checkpoint)}?id=eq.{urllib.parse.quote(checkpoint_id)}"
+        self._call("DELETE", path)

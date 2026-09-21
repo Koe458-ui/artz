@@ -41,6 +41,13 @@ class VersionStatus(str, Enum):
     RETIRED = "retired"
 
 
+class CheckpointKind(str, Enum):
+    BASE = "base"
+    BEST = "best"
+    LIVE = "live"
+    EXPORT = "export"
+
+
 @dataclass
 class Conversation:
 
@@ -139,6 +146,26 @@ class ModelVersion:
     created_at: str = field(default_factory=now)
 
 
+@dataclass
+class Checkpoint:
+
+    id: str = field(default_factory=new_id)
+    version_id: Optional[str] = None
+    session_id: Optional[str] = None
+    kind: CheckpointKind = CheckpointKind.BEST
+    run_name: str = ""
+    bucket_id: str = "ored-checkpoints"
+    object_path: str = ""
+    size_bytes: int = 0
+    sha256: str = ""
+    format_version: int = 1
+    torch_version: str = ""
+    epoch: int = 0
+    metrics: Dict[str, float] = field(default_factory=dict)
+    uploaded_by: Optional[str] = None
+    created_at: str = field(default_factory=now)
+
+
 RECORD_TABLES = {
     Dataset: "ored_datasets",
     Conversation: "ored_conversations",
@@ -147,6 +174,7 @@ RECORD_TABLES = {
     TrainingExample: "ored_training_examples",
     TrainingSession: "ored_training_sessions",
     ModelVersion: "ored_model_versions",
+    Checkpoint: "ored_checkpoints",
 }
 
 

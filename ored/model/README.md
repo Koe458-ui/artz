@@ -983,6 +983,54 @@ solved in one forward pass.
 
 ---
 
+## Supabase — Ored's own project
+
+Ored runs against its own Supabase project, separate from any other site. Nothing
+here reads a table belonging to another product, and the only schema outside
+`public` that Ored's tables reference is `auth`.
+
+### Environment
+
+| Variable | Used by | Secret |
+|---|---|---|
+| `ORED_SB_URL` | trainer, exporter, checkpoint CLI, serving | no |
+| `ORED_SB_SERVICE_KEY` | trainer, exporter, checkpoint CLI, serving | **yes — server only** |
+| `ORED_SB_CHECKPOINT_BUCKET` | checkpoint storage, default `ored-checkpoints` | no |
+| `ORED_API_URL` | the web backend, pointing at `scripts/serve.py` | no |
+| `ORED_API_KEY` | the web backend and the serving process | **yes — server only** |
+
+The browser never sees any of these. The Ored page reads `ored/config.js`, which
+carries only the project URL and the publishable key.
+
+### Tables
+
+`ored_staff`, `ored_conversations`, `ored_messages`, `ored_learning_candidates`,
+`ored_training_examples`, `ored_training_sessions`, `ored_model_versions`,
+`ored_datasets`, `ored_checkpoints`, `ored_rate_hits`.
+
+Row level security is on for every one of them. A signed-in member reads and
+writes only their own conversations and messages. The training tables are
+readable by a row in `ored_staff` and writable by nothing but the service key.
+`anon` holds no grant on any table.
+
+### Checkpoints
+
+Local checkpoints under `checkpoints/` stay the working copy, but they are not
+where a checkpoint lives. `ored_checkpoints` records every stored artefact and
+the bytes go to the private `ored-checkpoints` bucket, which has no storage
+policy for `anon` or `authenticated`: only the service key can read or write it.
+
+```bash
+python scripts/checkpoints.py push checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
+python scripts/checkpoints.py pull checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
+python scripts/checkpoints.py list
+```
+
+Every push records the size and a sha256, and `pull` refuses a file whose digest
+does not match what was recorded. `serve.py --remote-checkpoints` pulls the live
+checkpoint on boot when there is no local one and pushes it on every save, so a
+restart on a fresh machine does not lose what the model learned online.
+
 ## Code style — no comments, no docstrings
 
 **Do not add comments or docstrings to this code.** Not to new code, not to

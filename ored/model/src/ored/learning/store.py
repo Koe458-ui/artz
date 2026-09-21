@@ -4,6 +4,8 @@ from typing import Any, Dict, Iterable, List, Optional, Protocol
 
 from ored.learning.records import (
     CandidateStatus,
+    Checkpoint,
+    CheckpointKind,
     Conversation,
     Dataset,
     LearningCandidate,
@@ -53,6 +55,12 @@ class LearningStore(Protocol):
 
     def versions(self, status: Optional[VersionStatus] = None) -> List[ModelVersion]: ...
 
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint: ...
+
+    def checkpoints(self, kind: Optional[CheckpointKind] = None) -> List[Checkpoint]: ...
+
+    def drop_checkpoint(self, checkpoint_id: str) -> None: ...
+
 
 class InMemoryStore:
 
@@ -64,6 +72,7 @@ class InMemoryStore:
         self._examples: Dict[str, TrainingExample] = {}
         self._sessions: Dict[str, TrainingSession] = {}
         self._versions: Dict[str, ModelVersion] = {}
+        self._checkpoints: Dict[str, Checkpoint] = {}
 
     def add_dataset(self, dataset: Dataset) -> Dataset:
         self._datasets[dataset.name] = dataset
@@ -154,6 +163,23 @@ class InMemoryStore:
             found = [v for v in found if v.status == status]
         return sorted(found, key=lambda v: v.created_at)
 
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        if not checkpoint.object_path:
+            raise StoreError("a checkpoint must name the object it was uploaded to")
+        self._checkpoints[checkpoint.id] = checkpoint
+        return checkpoint
+
+    def checkpoints(self, kind: Optional[CheckpointKind] = None) -> List[Checkpoint]:
+        found = list(self._checkpoints.values())
+        if kind is not None:
+            found = [c for c in found if c.kind == kind]
+        return sorted(found, key=lambda c: c.created_at)
+
+    def drop_checkpoint(self, checkpoint_id: str) -> None:
+        if checkpoint_id not in self._checkpoints:
+            raise StoreError(f"no checkpoint {checkpoint_id}")
+        del self._checkpoints[checkpoint_id]
+
     def snapshot(self) -> Dict[str, List[Dict[str, Any]]]:
         return {
             "datasets": [to_row(r) for r in self._datasets.values()],
@@ -163,4 +189,5 @@ class InMemoryStore:
             "examples": [to_row(r) for r in self._examples.values()],
             "sessions": [to_row(r) for r in self._sessions.values()],
             "versions": [to_row(r) for r in self._versions.values()],
+            "checkpoints": [to_row(r) for r in self._checkpoints.values()],
         }
