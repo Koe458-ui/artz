@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'v260';
+const CACHE_VERSION = 'v261';
 
 const STATIC = `dz-static-${CACHE_VERSION}`;
 const THUMB  = `dz-img-thumb-${CACHE_VERSION}`;

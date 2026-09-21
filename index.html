@@ -48,13 +48,16 @@
        lands, so nothing has anything to animate. The `.open` rules are all a class
        more specific than these, so opening still wins.
        Anything added to those sheets with a hidden base state belongs here too. */
-    .upPop,.cropPop,.upGdPop,#upqBackdrop{position:fixed;inset:0;opacity:0;pointer-events:none;}
-    .upGdPop,#upqBackdrop{visibility:hidden;}
+    .upPop,.cropPop,.upGdPop,#upqBackdrop,#legalBackdrop{position:fixed;inset:0;opacity:0;pointer-events:none;}
+    .upGdPop,#upqBackdrop,#legalBackdrop{visibility:hidden;}
     #pfUpMod{opacity:1;transform:translateX(100%);visibility:hidden;}
-    #rankHub,#rankPage,#fgSearchPage,#cmBrowsePage,#cmInfoPage,#cmChatPanel{
+    #rankHub,#rankPage,#fgSearchPage,#cmBrowsePage,#cmInfoPage,#cmChatPanel,
+    #profilePage,#pfEditPage,#admPage,#pfMyWorkPage,#notifPage,#subPage,
+    #authMod,#themePage,#communityPage{
       position:fixed;inset:0;transform:translateX(100%);
     }
-    #cmChatPanel{visibility:hidden;}
+    #cmChatPanel,#communityPage,#subPage,#profilePage,#admPage,#notifPage,
+    #pfMyWorkPage,#authMod,#pfEditPage{visibility:hidden;}
   </style>
   <script data-cf-beacon='{"token": "aa4b7177387e4f689739a5fdf44cbffa"}' defer="" src="https://static.cloudflareinsights.com/beacon.min.js">
   </script>
