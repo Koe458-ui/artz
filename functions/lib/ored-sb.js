@@ -1,12 +1,14 @@
-export const oredUrl  = (env) => String(env.ORED_SB_URL || '').trim().replace(/\/$/, '');
-export const oredAnon = (env) => String(env.ORED_SB_KEY || '').trim();
-export const oredSvc  = (env) => String(env.ORED_SB_SERVICE_KEY || '').trim();
+export const authUrl = (env) => String(env.ORED_AUTH_URL || '').trim().replace(/\/$/, '');
+export const authKey = (env) => String(env.ORED_AUTH_KEY || '').trim();
+
+export const oredUrl = (env) => String(env.ORED_SB_URL || '').trim().replace(/\/$/, '');
+export const oredSvc = (env) => String(env.ORED_SB_SERVICE_KEY || '').trim();
 
 export async function oredUser(env, request) {
   const bearer = request.headers.get('authorization') || '';
   if (!bearer.startsWith('Bearer ')) return null;
-  const res = await fetch(oredUrl(env) + '/auth/v1/user', {
-    headers: { apikey: oredAnon(env), authorization: bearer },
+  const res = await fetch(authUrl(env) + '/auth/v1/user', {
+    headers: { apikey: authKey(env), authorization: bearer },
   });
   if (!res.ok) return null;
   const u = await res.json().catch(() => null);
@@ -28,6 +30,14 @@ export async function oredService(env, path, init = {}) {
   const body = await res.json().catch(() => null);
   if (!res.ok) throw new Error('postgrest ' + (init.method || 'GET') + ' ' + path + ' -> ' + res.status);
   return body;
+}
+
+export async function oredIsStaff(env, userId) {
+  try {
+    const rows = await oredService(env,
+      `/ored_staff?select=role&user_id=eq.${userId}&limit=1`);
+    return Array.isArray(rows) && rows.length === 1;
+  } catch { return false; }
 }
 
 export async function oredUnderLimit(env, bucket, limit, seconds) {

@@ -1,5 +1,5 @@
-import { oredUrl, oredAnon, oredSvc, oredUser, oredService, oredUnderLimit } from '../lib/ored-sb.js';
-import { UUID_RE, json, safeError, sameOrigin } from '../lib/http.js';
+import { authUrl, authKey, oredUrl, oredSvc, oredUser, oredService, oredUnderLimit } from '../lib/ored-sb.js';
+import { UUID_RE, json, safeError, sameOrigin } from '../lib/ored-http.js';
 
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_HISTORY_TURNS = 20;
@@ -119,7 +119,8 @@ export async function onRequestPost(context) {
   const { env, request } = context;
 
   if (!sameOrigin(request, env)) return json({ error: 'Not allowed' }, 403);
-  if (!oredUrl(env) || !oredAnon(env)) return json({ error: 'Not configured' }, 503);
+  if (!authUrl(env) || !authKey(env)) return json({ error: 'Not configured' }, 503);
+  if (!oredUrl(env) || !oredSvc(env)) return json({ error: 'Not configured' }, 503);
 
   let body = {};
   try { body = (await request.json()) || {}; }

@@ -26,9 +26,8 @@
 
   var auth = document.getElementById('oAuth');
   var authForm = document.getElementById('oAuthForm');
-  var authTitle = document.getElementById('oAuthTitle');
   var authGo = document.getElementById('oAuthGo');
-  var authSwap = document.getElementById('oAuthSwap');
+  var authJoin = document.getElementById('oAuthJoin');
   var authNote = document.getElementById('oAuthNote');
   var emailField = document.getElementById('oEmail');
   var passField = document.getElementById('oPass');
@@ -36,7 +35,6 @@
   var chats = [];
   var activeId = '';
   var busy = false;
-  var creating = false;
   var userId = '';
 
   function uid() {
@@ -167,17 +165,6 @@
     input.readOnly = value;
   }
 
-  function setMode(signUp) {
-    creating = signUp;
-    authTitle.textContent = signUp ? 'Create an Ored account' : 'Sign in to Ored';
-    authGo.textContent = signUp ? 'Create account' : 'Sign in';
-    authSwap.textContent = signUp
-      ? 'Already have an Ored account? Sign in'
-      : 'New to Ored? Create an account';
-    passField.setAttribute('autocomplete', signUp ? 'new-password' : 'current-password');
-    sayAuth('');
-  }
-
   function showAuth(message, bad) {
     userId = '';
     chats = [];
@@ -289,20 +276,18 @@
 
   authForm.addEventListener('submit', async function (event) {
     event.preventDefault();
-    if (!sb) { sayAuth('Ored cannot reach its server right now. Refresh and try again.', true); return; }
+    if (!sb) { sayAuth('Ored cannot reach the sign-in service right now. Refresh and try again.', true); return; }
 
     var email = emailField.value.trim();
     var password = passField.value;
     if (!email || !password) return;
 
     authGo.disabled = true;
-    sayAuth(creating ? 'Creating your account…' : 'Signing in…');
+    sayAuth('Signing in…');
 
     var result;
     try {
-      result = creating
-        ? await sb.auth.signUp({ email: email, password: password })
-        : await sb.auth.signInWithPassword({ email: email, password: password });
+      result = await sb.auth.signInWithPassword({ email: email, password: password });
     } catch (e) {
       authGo.disabled = false;
       sayAuth('That did not go through. Check your connection and try again.', true);
@@ -317,23 +302,14 @@
     }
 
     var session = result.data && result.data.session;
-    if (!session) {
-      sayAuth('Check your email to confirm the account, then sign in.');
-      return;
-    }
+    if (!session) { sayAuth('That did not work. Try again.', true); return; }
 
     showChat(session.user.id);
     input.focus();
   });
 
-  authSwap.addEventListener('click', function () {
-    setMode(!creating);
-    emailField.focus();
-  });
-
   outBtn.addEventListener('click', async function () {
     if (sb) { try { await sb.auth.signOut(); } catch (e) {   } }
-    setMode(false);
     showAuth('Signed out.');
   });
 
@@ -388,10 +364,10 @@
   });
 
   async function boot() {
-    setMode(false);
+    authJoin.href = (cfg.SITE_URL || 'https://digiartz.net') + '/login';
 
-    if (window.supabase && cfg.SB_URL && cfg.SB_KEY) {
-      try { sb = window.supabase.createClient(cfg.SB_URL, cfg.SB_KEY); }
+    if (window.supabase && cfg.AUTH_URL && cfg.AUTH_KEY) {
+      try { sb = window.supabase.createClient(cfg.AUTH_URL, cfg.AUTH_KEY); }
       catch (e) { sb = null; }
     }
 
