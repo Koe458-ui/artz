@@ -752,9 +752,11 @@
 
     try{
       var rows = await c.getOrSet(GAL_ALL, galFetch, 'gallery:latest', function(fresh){
+        window.dzGalleryReady = true;
         galApply(fresh, true);
         galStore(fresh);
       });
+      window.dzGalleryReady = true;
       galApply(rows, false);
       if(rows && rows.length){
         galStore(rows);

@@ -329,6 +329,8 @@
       awRList = feedSort(src).slice(0, FEED_CAP);
     }
 
+    if(!awRList.length && !window.dzGalleryReady) return;
+
     grid.classList.toggle('awGrid--artists', !!feedIsArtists());
 
     var keep = reset ? 0 : awRShown;
