@@ -45,6 +45,7 @@ const SHELL_URLS = [
   '/css/upload.css?v=29',
   '/css/widgets.css?v=35',
   '/css/overrides.css?v=69',
+  '/css/ored.css?v=1',
   '/css/select.css?v=5',
   '/css/analytics.css?v=17',
 
