@@ -153,6 +153,16 @@ python scripts/infer.py --interactive
 `infer.py` never imports the trainer, the optimizer or the loss function. It
 loads a checkpoint and runs a forward pass — that is all deployment is.
 
+It reads `task` out of the checkpoint and picks the matching predictor, so the
+same script also serves a Step 2 character language model — there it rebuilds
+the tokenizer saved alongside the weights and completes text instead of bits:
+
+```bash
+python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --text "17 + 9 = "
+python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --pairs 3+4 9+6
+python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --text "the " --sample --tokens 200
+```
+
 ### 5. Understand backpropagation
 
 ```bash
