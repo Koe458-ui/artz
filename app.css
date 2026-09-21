@@ -1,17 +1,65 @@
+/* The site's two faces, served from this repository rather than from Google.
+   Self-hosted for the reason the Supabase bundle is: it keeps the page to one
+   origin, off anyone else's uptime, and inside a policy that grants 'self' only.
+   Open Sans is the variable build, 400 to 800 in one file, which is every weight
+   the page asks for. See ATTRIBUTIONS.md. */
+@font-face{
+  font-family:'Open Sans';
+  font-style:normal;
+  font-weight:400 800;
+  font-stretch:100%;
+  font-display:swap;
+  src:url(/fonts/open-sans-latin.woff2) format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:'Open Sans';
+  font-style:normal;
+  font-weight:400 800;
+  font-stretch:100%;
+  font-display:swap;
+  src:url(/fonts/open-sans-latin-ext.woff2) format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+@font-face{
+  font-family:'Kaushan Script';
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url(/fonts/kaushan-script-latin.woff2) format('woff2');
+  unicode-range:U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD;
+}
+@font-face{
+  font-family:'Kaushan Script';
+  font-style:normal;
+  font-weight:400;
+  font-display:swap;
+  src:url(/fonts/kaushan-script-latin-ext.woff2) format('woff2');
+  unicode-range:U+0100-02BA,U+02BD-02C5,U+02C7-02CC,U+02CE-02D7,U+02DD-02FF,U+0304,U+0308,U+0329,U+1D00-1DBF,U+1E00-1E9F,U+1EF2-1EFF,U+2020,U+20A0-20AB,U+20AD-20C0,U+2113,U+2C60-2C7F,U+A720-A7FF;
+}
+
 :root{
-  --o-bg:#0A0A0C;
-  --o-sur:#141418;
-  --o-sur2:#1C1C22;
-  --o-bdr:#26262E;
-  --o-bdrh:#3A3A46;
-  --o-tx:#F2F2F5;
-  --o-txd:#9B9BA6;
-  --o-acc:#FFFFFF;
+      /* DigiArtz Charcoal, one palette shared with the site so the two pages read as one product */
+  --o-bg:#1A1A1F;
+  --o-sur:#24242C;
+  --o-sur2:#2E2E38;
+  --o-bdr:#40404E;
+  --o-bdrh:#56566A;
+  --o-tx:#F3F3F8;
+  --o-txd:rgba(216,216,228,.80);
+  --o-acc:#F4F4F6;
+  --o-ink:#1A1A1F;
   --o-danger:#FCA5A5;
+  --o-red:#EF4444;
+  --o-sh:0 1px 3px rgba(5,3,8,.3),0 4px 14px rgba(5,3,8,.35);
   --o-bar:3.75rem;
   --o-sat:env(safe-area-inset-top,0px);
   --o-sab:env(safe-area-inset-bottom,0px);
+      /* The site's own stack, weights and all, so nothing here steps away from DigiArtz */
   --o-font:'Open Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+      /* Wordmark script, the one place outside the site's top bar it is used: the hero verb */
+  --o-sig:'Kaushan Script','Syne','Open Sans',-apple-system,BlinkMacSystemFont,cursive;
+  --o-sig-ink:.05em;
   color-scheme:dark;
 }
 
@@ -142,8 +190,105 @@ body{
   padding:.75rem 1rem calc(.75rem + var(--o-sab));
   background:var(--o-bg);
 }
+  /* Nothing said yet: the thread collapses and the greeting and composer centre together as one block.
+     They can shrink and scroll, because the headline carries the site's own poster ramp and a short
+     window would otherwise clip it against the body's overflow:hidden */
 body.oEmpty .oMain{flex:0 1 auto;}
-body.oEmpty .oDock{margin-block:auto;}
+body.oEmpty .oDock{
+  margin-block:auto;
+  flex:0 1 auto;
+  min-height:0;
+  overflow-y:auto;
+  overscroll-behavior:contain;
+}
+
+  /* The greeting. Same measure as the thread and the composer, so the three share one column */
+.oHero{display:none;}
+body.oEmpty:not(.oOut) .oHero{display:block;}
+.oHero{
+  width:min(46rem,100%);
+  margin:0 auto clamp(1.5rem,4vw,2.5rem);
+  text-align:center;
+}
+
+  /* DigiArtz's own hero type, unchanged: 68px on a small phone to 112px wide, 84 to 152 from 768 up */
+.oHeroHead{
+  margin:0 auto clamp(1rem,2.4vw,1.75rem);
+  font-family:var(--o-font);
+  font-weight:800;
+  font-size:clamp(4.25rem,3.5rem + 3.75vw,7rem);
+  line-height:1.02;
+  letter-spacing:-.035em;
+  color:var(--o-tx);
+  text-wrap:balance;
+  max-width:18ch;
+}
+  /* Narrow measure on phones so the headline stacks, the way the site's does */
+@media(max-width:767px){
+  .oHeroHead{max-width:9ch;text-wrap:initial;}
+}
+@media(min-width:768px){
+  .oHeroHead{font-size:clamp(5.25rem,.5rem + 9.6vw,9.5rem);}
+}
+  /* The verb in the wordmark script, brand red — the site's treatment for "Create" and "Inspire".
+     Tracking back to zero: -.035em jams a script */
+.oHeroHead em{
+  font-style:normal;
+  font-family:var(--o-sig);
+  font-weight:400;
+  letter-spacing:0;
+  color:var(--o-red);
+  -webkit-text-stroke:var(--o-sig-ink) currentColor;
+}
+
+.oHeroSub{
+  margin:0 auto;
+  font-size:clamp(1.1875rem,.95rem + 1.15vw,1.75rem);
+  line-height:1.45;
+  color:var(--o-txd);
+  max-width:42ch;
+  text-wrap:pretty;
+}
+
+  /* Four openers. They fill the composer rather than send, so the first message is still the member's */
+.oSeeds{
+  width:min(46rem,100%);
+  margin:.875rem auto 0;
+  display:flex;
+  flex-wrap:wrap;
+  justify-content:center;
+  gap:.5rem;
+}
+body:not(.oEmpty) .oSeeds,
+body.oOut .oSeeds{display:none;}
+.oSeed{
+  padding:.5rem .875rem;
+  border:1px solid var(--o-bdr);
+  border-radius:999px;
+  background:var(--o-sur);
+  color:var(--o-txd);
+  font:inherit;
+  font-size:.875rem;
+  line-height:1.3;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .2s ease,border-color .2s ease,color .2s ease;
+}
+@media(hover:hover){
+  .oSeed:hover{background:var(--o-sur2);border-color:var(--o-bdrh);color:var(--o-tx);}
+}
+.oSeed:focus-visible{outline:2px solid var(--o-acc);outline-offset:2px;}
+
+  /* Short windows in portrait too — a laptop with the browser half-height */
+@media(max-height:720px) and (min-width:768px){
+  .oHeroHead{font-size:clamp(3.5rem,6vw,5.5rem);}
+}
+  /* A phone on its side leaves about 350px of fold: the headline gives up size and the prose steps aside */
+@media(max-height:560px) and (orientation:landscape){
+  .oHeroSub{display:none;}
+  .oHeroHead{font-size:clamp(1.75rem,4.5vw,2.5rem);max-width:22ch;margin-bottom:.75rem;}
+  .oSeeds{display:none;}
+}
 
 .oComposer{
   width:min(46rem,100%);
@@ -155,6 +300,8 @@ body.oEmpty .oDock{margin-block:auto;}
   border:1px solid var(--o-bdr);
   border-radius:1.5rem;
   background:var(--o-sur);
+      /* Charcoal lifts its cards off the page; the composer is the one card on this screen */
+  box-shadow:var(--o-sh);
   transition:border-color .2s ease;
 }
 .oComposer:focus-within{border-color:var(--o-bdrh);}
@@ -174,7 +321,7 @@ body.oEmpty .oDock{margin-block:auto;}
 }
 .oComposer textarea::placeholder{color:var(--o-txd);}
 
-.oSend{background:var(--o-acc);border-color:var(--o-acc);color:var(--o-bg);}
+.oSend{background:var(--o-acc);border-color:var(--o-acc);color:var(--o-ink);}
 @media(hover:hover){
   .oSend:hover{background:var(--o-acc);border-color:var(--o-acc);opacity:.88;}
 }
@@ -327,7 +474,7 @@ body.oOut #oOut{display:none;}
   border:1px solid var(--o-acc);
   border-radius:.875rem;
   background:var(--o-acc);
-  color:var(--o-bg);
+  color:var(--o-ink);
   font:inherit;
   font-weight:600;
   cursor:pointer;
@@ -364,4 +511,62 @@ body.oOut #oOut{display:none;}
 
 @media(prefers-reduced-motion:reduce){
   .oField,.oBtn{transition:none;}
+}
+
+  /* Sign-in: the site's own providers, in the site's own order, so the card people meet here is the
+     card they know. Two rows on a phone, four abreast is too tight at 22rem */
+.oSocial{
+  display:flex;
+  gap:.5rem;
+  margin-bottom:.25rem;
+}
+.oSocialBtn{
+  flex:1 1 0;
+  min-width:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:.5rem;
+  padding:.6875rem .5rem;
+  border:1px solid var(--o-bdr);
+  border-radius:.875rem;
+  background:var(--o-sur);
+  color:var(--o-tx);
+  font:inherit;
+  font-size:.8125rem;
+  font-weight:600;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:background .2s ease,border-color .2s ease;
+}
+.oSocialBtn svg{width:1.0625rem;height:1.0625rem;flex:0 0 auto;}
+@media(hover:hover){
+  .oSocialBtn:hover{background:var(--o-sur2);border-color:var(--o-bdrh);}
+}
+.oSocialBtn:focus-visible{outline:2px solid var(--o-acc);outline-offset:2px;}
+.oSocialBtn[disabled]{opacity:.55;cursor:not-allowed;}
+@media(max-width:420px){
+  .oSocial{flex-wrap:wrap;}
+  .oSocialBtn{flex:1 1 calc(50% - .25rem);}
+}
+
+.oOr{
+  display:flex;
+  align-items:center;
+  gap:.75rem;
+  margin:.25rem 0;
+  font-size:.75rem;
+  letter-spacing:.08em;
+  text-transform:uppercase;
+  color:var(--o-txd);
+}
+.oOr::before,.oOr::after{
+  content:"";
+  flex:1 1 auto;
+  height:1px;
+  background:var(--o-bdr);
+}
+
+@media(prefers-reduced-motion:reduce){
+  .oSocialBtn,.oSeed{transition:none;}
 }

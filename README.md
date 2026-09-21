@@ -11,6 +11,7 @@ It is in its training phase, and it runs at `ored.digiartz.net`.
 | Path | What |
 |---|---|
 | `index.html`, `app.js`, `app.css` | the chat page, served at the domain root |
+| `fonts/` | the two typefaces the page uses, served from here rather than Google |
 | `functions/api/ored.js` | the backend endpoint |
 | `functions/lib/ored-*.js` | its helpers |
 | `ored/model/` | the model, training, evaluation and learning code |
@@ -20,9 +21,23 @@ answers 404 for anything under `/ored/model/`.
 
 ## Sign-in
 
-Ored has no accounts. People sign in with their DigiArtz account, and
-`functions/api/ored.js` checks that token against the DigiArtz project before it
-writes anything.
+Ored has no accounts. People sign in with their DigiArtz account — by password,
+or with Google or Discord, the same providers and the same project the site
+signs in against — and `functions/api/ored.js` checks that token against the
+DigiArtz project before it writes anything. Apple is listed, as it is on the
+site, and says it is unavailable until the provider is enabled.
+
+One account therefore reaches both. Not one session, though: this is a domain of
+its own, so the sign-in the site stored is not one this origin can read, and a
+member signs in here once as well.
+
+Two things hold that together, and both will break sign-in quietly if they drift:
+
+* `config.js` must name the **DigiArtz** project, not Ored's own. `AUTH_URL` and
+  `AUTH_KEY` are the pair the site's own config carries.
+* The DigiArtz project's redirect allow-list must include
+  `https://ored.digiartz.net/**`. Without it a provider returns to the site
+  instead, and the member arrives back on DigiArtz rather than here.
 
 A DigiArtz token is signed by the DigiArtz project, so it means nothing to
 Ored's project. A browser therefore cannot reach Ored's database at all, and
@@ -39,6 +54,17 @@ reaches this data, and forcing RLS holds the table owner to the same rule.
 `user_id`, `reviewed_by` and `approved_by` hold DigiArtz user ids as plain uuid
 columns. There is no foreign key, because the accounts they name live in another
 project.
+
+## The page
+
+One screen. Until something is asked it shows a greeting — *Ask anything*, the
+verb in the wordmark script — the composer under it and four openers that fill
+the box rather than send it; all three go the moment a conversation starts. The
+palette is DigiArtz Charcoal and the type is the site's own, on the same size
+ramp its hero uses, so the two read as one product across two domains.
+
+The typefaces are in `fonts/`, not fetched from Google. The policy in `_headers`
+grants `'self'` and the Supabase project and nothing else, and it stays that way.
 
 ## Configuration
 
