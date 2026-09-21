@@ -860,23 +860,27 @@
   }
 
   async function dzFetchArtworkById(id){
-    if(!sb || !id) return null;
+    if(!sb || !id) return { reached:false, row:null };
     try{
       var r = await sb.from('artworks').select('*')
         .eq('id', String(id)).eq('status','approved').eq('visibility','published').limit(1);
-      return (r && r.data && r.data[0]) || null;
-    }catch(e){ return null; }
+      if(!r || r.error) return { reached:false, row:null };
+      return { reached:true, row:(r.data && r.data[0]) || null };
+    }catch(e){ return { reached:false, row:null }; }
   }
 
   async function dzViewArtwork(id, pushUrl){
-    if(!id) return false;
+    if(!id) return 'unavailable';
     var push = pushUrl !== false;
-    if(openArtworkById(id, push)) return true;
-    var art = await dzFetchArtworkById(id);
-    if(!art) return false;
-    var cats = catList(art.category).length ? catList(art.category) : ['others'];
-    openLB(art.image_url, art.name, cats[0]||'', art.description||'', String(art.id), push, [art]);
-    return true;
+    if(openArtworkById(id, push)) return 'opened';
+    var res = await dzFetchArtworkById(id);
+    if(res.row){
+      var cats = catList(res.row.category).length ? catList(res.row.category) : ['others'];
+      openLB(res.row.image_url, res.row.name, cats[0]||'', res.row.description||'',
+             String(res.row.id), push, [res.row]);
+      return 'opened';
+    }
+    return res.reached ? 'gone' : 'unavailable';
   }
   window.dzViewArtwork = dzViewArtwork;
 
@@ -890,8 +894,9 @@
     if(!m) return;
     e.preventDefault();
     var id = dzDecodeSeg(m[1]);
-    dzViewArtwork(id, true).then(function(ok){
-      if(!ok) location.href = '/artwork/' + encodeURIComponent(id);
+    dzViewArtwork(id, true).then(function(r){
+      if(r === 'gone') showToast('That artwork is no longer available');
+      else if(r !== 'opened') location.href = '/artwork/' + encodeURIComponent(id);
     });
   });
 

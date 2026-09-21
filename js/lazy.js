@@ -21,7 +21,7 @@
       api: ['zeoOpen', 'zeoHide']
     },
     secview: {
-      src: ['/js/secview.js?v=10'],
+      src: ['/js/secview.js?v=11'],
       warm: true,
       api: ['dzOpenById', 'dzOpenRow', 'dzOpenView', 'dzOpenArtwork', 'dzOpenListing',
             'dzVwFill', 'dzVwCard', 'dzVwActRow', 'dzResourceDownload', 'dzReportItem',

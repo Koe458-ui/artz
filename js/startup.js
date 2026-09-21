@@ -23,7 +23,11 @@
                        (typeof window.dzNavCurrent !== 'function') ||
                        window.dzNavCurrent(boot);
     var m = window.location.pathname.match(/^\/artwork\/([^/]+)\/?$/);
-    if(m && stillBooting) dzViewArtwork(dzDecodeSeg(m[1]), false);
+    if(m && stillBooting) dzViewArtwork(dzDecodeSeg(m[1]), false).then(function(r){
+      if(r !== 'gone') return;
+      try{ history.replaceState(null, '', '/'); }catch(e){}
+      showToast('That artwork is no longer available');
+    });
     var pm = window.location.pathname.match(/^\/profile\/([^/]+)\/?$/);
     if(pm && stillBooting) openProfileByUsername(dzDecodeSeg(pm[1]), false);
     var sm = window.location.pathname.match(/^\/(resource|blog|listing|job)\/([^/]+)\/?$/);
