@@ -64,7 +64,6 @@
   async function upqRun(job){
     try{
       job.stage='uploading'; job.upDone=0; upqSync();
-        // Fingerprint only — stored on the row, never gates the upload, and a file it cannot read simply has none.
       var phash = (window.ImageHash && typeof ImageHash.phashOf==='function')
         ? await ImageHash.phashOf(job.file) : null;
       var uniq = Date.now()+'_'+job.id.split('_')[1];
@@ -102,7 +101,6 @@
       x.slug = (typeof dzSlugify === 'function')
         ? (dzSlugify(job.name).slice(0,110) + '-' + String(Date.now()).slice(-6))
         : null;
-        // The artist's own 18+ declaration on the form is what sets the rating now.
       var _mature = !!x.declared_mature;
 
       if(job.publishAt){

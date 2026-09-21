@@ -1,9 +1,6 @@
 (function () {
   'use strict';
 
-    // Perceptual hash for an uploaded image, stored on the row as `phash`. It is a fingerprint only — nothing
-    // is gated on it, and a match never stops an upload.
-
   function fileToBitmap(file) {
     if (typeof createImageBitmap === 'function') {
       return createImageBitmap(file);
@@ -53,7 +50,6 @@
     return d;
   }
 
-    // Never throws: a hash that could not be taken is simply absent, and the upload carries on without it.
   async function phashOf(file) {
     try { return await computeDHash(file); } catch (e) { return null; }
   }

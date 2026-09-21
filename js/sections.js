@@ -3054,7 +3054,6 @@
     if(bad){ dzFieldFail(sec, bad.k, bad.msg); return; }
 
     if(btn){ btn.disabled = true; btn.textContent = 'Publishing…'; }
-      // Sections that carry an image show the step-by-step panel while it transfers; the rest just toast.
     var trackImg = null, trackRecv = 'File & preview received';
     if(sec === 'resources' || sec === 'marketplace'){ trackImg = st(sec).files.preview; }
     else if(sec === 'blog'){ trackImg = st(sec).files.cover; trackRecv = 'Cover image received'; }
