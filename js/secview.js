@@ -144,10 +144,15 @@
   };
 
   window.dzOpenArtwork = function(id){
+    function fallback(){ try{ location.href = '/artwork/' + encodeURIComponent(id); }catch(e){} }
     try{
+      if(typeof window.dzViewArtwork === 'function'){
+        window.dzViewArtwork(id, true).then(function(ok){ if(!ok) fallback(); }, fallback);
+        return;
+      }
       if(typeof openArtworkById === 'function' && openArtworkById(id, true)) return;
     }catch(e){}
-    try{ location.href = '/artwork/' + encodeURIComponent(id); }catch(e){}
+    fallback();
   };
   window.dzOpenListing = async function(id){
     if(!sb) return;

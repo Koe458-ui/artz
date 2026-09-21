@@ -859,6 +859,42 @@
     return true;
   }
 
+  async function dzFetchArtworkById(id){
+    if(!sb || !id) return null;
+    try{
+      var r = await sb.from('artworks').select('*')
+        .eq('id', String(id)).eq('status','approved').eq('visibility','published').limit(1);
+      return (r && r.data && r.data[0]) || null;
+    }catch(e){ return null; }
+  }
+
+  async function dzViewArtwork(id, pushUrl){
+    if(!id) return false;
+    var push = pushUrl !== false;
+    if(openArtworkById(id, push)) return true;
+    var art = await dzFetchArtworkById(id);
+    if(!art) return false;
+    var cats = catList(art.category).length ? catList(art.category) : ['others'];
+    openLB(art.image_url, art.name, cats[0]||'', art.description||'', String(art.id), push, [art]);
+    return true;
+  }
+  window.dzViewArtwork = dzViewArtwork;
+
+  document.addEventListener('click', function(e){
+    if(e.defaultPrevented || dzModifiedClick(e)) return;
+    var t = e.target;
+    if(!t || !t.closest) return;
+    var card = t.closest('a.awCard');
+    if(!card) return;
+    var m = /^\/artwork\/([^/?#]+)/.exec(card.getAttribute('href') || '');
+    if(!m) return;
+    e.preventDefault();
+    var id = dzDecodeSeg(m[1]);
+    dzViewArtwork(id, true).then(function(ok){
+      if(!ok) location.href = '/artwork/' + encodeURIComponent(id);
+    });
+  });
+
   var SITE_NAME = 'Digiartz';
   var SITE_URL  = 'https://digiartz.net';
   function setMeta(selector, attr, value){
