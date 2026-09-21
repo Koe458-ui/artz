@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'v263';
+const CACHE_VERSION = 'v264';
 
 const STATIC = `dz-static-${CACHE_VERSION}`;
 const THUMB  = `dz-img-thumb-${CACHE_VERSION}`;
@@ -45,6 +45,7 @@ const SHELL_URLS = [
   '/css/upload.css?v=29',
   '/css/widgets.css?v=35',
   '/css/overrides.css?v=69',
+  '/css/ored.css?v=1',
   '/css/select.css?v=5',
   '/css/analytics.css?v=17',
 
