@@ -1,5 +1,5 @@
-import { sbUrl, sbAnon, sbSvc, sbUser, sbService, underLimit } from '../lib/sb.js';
-import { UUID_RE, json, safeError, sameOrigin } from '../lib/http.js';
+import { authUrl, authKey, oredUrl, oredSvc, oredUser, oredService, oredUnderLimit } from '../lib/ored-sb.js';
+import { UUID_RE, json, safeError, sameOrigin } from '../lib/ored-http.js';
 
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_HISTORY_TURNS = 20;
@@ -46,22 +46,22 @@ async function ask(env, payload) {
 }
 
 async function owns(env, conversationId, userId, title) {
-  await sbService(env, '/ored_conversations', {
+  await oredService(env, '/ored_conversations', {
     method: 'POST',
     headers: { prefer: 'resolution=ignore-duplicates,return=minimal' },
     body: JSON.stringify({ id: conversationId, user_id: userId, title: title }),
   });
-  const rows = await sbService(env,
+  const rows = await oredService(env,
     `/ored_conversations?select=id&id=eq.${conversationId}&user_id=eq.${userId}&limit=1`);
   return Array.isArray(rows) && rows.length === 1;
 }
 
 async function remember(env, conversationId, userId, message, answer) {
-  if (!sbSvc(env) || !UUID_RE.test(conversationId) || !UUID_RE.test(userId)) return;
+  if (!oredSvc(env) || !UUID_RE.test(conversationId) || !UUID_RE.test(userId)) return;
   try {
     const title = message.replace(/\s+/g, ' ').trim().slice(0, 80);
     if (!(await owns(env, conversationId, userId, title))) return;
-    await sbService(env, '/ored_messages', {
+    await oredService(env, '/ored_messages', {
       method: 'POST',
       headers: { prefer: 'return=minimal' },
       body: JSON.stringify([
@@ -93,7 +93,7 @@ const ACTIONS = {
       const message = text(body.message, MAX_MESSAGE_CHARS);
       if (!message) return json({ error: 'Write something first' }, 400);
 
-      if (!(await underLimit(env, 'ored:send:' + user.id, SEND_LIMIT, SEND_WINDOW)))
+      if (!(await oredUnderLimit(env, 'ored:send:' + user.id, SEND_LIMIT, SEND_WINDOW)))
         return json({ error: 'Too many messages — wait a moment' }, 429);
 
       if (!endpoint(env))
@@ -119,7 +119,8 @@ export async function onRequestPost(context) {
   const { env, request } = context;
 
   if (!sameOrigin(request, env)) return json({ error: 'Not allowed' }, 403);
-  if (!sbUrl(env) || !sbAnon(env)) return json({ error: 'Not configured' }, 503);
+  if (!authUrl(env) || !authKey(env)) return json({ error: 'Not configured' }, 503);
+  if (!oredUrl(env) || !oredSvc(env)) return json({ error: 'Not configured' }, 503);
 
   let body = {};
   try { body = (await request.json()) || {}; }
@@ -130,7 +131,7 @@ export async function onRequestPost(context) {
     return json({ error: 'Unknown action' }, 404);
 
   const action = ACTIONS[name];
-  const user = await sbUser(env, request);
+  const user = await oredUser(env, request);
   if (action.auth && !user) return json({ error: 'Sign in required' }, 401);
 
   try {

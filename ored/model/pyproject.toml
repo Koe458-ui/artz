@@ -26,6 +26,7 @@ ored-evaluate = "ored.evaluation.evaluator:main"
 ored-infer = "ored.inference.predictor:main"
 ored-generate = "ored.inference.generate_cli:main"
 ored-export-learning = "ored.learning.export_cli:main"
+ored-checkpoints = "ored.learning.checkpoint_cli:main"
 ored-serve = "ored.serving.server:main"
 
 [tool.setuptools.packages.find]

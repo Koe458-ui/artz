@@ -1,7 +1,10 @@
 from ored.learning.candidates import CandidatePolicy, build_candidates, redact
 from ored.learning.dataset import DatasetError, DatasetReport, DatasetSpec, export
+from ored.learning.checkpoints import CheckpointStore, DEFAULT_BUCKET, fetch, publish
 from ored.learning.records import (
     CandidateStatus,
+    Checkpoint,
+    CheckpointKind,
     Conversation,
     Dataset,
     LearningCandidate,
@@ -27,6 +30,12 @@ from ored.learning.supabase_store import SupabaseStore
 
 __all__ = [
     "CandidatePolicy",
+    "Checkpoint",
+    "CheckpointKind",
+    "CheckpointStore",
+    "DEFAULT_BUCKET",
+    "fetch",
+    "publish",
     "build_candidates",
     "redact",
     "DatasetError",

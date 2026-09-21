@@ -153,6 +153,16 @@ python scripts/infer.py --interactive
 `infer.py` never imports the trainer, the optimizer or the loss function. It
 loads a checkpoint and runs a forward pass — that is all deployment is.
 
+It reads `task` out of the checkpoint and picks the matching predictor, so the
+same script also serves a Step 2 character language model — there it rebuilds
+the tokenizer saved alongside the weights and completes text instead of bits:
+
+```bash
+python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --text "17 + 9 = "
+python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --pairs 3+4 9+6
+python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --text "the " --sample --tokens 200
+```
+
 ### 5. Understand backpropagation
 
 ```bash
@@ -972,6 +982,67 @@ solved in one forward pass.
    context, which is O(n²) work for O(n) output.
 
 ---
+
+## Supabase — Ored's own project
+
+Ored runs against its own Supabase project, separate from any other site. Nothing
+here reads a table belonging to another product, and the only schema outside
+`public` that Ored's tables reference is `auth`.
+
+### Environment
+
+| Variable | Used by | Secret |
+|---|---|---|
+| `ORED_SB_URL` | trainer, exporter, checkpoint CLI, serving, web backend | no |
+| `ORED_SB_SERVICE_KEY` | trainer, exporter, checkpoint CLI, serving, web backend | **yes — server only** |
+| `ORED_SB_CHECKPOINT_BUCKET` | checkpoint storage, default `ored-checkpoints` | no |
+| `ORED_AUTH_URL` | web backend, to verify a DigiArtz token | no |
+| `ORED_AUTH_KEY` | web backend, publishable key of the DigiArtz project | no |
+| `ORED_ALLOWED_ORIGINS` | web backend, extra origins allowed to post | no |
+| `ORED_API_URL` | the web backend, pointing at `scripts/serve.py` | no |
+| `ORED_API_KEY` | the web backend and the serving process | **yes — server only** |
+
+Ored has no accounts of its own. People sign in with their DigiArtz account, and
+the backend checks that token against the DigiArtz project before it writes
+anything. What it writes goes to Ored's own project under the service key.
+
+The browser never holds an Ored project credential of any kind. `ored/config.js`
+carries the DigiArtz project URL and its publishable key, and nothing else.
+
+### Tables
+
+`ored_staff`, `ored_conversations`, `ored_messages`, `ored_learning_candidates`,
+`ored_training_examples`, `ored_training_sessions`, `ored_model_versions`,
+`ored_datasets`, `ored_checkpoints`, `ored_rate_hits`.
+
+Row level security is enabled **and forced** on every one of them, and not one
+carries a policy. `anon` and `authenticated` hold no grant on any table and no
+grant on the schema, so a browser cannot read a row of Ored data even with a
+valid DigiArtz token — that token was signed by a different project and means
+nothing here. Every read and write goes through the backend or the trainer on
+the service key, which is the only thing that reaches this data at all.
+
+`user_id`, `reviewed_by` and `approved_by` hold DigiArtz user ids. They are
+plain uuid columns with no foreign key, because the accounts they name live in
+a different project.
+
+### Checkpoints
+
+Local checkpoints under `checkpoints/` stay the working copy, but they are not
+where a checkpoint lives. `ored_checkpoints` records every stored artefact and
+the bytes go to the private `ored-checkpoints` bucket, which has no storage
+policy for `anon` or `authenticated`: only the service key can read or write it.
+
+```bash
+python scripts/checkpoints.py push checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
+python scripts/checkpoints.py pull checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
+python scripts/checkpoints.py list
+```
+
+Every push records the size and a sha256, and `pull` refuses a file whose digest
+does not match what was recorded. `serve.py --remote-checkpoints` pulls the live
+checkpoint on boot when there is no local one and pushes it on every save, so a
+restart on a fresh machine does not lose what the model learned online.
 
 ## Code style — no comments, no docstrings
 

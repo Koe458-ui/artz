@@ -1,12 +1,12 @@
 (function () {
   'use strict';
 
-  var STORE_KEY = 'ored.chats.v1';
+  var STORE_PREFIX = 'ored.chats.v1';
   var MAX_CHATS = 50;
   var MAX_HISTORY_TURNS = 20;
   var TITLE_CHARS = 60;
 
-  var cfg = window.KOE_CONFIG || {};
+  var cfg = window.ORED_CONFIG || {};
   var sb = null;
 
   var main = document.getElementById('oMain');
@@ -17,25 +17,41 @@
   var note = document.getElementById('oNote');
   var newBtn = document.getElementById('oNew');
   var menuBtn = document.getElementById('oMenu');
+  var outBtn = document.getElementById('oOut');
   var panel = document.getElementById('oHistory');
   var panelClose = document.getElementById('oHistoryClose');
   var list = document.getElementById('oHistoryList');
   var empty = document.getElementById('oHistoryEmpty');
   var scrim = document.getElementById('oScrim');
 
+  var auth = document.getElementById('oAuth');
+  var authForm = document.getElementById('oAuthForm');
+  var authGo = document.getElementById('oAuthGo');
+  var authJoin = document.getElementById('oAuthJoin');
+  var authNote = document.getElementById('oAuthNote');
+  var emailField = document.getElementById('oEmail');
+  var passField = document.getElementById('oPass');
+
   var chats = [];
   var activeId = '';
   var busy = false;
+  var userId = '';
 
   function uid() {
     if (window.crypto && window.crypto.randomUUID) return window.crypto.randomUUID();
     return 'c' + Date.now().toString(36) + Math.random().toString(36).slice(2, 10);
   }
 
+  function storeKey() {
+    return userId ? STORE_PREFIX + ':' + userId : '';
+  }
+
   function read() {
+    var key = storeKey();
+    if (!key) return [];
     var parsed = [];
     try {
-      var raw = window.localStorage.getItem(STORE_KEY);
+      var raw = window.localStorage.getItem(key);
       parsed = raw ? JSON.parse(raw) : [];
     } catch (e) { return []; }
     if (!Array.isArray(parsed)) return [];
@@ -45,8 +61,10 @@
   }
 
   function write() {
+    var key = storeKey();
+    if (!key) return;
     try {
-      window.localStorage.setItem(STORE_KEY, JSON.stringify(chats.slice(0, MAX_CHATS)));
+      window.localStorage.setItem(key, JSON.stringify(chats.slice(0, MAX_CHATS)));
     } catch (e) {   }
   }
 
@@ -77,12 +95,9 @@
     note.classList.toggle('oNoteBad', !!bad);
   }
 
-  function saySignIn() {
-    say('Sign in to DigiArtz to send messages. ');
-    var link = document.createElement('a');
-    link.href = '/login';
-    link.textContent = 'Sign in';
-    note.appendChild(link);
+  function sayAuth(message, bad) {
+    authNote.textContent = message || '';
+    authNote.classList.toggle('oNoteBad', !!bad);
   }
 
   function bubble(role, content, failed) {
@@ -150,6 +165,34 @@
     input.readOnly = value;
   }
 
+  function showAuth(message, bad) {
+    userId = '';
+    chats = [];
+    activeId = '';
+    closeHistory(false);
+    thread.textContent = '';
+    document.body.classList.add('oOut');
+    document.body.classList.remove('oEmpty');
+    auth.hidden = false;
+    say('');
+    if (message) sayAuth(message, bad);
+    emailField.focus();
+  }
+
+  function showChat(id) {
+    userId = id;
+    document.body.classList.remove('oOut');
+    auth.hidden = true;
+    sayAuth('');
+    passField.value = '';
+    chats = read();
+    if (!chats.length || chats[0].messages.length) startChat();
+    else activeId = chats[0].id;
+    renderThread();
+    renderHistory();
+    say('');
+  }
+
   async function token() {
     if (!sb) return '';
     try {
@@ -175,12 +218,12 @@
     if (busy) return;
 
     if (!sb) {
-      say('Ored cannot reach DigiArtz right now. Refresh and try again.', true);
+      say('Ored cannot reach its server right now. Refresh and try again.', true);
       return;
     }
 
     var bearer = await token();
-    if (!bearer) { saySignIn(); return; }
+    if (!bearer) { showAuth('Your session expired. Sign in again.', true); return; }
 
     var chat = current() || startChat();
     var past = chat.messages.slice(-MAX_HISTORY_TURNS).map(function (m) {
@@ -212,7 +255,7 @@
 
     setBusy(false);
 
-    if (answer.status === 401) { saySignIn(); return; }
+    if (answer.status === 401) { showAuth('Your session expired. Sign in again.', true); return; }
 
     if (!answer.body.ok) {
       say(answer.body.error || 'Ored could not answer that right now.', true);
@@ -230,6 +273,45 @@
     write();
     renderThread();
   }
+
+  authForm.addEventListener('submit', async function (event) {
+    event.preventDefault();
+    if (!sb) { sayAuth('Ored cannot reach the sign-in service right now. Refresh and try again.', true); return; }
+
+    var email = emailField.value.trim();
+    var password = passField.value;
+    if (!email || !password) return;
+
+    authGo.disabled = true;
+    sayAuth('Signing in…');
+
+    var result;
+    try {
+      result = await sb.auth.signInWithPassword({ email: email, password: password });
+    } catch (e) {
+      authGo.disabled = false;
+      sayAuth('That did not go through. Check your connection and try again.', true);
+      return;
+    }
+
+    authGo.disabled = false;
+
+    if (result.error) {
+      sayAuth(result.error.message || 'That did not work. Try again.', true);
+      return;
+    }
+
+    var session = result.data && result.data.session;
+    if (!session) { sayAuth('That did not work. Try again.', true); return; }
+
+    showChat(session.user.id);
+    input.focus();
+  });
+
+  outBtn.addEventListener('click', async function () {
+    if (sb) { try { await sb.auth.signOut(); } catch (e) {   } }
+    showAuth('Signed out.');
+  });
 
   form.addEventListener('submit', function (event) {
     event.preventDefault();
@@ -281,20 +363,34 @@
     if (event.key === 'Escape' && !panel.hidden) closeHistory(true);
   });
 
-  function boot() {
-    if (window.supabase && cfg.SB_URL && cfg.SB_KEY) {
-      try { sb = window.supabase.createClient(cfg.SB_URL, cfg.SB_KEY); }
+  async function boot() {
+    authJoin.href = (cfg.SITE_URL || 'https://digiartz.net') + '/login';
+
+    if (window.supabase && cfg.AUTH_URL && cfg.AUTH_KEY) {
+      try { sb = window.supabase.createClient(cfg.AUTH_URL, cfg.AUTH_KEY); }
       catch (e) { sb = null; }
     }
 
-    chats = read();
-    if (!chats.length || chats[0].messages.length) startChat();
-    else activeId = chats[0].id;
+    if (!sb) {
+      showAuth('Ored is not configured. Copy ored/config.example.js to ored/config.js.', true);
+      return;
+    }
 
-    renderThread();
-    renderHistory();
+    var session = null;
+    try {
+      var result = await sb.auth.getSession();
+      session = result && result.data && result.data.session;
+    } catch (e) { session = null; }
 
-    if (!sb) say('Ored cannot reach DigiArtz right now. Refresh and try again.', true);
+    if (session) showChat(session.user.id); else showAuth('');
+
+    sb.auth.onAuthStateChange(function (event, next) {
+      if (next && next.user) {
+        if (next.user.id !== userId) showChat(next.user.id);
+      } else if (userId) {
+        showAuth('');
+      }
+    });
   }
 
   if (document.readyState === 'loading') {
