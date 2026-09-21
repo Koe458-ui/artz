@@ -9,7 +9,6 @@ const LIMITS = [
   ['/api/admin',             30],
   ['/api/moderation',        30],
   ['/api/ops',               30],
-  ['/api/ored',              20],
   ['/api/csp-report',        30],
   ['/api/store',             60],
   ['/api/download',         120],
