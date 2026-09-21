@@ -9,7 +9,7 @@
 <link rel="icon" type="image/svg+xml" href="/favicon.svg?v=4" sizes="any">
 <link rel="icon" href="/favicon.ico?v=4" sizes="16x16 32x32 48x48">
 <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=4">
-<link rel="stylesheet" href="/ored/app.css?v=1">
+<link rel="stylesheet" href="/ored/app.css?v=3">
 </head>
 <body>
 
@@ -25,6 +25,11 @@
             aria-expanded="false" aria-controls="oHistory">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
         <path d="M4 8h16M4 16h16"></path>
+      </svg>
+    </button>
+    <button type="button" class="oCirc" id="oOut" aria-label="Sign out" title="Sign out">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M15 17l5-5-5-5M20 12H9M13 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h7"></path>
       </svg>
     </button>
   </div>
@@ -48,6 +53,23 @@
   <p class="oNote" id="oNote" role="status"></p>
 </div>
 
+<section class="oAuth" id="oAuth" hidden aria-labelledby="oAuthTitle">
+  <form class="oAuthCard" id="oAuthForm" autocomplete="on">
+    <h1 class="oAuthTitle" id="oAuthTitle">Sign in to Ored</h1>
+    <p class="oAuthLede" id="oAuthLede">Use your DigiArtz account.</p>
+    <label class="oSrOnly" for="oEmail">Email</label>
+    <input class="oField" id="oEmail" type="email" name="email" placeholder="Email"
+           autocomplete="email" required>
+    <label class="oSrOnly" for="oPass">Password</label>
+    <input class="oField" id="oPass" type="password" name="password" placeholder="Password"
+           autocomplete="current-password" minlength="8" required>
+    <button type="submit" class="oBtn" id="oAuthGo">Sign in</button>
+    <p class="oAuthNote" id="oAuthNote" role="status"></p>
+    <a class="oLink" id="oAuthJoin" href="https://digiartz.net/login"
+       target="_blank" rel="noopener">No account yet? Create one on DigiArtz</a>
+  </form>
+</section>
+
 <div class="oScrim" id="oScrim" hidden></div>
 
 <aside class="oHistory" id="oHistory" aria-label="Chat history" hidden>
@@ -64,8 +86,8 @@
 </aside>
 
 <script defer src="/js/vendor/supabase-js-2.112.2.min.js"></script>
-<script defer src="/config.js"></script>
-<script defer src="/ored/app.js?v=1"></script>
+<script defer src="/ored/config.js?v=2"></script>
+<script defer src="/ored/app.js?v=3"></script>
 
 </body>
 </html>

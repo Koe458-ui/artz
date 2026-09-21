@@ -5,9 +5,19 @@ import json
 import os
 import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 from typing import Any, Dict, List, Optional
 
-from ored.learning.online import DEFAULT_CHECKPOINT, DEFAULT_LIVE_DIR, OnlineLearner, OnlinePolicy
+from ored.learning.checkpoints import CheckpointStore
+from ored.learning.online import (
+    DEFAULT_CHECKPOINT,
+    DEFAULT_LIVE_DIR,
+    OnlineLearner,
+    OnlinePolicy,
+    RemoteCheckpoints,
+)
+from ored.learning.store import StoreError
+from ored.learning.supabase_store import SupabaseStore
 from ored.utils.logging_utils import get_logger, section
 
 logger = get_logger(__name__)
@@ -84,6 +94,18 @@ class OredHandler(BaseHTTPRequestHandler):
         })
 
 
+def build_remote(run_name: str) -> Optional[RemoteCheckpoints]:
+    try:
+        return RemoteCheckpoints(
+            store=SupabaseStore.from_env(),
+            files=CheckpointStore.from_env(),
+            run_name=run_name,
+        )
+    except StoreError as exc:
+        logger.error("remote checkpoints are off: %s", exc)
+        return None
+
+
 def build_server(
     host: str,
     port: int,
@@ -92,9 +114,22 @@ def build_server(
     policy: OnlinePolicy,
     live_dir: str,
     api_key: str,
+    remote: Optional[RemoteCheckpoints] = None,
 ) -> ThreadingHTTPServer:
+    if remote is not None:
+        live = Path(live_dir) / "live.pt"
+        if not live.exists():
+            try:
+                if remote.pull(live):
+                    checkpoint = str(live)
+                    logger.info("pulled the live checkpoint from Supabase")
+            except StoreError as exc:
+                logger.error("live checkpoint not pulled: %s", exc)
+        else:
+            checkpoint = str(live)
+
     OredHandler.learner = OnlineLearner.from_checkpoint(
-        path=checkpoint, device=device, policy=policy, live_dir=live_dir
+        path=checkpoint, device=device, policy=policy, live_dir=live_dir, remote=remote
     )
     OredHandler.api_key = api_key
     return ThreadingHTTPServer((host, port), OredHandler)
@@ -115,6 +150,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--steps-per-message", type=int, default=1)
     parser.add_argument("--save-every", type=int, default=25)
     parser.add_argument("--no-learning", action="store_true")
+    parser.add_argument("--remote-checkpoints", action="store_true")
+    parser.add_argument("--run-name", default="live")
     args = parser.parse_args(argv)
 
     policy = OnlinePolicy(
@@ -126,6 +163,8 @@ def main(argv: Optional[List[str]] = None) -> int:
         policy.steps_per_message = 1
         policy.save_every = 0
 
+    remote = build_remote(args.run_name) if args.remote_checkpoints else None
+
     server = build_server(
         host=args.host,
         port=args.port,
@@ -134,12 +173,14 @@ def main(argv: Optional[List[str]] = None) -> int:
         policy=policy,
         live_dir=args.live_dir,
         api_key=os.environ.get("ORED_API_KEY", ""),
+        remote=remote,
     )
 
     logger.info(section("ORED.AI -- SERVING"))
     logger.info(f"listening on {args.host}:{args.port}")
     logger.info(f"base checkpoint : {args.checkpoint}")
     logger.info(f"live checkpoint : {args.live_dir}/live.pt")
+    logger.info(f"supabase        : {'on' if remote else 'off'}")
 
     try:
         server.serve_forever()

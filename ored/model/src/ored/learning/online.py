@@ -11,6 +11,9 @@ from ored.config import Config
 from ored.data.tokenizer import Tokenizer
 from ored.evaluation.lm_evaluator import load_language_model
 from ored.inference.generator import generate_text
+from ored.learning.checkpoints import CheckpointStore, fetch, publish
+from ored.learning.records import CheckpointKind
+from ored.learning.store import StoreError
 from ored.utils.checkpoint import save_checkpoint
 from ored.utils.logging_utils import get_logger
 
@@ -41,6 +44,32 @@ class OnlinePolicy:
             raise ValueError("min_known_ratio must be in (0, 1]")
         if self.min_chars < 2:
             raise ValueError("min_chars must be >= 2")
+
+
+@dataclass
+class RemoteCheckpoints:
+
+    store: Any
+    files: CheckpointStore
+    run_name: str = "live"
+
+    def push(self, path: Path, stats: Dict[str, Any]) -> None:
+        publish(
+            store=self.store,
+            files=self.files,
+            path=path,
+            kind=CheckpointKind.LIVE,
+            run_name=self.run_name,
+        )
+
+    def pull(self, path: Path) -> bool:
+        return fetch(
+            store=self.store,
+            files=self.files,
+            path=path,
+            kind=CheckpointKind.LIVE,
+            run_name=self.run_name,
+        ) is not None
 
 
 @dataclass
@@ -82,6 +111,7 @@ class OnlineLearner:
         policy: Optional[OnlinePolicy] = None,
         live_dir: str | Path = DEFAULT_LIVE_DIR,
         version: str = "live",
+        remote: Optional[RemoteCheckpoints] = None,
     ) -> None:
         self.policy = policy or OnlinePolicy()
         self.policy.validate()
@@ -92,6 +122,7 @@ class OnlineLearner:
         self.block_size = cfg.data.block_size
         self.live_dir = Path(live_dir)
         self.version = version
+        self.remote = remote
         self.stats = OnlineStats()
         self.optimizer = torch.optim.AdamW(
             self.model.parameters(), lr=self.policy.learning_rate
@@ -105,6 +136,7 @@ class OnlineLearner:
         device: str = "auto",
         policy: Optional[OnlinePolicy] = None,
         live_dir: str | Path = DEFAULT_LIVE_DIR,
+        remote: Optional[RemoteCheckpoints] = None,
     ) -> "OnlineLearner":
         model, tokenizer, cfg, info = load_language_model(path, device)
         return cls(
@@ -114,6 +146,7 @@ class OnlineLearner:
             device=info["device"],
             policy=policy,
             live_dir=live_dir,
+            remote=remote,
         )
 
     def _encode(self, text: str) -> Tuple[List[int], float]:
@@ -199,7 +232,7 @@ class OnlineLearner:
 
     def save(self) -> Path:
         self.live_dir.mkdir(parents=True, exist_ok=True)
-        return save_checkpoint(
+        path = save_checkpoint(
             path=self.live_dir / "live.pt",
             model=self.model,
             config=self.cfg.to_dict(),
@@ -208,3 +241,9 @@ class OnlineLearner:
             optimizer=self.optimizer,
             extra={"tokenizer": self.tokenizer.to_dict(), "online": self.stats.as_dict()},
         )
+        if self.remote is not None:
+            try:
+                self.remote.push(path, self.stats.as_dict())
+            except StoreError as exc:
+                logger.error("live checkpoint not pushed: %s", exc)
+        return path

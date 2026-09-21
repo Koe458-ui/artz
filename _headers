@@ -23,6 +23,9 @@
 /config.js
   Cache-Control: public, max-age=300, must-revalidate
 
+/ored/config.js
+  Cache-Control: public, max-age=300, must-revalidate
+
 /favicon.svg
   Cache-Control: public, max-age=604800
 /favicon.ico
