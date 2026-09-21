@@ -7,6 +7,11 @@
   var TITLE_CHARS = 60;
 
   var cfg = window.ORED_CONFIG || {};
+  // Ored has no accounts of its own. AUTH_URL and AUTH_KEY name the DigiArtz project, so the account
+  // someone has on the site is the account they have here, by password or by the same providers.
+  var AUTH_URL = String(cfg.AUTH_URL || '');
+  var AUTH_KEY = String(cfg.AUTH_KEY || '');
+  var SITE_URL = String(cfg.SITE_URL || 'https://digiartz.net');
   var sb = null;
 
   var main = document.getElementById('oMain');
@@ -31,6 +36,8 @@
   var authNote = document.getElementById('oAuthNote');
   var emailField = document.getElementById('oEmail');
   var passField = document.getElementById('oPass');
+  var seeds = document.getElementById('oSeeds');
+  var socialBtns = Array.prototype.slice.call(document.querySelectorAll('.oSocialBtn'));
 
   var chats = [];
   var activeId = '';
@@ -308,6 +315,59 @@
     input.focus();
   });
 
+  // The site's providers, in the site's order. Apple is listed there and not yet enabled on the
+  // project, so it says so here rather than failing at Supabase with a provider error.
+  var OAUTH_LABELS = { google: 'Google', discord: 'Discord', apple: 'Apple' };
+
+  function socialBusy(value) {
+    for (var i = 0; i < socialBtns.length; i++) socialBtns[i].disabled = value;
+  }
+
+  async function oauth(provider) {
+    if (provider === 'apple') {
+      sayAuth('Apple sign-in isn\u2019t available at the moment. Continue with Google or Discord.', true);
+      return;
+    }
+    if (!sb) {
+      sayAuth('Ored cannot reach the sign-in service right now. Refresh and try again.', true);
+      return;
+    }
+
+    var label = OAUTH_LABELS[provider] || provider;
+    socialBusy(true);
+    sayAuth('Opening ' + label + '\u2026');
+
+    // Back to this page. It is the whole of this site, so the origin is the address to return to
+    var opts = { redirectTo: window.location.origin + '/' };
+    if (provider === 'google') opts.queryParams = { prompt: 'select_account' };
+
+    try {
+      var result = await sb.auth.signInWithOAuth({ provider: provider, options: opts });
+      if (result.error) throw result.error;
+    } catch (e) {
+      socialBusy(false);
+      var raw = (e && e.message ? String(e.message) : '').toLowerCase();
+      sayAuth(/provider is not enabled|unsupported provider/.test(raw)
+        ? label + ' sign-in isn\u2019t available right now. Try another way.'
+        : label + ' sign-in did not go through. Try again.', true);
+    }
+  }
+
+  socialBtns.forEach(function (button) {
+    button.addEventListener('click', function () {
+      oauth(button.getAttribute('data-provider'));
+    });
+  });
+
+  // An opener fills the box rather than sending it, so the first message is still the member's own
+  seeds.addEventListener('click', function (event) {
+    var button = event.target.closest('.oSeed');
+    if (!button) return;
+    input.value = button.textContent.trim();
+    grow();
+    input.focus();
+  });
+
   outBtn.addEventListener('click', async function () {
     if (sb) { try { await sb.auth.signOut(); } catch (e) {   } }
     showAuth('Signed out.');
@@ -363,15 +423,31 @@
     if (event.key === 'Escape' && !panel.hidden) closeHistory(true);
   });
 
-  async function boot() {
-    authJoin.href = (cfg.SITE_URL || 'https://digiartz.net') + '/login';
+  // What a provider sent back. Supabase reads the code itself while the client initialises, so this
+  // runs after getSession() and only tidies the address bar and reports a refusal the member can read.
+  function oauthNotice() {
+    var query = new URLSearchParams(window.location.search);
+    var hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
+    var error = query.get('error_description') || query.get('error') ||
+                hash.get('error_description') || hash.get('error') || '';
+    var handled = error || query.has('code') || hash.has('access_token');
+    if (handled) {
+      try { window.history.replaceState({}, document.title, window.location.pathname); }
+      catch (e) {   }
+    }
+    return error ? String(error).replace(/\+/g, ' ') : '';
+  }
 
-    if (window.supabase && cfg.AUTH_URL && cfg.AUTH_KEY) {
-      try { sb = window.supabase.createClient(cfg.AUTH_URL, cfg.AUTH_KEY); }
+  async function boot() {
+    authJoin.href = SITE_URL + '/login';
+
+    if (window.supabase && AUTH_URL && AUTH_KEY) {
+      try { sb = window.supabase.createClient(AUTH_URL, AUTH_KEY); }
       catch (e) { sb = null; }
     }
 
     if (!sb) {
+      socialBusy(true);
       showAuth('Ored is not configured. Copy config.example.js to config.js.', true);
       return;
     }
@@ -382,7 +458,10 @@
       session = result && result.data && result.data.session;
     } catch (e) { session = null; }
 
-    if (session) showChat(session.user.id); else showAuth('');
+    var refused = oauthNotice();
+
+    if (session) showChat(session.user.id);
+    else showAuth(refused || '', !!refused);
 
     sb.auth.onAuthStateChange(function (event, next) {
       if (next && next.user) {
