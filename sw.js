@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'v258';
+const CACHE_VERSION = 'v259';
 
 const STATIC = `dz-static-${CACHE_VERSION}`;
 const THUMB  = `dz-img-thumb-${CACHE_VERSION}`;
@@ -25,7 +25,7 @@ const SHELL_URLS = [
   '/',
   '/index.html',
   '/config.js',
-  '/uploadVerifier.js',
+  '/js/imagehash.js?v=1',
   '/site.webmanifest',
   '/favicon.svg?v=4',
   '/favicon.ico?v=4',
@@ -75,7 +75,7 @@ const SHELL_URLS = [
   '/js/profile.js?v=33',
   '/js/albums.js?v=32',
   '/js/drafts.js?v=14',
-  '/js/upqueue.js?v=10',
+  '/js/upqueue.js?v=11',
   '/js/avatar.js?v=9',
   '/js/pfedit.js?v=26',
   '/js/mywork.js?v=32',
@@ -93,7 +93,7 @@ const SHELL_URLS = [
   '/js/hubs.js?v=5',
   '/js/secview.js?v=9',
   '/js/engagement.js?v=12',
-  '/js/sections.js?v=143',
+  '/js/sections.js?v=144',
   '/js/heropitch.js?v=5',
   '/js/routes.js?v=4',
   '/js/topnav.js?v=12',

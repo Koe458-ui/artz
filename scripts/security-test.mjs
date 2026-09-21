@@ -15,7 +15,7 @@ function falsy(name, got)  { check(name, !!got, false); }
 const routes = [
   '/api/store', '/api/ops', '/api/collab', '/api/collab/promo-code',
   '/api/rzp', '/api/paypal', '/api/payouts', '/api/download',
-  '/api/market-download', '/api/resource-download', '/api/moderate-upload',
+  '/api/market-download', '/api/resource-download',
   '/api/moderation/ban-user', '/api/admin/collab/add-partner',
   '/api/subscription/claim-max', '/api/something-added-tomorrow',
 ];
@@ -100,7 +100,7 @@ check('empty name has a fallback', storedFileName(''), 'file');
   truthy('collab dispatch requires a function', /typeof fn !== 'function'/.test(collab));
 }
 
-for (const f of ['download', 'market-download', 'resource-download', 'moderate-upload',
+for (const f of ['download', 'market-download', 'resource-download',
                  'rzp', 'paypal', 'payouts', 'collab', 'ops', 'store']) {
   const src = readFileSync(`functions/api/${f}.js`, 'utf8');
   falsy(`${f}.js does not return String(err) to the caller`, /detail:\s*String\(err\)/.test(src));
@@ -195,7 +195,7 @@ for (const f of ['functions/api/paypal.js', 'functions/api/paypal-webhook.js']) 
 {
   const SECRET = /(eyJ[A-Za-z0-9_-]{20,}\.eyJ[A-Za-z0-9_-]{20,})|(\brzp_(live|test)_[A-Za-z0-9]{10,})|(\bsk_live_[A-Za-z0-9]{10,})|(\bAIzaSy[A-Za-z0-9_-]{20,})|(\bsb_secret_[A-Za-z0-9_-]{10,})|(-----BEGIN [A-Z ]*PRIVATE KEY-----)/;
   const { readdirSync } = await import('node:fs');
-  const served = ['index.html', 'sw.js', 'uploadVerifier.js', 'aiAssistantData.js', 'config.example.js']
+  const served = ['index.html', 'sw.js', 'aiAssistantData.js', 'config.example.js']
     .concat(readdirSync('js').filter((f) => f.endsWith('.js')).map((f) => 'js/' + f));
   for (const f of served) falsy(`${f} carries no secret-shaped literal`, SECRET.test(readFileSync(f, 'utf8')));
 }
