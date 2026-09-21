@@ -1,6 +1,2 @@
 User-agent: *
-Allow: /
-
-Disallow: /api/
-
-Sitemap: https://digiartz.net/sitemap.xml
+Disallow: /
