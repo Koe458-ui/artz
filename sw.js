@@ -101,6 +101,7 @@ const SHELL_URLS = [
 ];
 
 const API_RE       = /^\/api\//;
+const CONFIG_RE    = /^\/config\.js$/;
 const SUPABASE_RE  = /\.supabase\.co$/;
 const FONT_RE      = /^fonts\.(googleapis|gstatic)\.com$/;
 const BYPASS_RE    = /(googletagmanager|google-analytics|googlesyndication|doubleclick|cloudflareinsights)\./;
@@ -233,6 +234,23 @@ async function cacheFirst(request, cacheName) {
   }
 }
 
+async function networkFirst(request, cacheName) {
+  const cache = await caches.open(cacheName);
+  try {
+    const res = await fetch(request);
+    if (res && res.ok) {
+      cache.put(request, res.clone()).catch(() => {});
+      return res;
+    }
+    const hit = await cache.match(request, { ignoreVary: true });
+    return hit || res;
+  } catch (err) {
+    const hit = await cache.match(request, { ignoreVary: true });
+    if (hit) return hit;
+    throw err;
+  }
+}
+
 async function staleWhileRevalidate(request, cacheName) {
   const cache = await caches.open(cacheName);
   const hit = await cache.match(request);
@@ -290,6 +308,10 @@ self.addEventListener('fetch', (event) => {
   }
 
   if (url.origin === self.location.origin) {
+    if (CONFIG_RE.test(url.pathname)) {
+      event.respondWith(networkFirst(req, STATIC));
+      return;
+    }
     event.respondWith(isVersioned(url)
       ? cacheFirst(req, STATIC)
       : staleWhileRevalidate(req, STATIC));
