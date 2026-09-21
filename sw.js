@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'v261';
+const CACHE_VERSION = 'v262';
 
 const STATIC = `dz-static-${CACHE_VERSION}`;
 const THUMB  = `dz-img-thumb-${CACHE_VERSION}`;
@@ -68,7 +68,7 @@ const SHELL_URLS = [
   '/js/misc-core.js?v=10',
   '/js/app-core.js?v=61',
   '/js/protect.js?v=4',
-  '/js/gallery.js?v=112',
+  '/js/gallery.js?v=113',
   '/js/fghead.js?v=11',
   '/js/auth.js?v=36',
   '/js/follow.js?v=3',
@@ -79,7 +79,7 @@ const SHELL_URLS = [
   '/js/avatar.js?v=9',
   '/js/pfedit.js?v=26',
   '/js/mywork.js?v=32',
-  '/js/startup.js?v=12',
+  '/js/startup.js?v=13',
   '/js/search.js?v=31',
   '/js/feed.js?v=23',
   '/js/herosearch.js?v=10',
@@ -87,11 +87,11 @@ const SHELL_URLS = [
   '/js/legal-content.js?v=4',
   '/js/theme.js?v=10',
   '/js/antrack.js?v=2',
-  '/js/lazy.js?v=15',
+  '/js/lazy.js?v=16',
 
   '/js/analytics.js?v=23',
   '/js/hubs.js?v=5',
-  '/js/secview.js?v=9',
+  '/js/secview.js?v=10',
   '/js/engagement.js?v=12',
   '/js/sections.js?v=144',
   '/js/heropitch.js?v=5',
