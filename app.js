@@ -372,7 +372,7 @@
     }
 
     if (!sb) {
-      showAuth('Ored is not configured. Copy ored/config.example.js to ored/config.js.', true);
+      showAuth('Ored is not configured. Copy config.example.js to config.js.', true);
       return;
     }
 
