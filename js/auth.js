@@ -532,6 +532,36 @@
   }
   window.checkUserRole = checkUserRole;
 
+  // A member sent here by /authorize is in the middle of signing in to another
+  // DigiArtz property. Once they are through, they go back to finish it. The
+  // note keeps for a quarter of an hour, so an abandoned hand-off cannot carry
+  // somebody off the site days later.
+  var DZ_HANDOFF_KEY = 'dz.handoff.return';
+  var DZ_HANDOFF_LIFE = 15 * 60 * 1000;
+
+  function dzHandoffBack(){
+    var raw = '';
+    try { raw = window.sessionStorage.getItem(DZ_HANDOFF_KEY) || ''; } catch(e){}
+    if (raw) {
+      var kept = null;
+      try { kept = JSON.parse(raw); } catch(e){ kept = null; }
+      var fresh = kept && typeof kept.u === 'string' &&
+                  typeof kept.t === 'number' && (Date.now() - kept.t) < DZ_HANDOFF_LIFE;
+      if (fresh) return kept.u;
+    }
+    var asked = '';
+    try { asked = new URLSearchParams(window.location.search).get('continue') || ''; } catch(e){}
+    return asked;
+  }
+
+  function dzHandoffResume(){
+    var where = dzHandoffBack();
+    try { window.sessionStorage.removeItem(DZ_HANDOFF_KEY); } catch(e){}
+    if (!/^\/authorize\?[^\s]*$/.test(where)) return false;
+    window.location.replace(where);
+    return true;
+  }
+
   var dzLastAuthId = (function(){
     try { return currentUser && currentUser.id ? String(currentUser.id) : 'guest'; }
     catch (e) { return 'guest'; }
@@ -567,6 +597,7 @@
       }
 
       if (event === 'SIGNED_IN') {
+        if (dzHandoffResume()) return;
         closeAuthMod();
         checkUserRole();
         var greetName = (currentUser && currentUser.user_metadata && currentUser.user_metadata.username)

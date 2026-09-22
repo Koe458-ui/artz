@@ -1,6 +1,6 @@
 'use strict';
 
-const CACHE_VERSION = 'v264';
+const CACHE_VERSION = 'v265';
 
 const STATIC = `dz-static-${CACHE_VERSION}`;
 const THUMB  = `dz-img-thumb-${CACHE_VERSION}`;
@@ -70,7 +70,7 @@ const SHELL_URLS = [
   '/js/protect.js?v=4',
   '/js/gallery.js?v=114',
   '/js/fghead.js?v=11',
-  '/js/auth.js?v=36',
+  '/js/auth.js?v=37',
   '/js/follow.js?v=3',
   '/js/profile.js?v=33',
   '/js/albums.js?v=32',

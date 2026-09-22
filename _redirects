@@ -12,6 +12,8 @@
 
 /login      /index.html  200
 
+/authorize  /authorize.html  200
+
 /resource/*  /index.html  200
 /blog/*      /index.html  200
 /listing/*   /index.html  200
