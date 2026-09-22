@@ -2,6 +2,12 @@
   "name": "ored",
   "main": "worker.js",
   "compatibility_date": "2026-09-21",
+  "vars": {
+    "ORED_AUTH_URL": "https://tmqzqlrpjpydiftlrzmj.supabase.co",
+    "ORED_AUTH_KEY": "sb_publishable_x7xlsCx-ZsvpNLCXRxyvMw_PsJQT2xy",
+    "ORED_SB_URL": "https://xoauguhlxjozpvukjtro.supabase.co",
+    "ORED_SITE_URL": "https://digiartz.net"
+  },
   "assets": {
     "directory": "./public",
     "binding": "ASSETS",
