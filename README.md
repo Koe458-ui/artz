@@ -11,15 +11,23 @@ own, listed in search separately from DigiArtz.
 
 | Path | What |
 |---|---|
-| `index.html`, `app.js`, `app.css` | the chat page, served at the domain root |
-| `fonts/` | the two typefaces the page uses, served from here rather than Google |
+| `public/` | everything the deploy publishes, and nothing else |
+| `public/index.html`, `public/app.js`, `public/app.css` | the chat page, served at the domain root |
+| `public/fonts/` | the two typefaces the page uses, served from here rather than Google |
+| `public/robots.txt`, `public/sitemap.xml` | what crawlers are told, for the one page there is |
+| `worker.js`, `wrangler.jsonc` | the Worker: its entry, and the config the deploy reads |
 | `functions/api/ored.js` | the backend endpoint |
 | `functions/lib/ored-*.js` | its helpers |
-| `robots.txt`, `sitemap.xml` | what crawlers are told, for the one page there is |
 | `ored/model/` | the model, training, evaluation and learning code |
 
-`ored/model/` is Python and is never meant to be served. `functions/ored/model/`
-answers 404 for anything under `/ored/model/`.
+`public/` is the whole of what is reachable. `wrangler.jsonc` points `assets` at
+that directory and at no other, so a file added anywhere else in this repository
+is not published by adding it. That is the point of the directory: the list of
+what is public is a place rather than a rule, and it cannot drift.
+
+`ored/model/` is Python and is never meant to be served. It is outside `public/`,
+and `worker.js` answers 404 for anything under `/ored/model/` as well, with the
+same `noindex` header every other 404 carries.
 
 ## Sign-in
 
@@ -97,8 +105,9 @@ grants `'self'` and the Supabase project and nothing else, and it stays that way
 
 ## Configuration
 
-`config.js` is generated at deploy and git-ignored. Copy `config.example.js` and
-fill it in. It holds the DigiArtz project URL and its publishable key, and never
+`config.js` is generated at deploy and git-ignored. Copy `config.example.js` to
+`public/config.js` — inside the published directory, which is where the page
+asks for it. It holds the DigiArtz project URL and its publishable key, and never
 anything secret.
 
 Everything else is an environment variable on the backend:
