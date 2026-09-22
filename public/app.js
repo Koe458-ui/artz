@@ -2,6 +2,11 @@
   'use strict';
 
   var STORE_PREFIX = 'ored.chats.v1';
+  var HANDOFF_PATH = '/authorize';
+  var STATE_KEY = 'ored.sso.state';
+  var TRIED_KEY = 'ored.sso.tried';
+  var OFF_KEY = 'ored.sso.off';
+  var SEEN_KEY = 'ored.sso.seen';
   var MAX_CHATS = 50;
   var MAX_HISTORY_TURNS = 20;
   var TITLE_CHARS = 60;
@@ -28,14 +33,10 @@
   var scrim = document.getElementById('oScrim');
 
   var auth = document.getElementById('oAuth');
-  var authForm = document.getElementById('oAuthForm');
   var authGo = document.getElementById('oAuthGo');
   var authJoin = document.getElementById('oAuthJoin');
   var authNote = document.getElementById('oAuthNote');
-  var emailField = document.getElementById('oEmail');
-  var passField = document.getElementById('oPass');
   var seeds = document.getElementById('oSeeds');
-  var socialBtns = Array.prototype.slice.call(document.querySelectorAll('.oSocialBtn'));
 
   var chats = [];
   var activeId = '';
@@ -49,6 +50,18 @@
 
   function storeKey() {
     return userId ? STORE_PREFIX + ':' + userId : '';
+  }
+
+  function flagGet(store, key) {
+    try { return window[store].getItem(key) || ''; } catch (e) { return ''; }
+  }
+
+  function flagSet(store, key, value) {
+    try { window[store].setItem(key, value); } catch (e) {   }
+  }
+
+  function flagDrop(store, key) {
+    try { window[store].removeItem(key); } catch (e) {   }
   }
 
   function read() {
@@ -179,17 +192,19 @@
     document.body.classList.add('oOut');
     document.body.classList.remove('oEmpty');
     auth.hidden = false;
+    settle();
     say('');
-    if (message) sayAuth(message, bad);
-    emailField.focus();
+    sayAuth(message || '', bad);
+    authGo.disabled = false;
+    try { authGo.focus({ preventScroll: true }); } catch (e) {   }
   }
 
   function showChat(id) {
     userId = id;
     document.body.classList.remove('oOut');
     auth.hidden = true;
+    settle();
     sayAuth('');
-    passField.value = '';
     chats = read();
     if (!chats.length || chats[0].messages.length) startChat();
     else activeId = chats[0].id;
@@ -279,80 +294,36 @@
     renderThread();
   }
 
-  authForm.addEventListener('submit', async function (event) {
-    event.preventDefault();
-    if (!sb) { sayAuth('Ored cannot reach the sign-in service right now. Refresh and try again.', true); return; }
+  function siteOrigin() {
+    try { return new URL(SITE_URL).origin; } catch (e) { return ''; }
+  }
 
-    var email = emailField.value.trim();
-    var password = passField.value;
-    if (!email || !password) return;
+  var NO_SITE = 'Ored does not know where DigiArtz is. Refresh and try again.';
 
+  function handoff(silent) {
+    var origin = siteOrigin();
+    if (!origin) return false;
+    var state = uid();
+    flagSet('sessionStorage', STATE_KEY, state);
+    flagSet('sessionStorage', TRIED_KEY, '1');
+    var url = origin + HANDOFF_PATH +
+      '?redirect_uri=' + encodeURIComponent(window.location.origin + '/') +
+      '&state=' + encodeURIComponent(state) +
+      (silent ? '&prompt=none' : '');
+    window.location.assign(url);
+    return true;
+  }
+
+  function signIn() {
+    flagDrop('sessionStorage', OFF_KEY);
     authGo.disabled = true;
-    sayAuth('Signing in…');
-
-    var result;
-    try {
-      result = await sb.auth.signInWithPassword({ email: email, password: password });
-    } catch (e) {
-      authGo.disabled = false;
-      sayAuth('That did not go through. Check your connection and try again.', true);
-      return;
-    }
-
+    sayAuth('Taking you to DigiArtz\u2026');
+    if (handoff(false)) return;
     authGo.disabled = false;
-
-    if (result.error) {
-      sayAuth(result.error.message || 'That did not work. Try again.', true);
-      return;
-    }
-
-    var session = result.data && result.data.session;
-    if (!session) { sayAuth('That did not work. Try again.', true); return; }
-
-    showChat(session.user.id);
-    input.focus();
-  });
-
-  var OAUTH_LABELS = { google: 'Google', discord: 'Discord', apple: 'Apple' };
-
-  function socialBusy(value) {
-    for (var i = 0; i < socialBtns.length; i++) socialBtns[i].disabled = value;
+    sayAuth(NO_SITE, true);
   }
 
-  async function oauth(provider) {
-    if (provider === 'apple') {
-      sayAuth('Apple sign-in isn\u2019t available at the moment. Continue with Google or Discord.', true);
-      return;
-    }
-    if (!sb) {
-      sayAuth('Ored cannot reach the sign-in service right now. Refresh and try again.', true);
-      return;
-    }
-
-    var label = OAUTH_LABELS[provider] || provider;
-    socialBusy(true);
-    sayAuth('Opening ' + label + '\u2026');
-
-    var opts = { redirectTo: window.location.origin + '/' };
-    if (provider === 'google') opts.queryParams = { prompt: 'select_account' };
-
-    try {
-      var result = await sb.auth.signInWithOAuth({ provider: provider, options: opts });
-      if (result.error) throw result.error;
-    } catch (e) {
-      socialBusy(false);
-      var raw = (e && e.message ? String(e.message) : '').toLowerCase();
-      sayAuth(/provider is not enabled|unsupported provider/.test(raw)
-        ? label + ' sign-in isn\u2019t available right now. Try another way.'
-        : label + ' sign-in did not go through. Try again.', true);
-    }
-  }
-
-  socialBtns.forEach(function (button) {
-    button.addEventListener('click', function () {
-      oauth(button.getAttribute('data-provider'));
-    });
-  });
+  authGo.addEventListener('click', signIn);
 
   seeds.addEventListener('click', function (event) {
     var button = event.target.closest('.oSeed');
@@ -363,8 +334,10 @@
   });
 
   outBtn.addEventListener('click', async function () {
+    flagSet('sessionStorage', OFF_KEY, '1');
+    flagDrop('localStorage', SEEN_KEY);
     if (sb) { try { await sb.auth.signOut(); } catch (e) {   } }
-    showAuth('Signed out.');
+    showAuth('Signed out. You are still signed in on DigiArtz.');
   });
 
   form.addEventListener('submit', function (event) {
@@ -417,44 +390,54 @@
     if (event.key === 'Escape' && !panel.hidden) closeHistory(true);
   });
 
-  function oauthNotice() {
-    var query = new URLSearchParams(window.location.search);
-    var hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
-    var error = query.get('error_description') || query.get('error') ||
-                hash.get('error_description') || hash.get('error') || '';
-    var handled = error || query.has('code') || hash.has('access_token');
-    if (handled) {
-      try { window.history.replaceState({}, document.title, window.location.pathname); }
-      catch (e) {   }
-    }
-    return error ? String(error).replace(/\+/g, ' ') : '';
+  function settle() {
+    document.body.classList.remove('oBooting');
   }
 
-  async function boot() {
-    authJoin.href = SITE_URL + '/login';
+  function landing() {
+    var hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
+    var query = new URLSearchParams(window.location.search);
+    var pick = function (name) { return hash.get(name) || query.get(name) || ''; };
 
-    if (window.supabase && AUTH_URL && AUTH_KEY) {
-      try { sb = window.supabase.createClient(AUTH_URL, AUTH_KEY); }
-      catch (e) { sb = null; }
-    }
+    var access = pick('access_token');
+    var refresh = pick('refresh_token');
+    var state = pick('state');
+    var error = pick('error_description') || pick('error');
+    var invited = query.has('sso') || query.get('from') === 'digiartz';
 
-    if (!sb) {
-      socialBusy(true);
-      showAuth('Ored is not configured. ORED_AUTH_URL and ORED_AUTH_KEY are not set on the Worker.', true);
-      return;
-    }
+    if (!access && !error && !invited) return null;
 
-    var session = null;
-    try {
-      var result = await sb.auth.getSession();
-      session = result && result.data && result.data.session;
-    } catch (e) { session = null; }
+    try { window.history.replaceState({}, document.title, window.location.pathname); }
+    catch (e) {   }
 
-    var refused = oauthNotice();
+    if (!access && !error) return { invited: true };
 
-    if (session) showChat(session.user.id);
-    else showAuth(refused || '', !!refused);
+    var expected = flagGet('sessionStorage', STATE_KEY);
+    flagDrop('sessionStorage', STATE_KEY);
+    if (!expected || state !== expected)
+      return { error: 'That sign-in could not be verified. Try again.' };
 
+    var code = String(error || '').replace(/\+/g, ' ');
+    if (/^(login|interaction|consent)_required$/.test(code)) return { quiet: true };
+    if (code) return { error: code };
+    if (!refresh) return { error: 'That sign-in did not come back complete. Try again.' };
+
+    return { access_token: access, refresh_token: refresh };
+  }
+
+  function cameFromSite() {
+    var origin = siteOrigin();
+    if (!origin) return false;
+    try { return new URL(document.referrer).origin === origin; } catch (e) { return false; }
+  }
+
+  function trySilently(invited) {
+    if (flagGet('sessionStorage', TRIED_KEY)) return false;
+    if (flagGet('sessionStorage', OFF_KEY)) return false;
+    return !!invited || !!flagGet('localStorage', SEEN_KEY) || cameFromSite();
+  }
+
+  function watch() {
     sb.auth.onAuthStateChange(function (event, next) {
       if (next && next.user) {
         if (next.user.id !== userId) showChat(next.user.id);
@@ -464,9 +447,87 @@
     });
   }
 
+  async function adopt(back) {
+    var result;
+    try {
+      result = await sb.auth.setSession({
+        access_token: back.access_token,
+        refresh_token: back.refresh_token
+      });
+    } catch (e) { result = null; }
+    var session = result && result.data && result.data.session;
+    if (!session || result.error) return null;
+    return session;
+  }
+
+  async function boot() {
+    authJoin.href = SITE_URL + '/login';
+
+    if (window.supabase && AUTH_URL && AUTH_KEY) {
+      try {
+        sb = window.supabase.createClient(AUTH_URL, AUTH_KEY, {
+          auth: { detectSessionInUrl: false, persistSession: true, autoRefreshToken: true }
+        });
+      } catch (e) { sb = null; }
+    }
+
+    if (!sb) {
+      showAuth('Ored is not configured. ORED_AUTH_URL and ORED_AUTH_KEY are not set on the Worker.', true);
+      authGo.disabled = true;
+      return;
+    }
+
+    var back = landing();
+
+    if (back && back.access_token) {
+      var handed = await adopt(back);
+      if (handed) {
+        flagSet('localStorage', SEEN_KEY, '1');
+        showChat(handed.user.id);
+        watch();
+        return;
+      }
+      showAuth('That sign-in did not go through. Try again.', true);
+      watch();
+      return;
+    }
+
+    var session = null;
+    try {
+      var result = await sb.auth.getSession();
+      session = result && result.data && result.data.session;
+    } catch (e) { session = null; }
+
+    if (session) {
+      showChat(session.user.id);
+      watch();
+      return;
+    }
+
+    if (back && back.quiet) {
+      flagDrop('localStorage', SEEN_KEY);
+      showAuth('');
+    } else if (back && back.error) {
+      showAuth(back.error, true);
+    } else if (trySilently(back && back.invited)) {
+      if (handoff(true)) return;
+      showAuth(NO_SITE, true);
+    } else {
+      showAuth('');
+    }
+
+    watch();
+  }
+
+  function start() {
+    boot().catch(function () {
+      showAuth('Ored could not start. Refresh and try again.', true);
+    });
+  }
+
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', boot);
+    document.addEventListener('DOMContentLoaded', start);
   } else {
-    boot();
+    start();
   }
 })();
