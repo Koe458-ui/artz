@@ -83,7 +83,6 @@ def test_language_model_checkpoint_loads_with_its_tokenizer(trained_lm_checkpoin
     assert isinstance(predictor, LanguageModelPredictor)
     assert predictor.task == "language_model"
     assert predictor.vocab_size == predictor.tokenizer.vocab_size
-    # the head is as wide as the vocabulary the tokenizer carries
     assert predictor.model.describe()["vocab_size"] == predictor.tokenizer.vocab_size
     assert predictor.model.training is False
 
@@ -133,7 +132,6 @@ def test_language_model_weights_match_the_checkpoint(trained_lm_checkpoint):
 
 
 def test_predictor_class_dispatches_on_the_checkpoint_task(trained_lm_checkpoint):
-    # asking for the bit-addition predictor still yields a working language model
     predictor = Predictor.from_checkpoint(trained_lm_checkpoint, device="cpu")
     assert isinstance(predictor, LanguageModelPredictor)
 
@@ -151,7 +149,6 @@ def test_language_model_checkpoint_without_a_tokenizer_is_rejected(
 
 
 def test_language_model_cli_completes_text(trained_lm_checkpoint):
-    # the "ored" logger writes to its own stdout handler, so listen on it directly
     import io
     import logging
 
@@ -192,12 +189,6 @@ def test_default_checkpoint_falls_back_to_the_language_model(tmp_path, monkeypat
     assert resolve_checkpoint() == DEFAULT_CHECKPOINT
 
 
-# --- loading a char transformer checkpoint -------------------------------
-# the failure these cover: a language model checkpoint going down the bit-adder
-# path and dying on "Transformer needs vocab_size, which comes from the
-# tokenizer", because config.task defaults to "bit_addition".
-
-
 def _payload(path):
     return torch.load(path, map_location="cpu", weights_only=True)
 
@@ -210,8 +201,6 @@ def test_checkpoint_task_is_read_from_the_payload_not_just_the_label(trained_lm_
 
     assert resolve_task(payload, cfg, trained_lm_checkpoint) == "language_model"
 
-    # an older checkpoint, written before config carried a task field, falls
-    # back to the "bit_addition" default -- the tokenizer must still win.
     payload["config"]["task"] = "bit_addition"
     stale = config_from_dict(payload["config"])
     assert resolve_task(payload, stale, trained_lm_checkpoint) == "language_model"
@@ -227,7 +216,6 @@ def test_stale_task_label_still_loads_the_char_transformer(trained_lm_checkpoint
 
     assert isinstance(predictor, LanguageModelPredictor)
     assert predictor.model.describe()["vocab_size"] == predictor.tokenizer.vocab_size
-    # strict loading: every weight in the checkpoint reached the model
     state = predictor.model.state_dict()
     assert set(state) == set(payload["model_state"])
 
@@ -253,7 +241,6 @@ def test_state_dict_loading_stays_strict(trained_lm_checkpoint, tmp_path):
 
 
 def test_bit_adder_checkpoint_still_loads_as_a_bit_predictor(trained_checkpoint):
-    # the old path must survive the detection change
     predictor = load_predictor(trained_checkpoint, device="cpu")
 
     assert isinstance(predictor, Predictor)
@@ -262,8 +249,6 @@ def test_bit_adder_checkpoint_still_loads_as_a_bit_predictor(trained_checkpoint)
 
 
 def test_char_transformer_checkpoint_runs_through_the_cli(trained_lm_checkpoint, tmp_path):
-    # mirrors "python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt":
-    # no prompt, no pairs, so the default language-model sample has to be text.
     import io
     import logging
     import shutil
@@ -286,7 +271,6 @@ def test_char_transformer_checkpoint_runs_through_the_cli(trained_lm_checkpoint,
     assert "task       : language_model" in output
     assert "generated text:" in output
     assert "3 + 4 = " in output
-    # no trace of the bit-adder path
     assert "bits " not in output
 
 
