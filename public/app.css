@@ -140,6 +140,32 @@ body{
 .oCirc:focus-visible{outline:2px solid var(--o-acc);outline-offset:2px;}
 .oCirc[disabled]{opacity:.45;cursor:not-allowed;}
 
+.oPill{
+  height:2.5rem;
+  flex:0 0 auto;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:0 1.0625rem;
+  border-radius:999px;
+  border:1px solid var(--o-acc);
+  background:var(--o-acc);
+  color:var(--o-ink);
+  font:inherit;
+  font-size:.9375rem;
+  font-weight:600;
+  line-height:1;
+  cursor:pointer;
+  -webkit-tap-highlight-color:transparent;
+  transition:opacity .2s ease,transform .2s ease;
+}
+@media(hover:hover){
+  .oPill:hover{opacity:.88;}
+}
+.oPill:active{transform:scale(.96);}
+.oPill:focus-visible{outline:2px solid var(--o-acc);outline-offset:2px;}
+.oPill[disabled]{opacity:.45;cursor:not-allowed;}
+
 .oMain{
   flex:1 1 auto;
   min-height:0;
@@ -192,7 +218,7 @@ body.oEmpty .oDock{
 }
 
 .oHero{display:none;}
-body.oEmpty:not(.oOut) .oHero{display:block;}
+body.oEmpty .oHero{display:block;}
 .oHero{
   width:min(46rem,100%);
   margin:0 auto clamp(1.5rem,4vw,2.5rem);
@@ -242,8 +268,7 @@ body.oEmpty:not(.oOut) .oHero{display:block;}
   justify-content:center;
   gap:.5rem;
 }
-body:not(.oEmpty) .oSeeds,
-body.oOut .oSeeds{display:none;}
+body:not(.oEmpty) .oSeeds{display:none;}
 .oSeed{
   padding:.5rem .875rem;
   border:1px solid var(--o-bdr);
@@ -316,6 +341,15 @@ body.oOut .oSeeds{display:none;}
 }
 .oNote a{color:var(--o-tx);}
 .oNote.oNoteBad{color:var(--o-danger);}
+
+.oGuestNote{
+  width:min(46rem,100%);
+  margin:.125rem auto 0;
+  font-size:.75rem;
+  line-height:1.4;
+  color:var(--o-txd);
+  opacity:.8;
+}
 
 .oScrim{
   position:fixed;
@@ -393,16 +427,17 @@ body.oOut .oSeeds{display:none;}
 }
 
 @media(prefers-reduced-motion:reduce){
-  .oCirc,.oComposer{transition:none;}
-  .oCirc:active{transform:none;}
+  .oCirc,.oComposer,.oPill{transition:none;}
+  .oCirc:active,.oPill:active{transform:none;}
 }
 
 body.oBooting .oBarActs,
-body.oBooting .oDock,
-body.oOut .oBarActs,
-body.oOut .oDock{display:none;}
-body:not(.oOut) #oOut{display:flex;}
+body.oBooting .oDock{display:none;}
+body.oOut #oMenu,
 body.oOut #oOut{display:none;}
+body:not(.oOut) #oLogin{display:none;}
+body:not(.oOut) .oGuestNote,
+body.oBooting .oGuestNote{display:none;}
 
 .oAuth{
   position:fixed;
@@ -417,14 +452,18 @@ body.oOut #oOut{display:none;}
 }
 
 .oAuthCard{
+  position:relative;
   width:min(22rem,100%);
   display:flex;
   flex-direction:column;
   gap:.75rem;
 }
 
+.oAuthBack{position:absolute;top:0;right:0;}
+
 .oAuthTitle{
   margin:0;
+  padding-right:2.75rem;
   font-size:1.375rem;
   font-weight:700;
   letter-spacing:-.01em;

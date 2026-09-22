@@ -30,17 +30,36 @@ what is public is a place rather than a rule, and it cannot drift.
 and `worker.js` answers 404 for anything under `/ored/model/` as well, with the
 same `noindex` header every other 404 carries.
 
+## Asking without an account
+
+Ored answers anyone. A visitor who has not signed in gets the same page, the
+same composer and the same model. The bar carries the wordmark, the `+` that
+starts a new chat, and **Login** — and nothing is behind that button that stops
+someone asking a question first.
+
+What signing in changes is what is kept. A member's chats are stored under their
+DigiArtz id, and the hamburger next to `+` opens their history. A guest's chat
+lives in this browser until it is cleared, and in the database it is stored as
+anonymous: `user_id` null, `visitor` `anonymous`. Guests are rate limited more
+tightly — eight messages a minute against a member's twenty — and counted per
+address rather than per account, because there is no account to count.
+
+Both kinds of conversation are learned from in exactly the same way. Nothing
+under `ored/model/` reads `user_id` at all: candidates are built from the
+message pairs of a conversation, whoever asked, and the redaction pass in
+`learning/candidates.py` runs over a guest's words the same as a member's. An
+anonymous question with a good answer is a training pair like any other.
+
 ## Sign-in
 
-Ored has no accounts and no sign-in form of its own. A signed-out visitor gets
-one card — *Login DigiArtz to continue* — and one button, and the button leaves
-for DigiArtz. Everything about proving who someone is happens over there, on the
-page that already does it: password, Google, Discord, Apple, the lot. Ored only
-receives the result.
+Ored has no accounts and no sign-in form of its own. **Login** opens one card
+and one button, and the button leaves for DigiArtz. Everything about proving who
+someone is happens over there, on the page that already does it: password,
+Google, Discord, Apple, the lot. Ored only receives the result.
 
 `functions/api/ored.js` still checks every token against the DigiArtz project
-before it writes anything, exactly as before. What changed is where the token
-comes from.
+before it writes anything. A request with no token, or with one that no longer
+holds, is not refused — it is answered and stored as anonymous.
 
 ### The hand-off
 
@@ -86,11 +105,13 @@ and none of these is:
   Sign out mean something
 
 A cold visitor who has never signed in and did not come from DigiArtz is not
-bounced anywhere. They get the card, and the button is theirs to press.
+bounced anywhere. They get the chat, and the button is theirs to press.
 
-Signing out of Ored signs out of Ored. The DigiArtz session is untouched, the
-card says so, and the next press of the button will sign them back in without a
-prompt — which is what one account across two sites means.
+Signing out of Ored signs out of Ored. It does not close the page: it drops back
+to the guest state, where asking still works and only the keeping stops. The
+DigiArtz session is untouched, the card says so, and the next press of the
+button will sign them back in without a prompt — which is what one account
+across two sites means.
 
 ### What has to be true
 
@@ -148,11 +169,19 @@ reaches this data, and forcing RLS holds the table owner to the same rule.
 columns. There is no foreign key, because the accounts they name live in another
 project.
 
+`ored_conversations.user_id` is null when nobody was signed in, and `visitor`
+says which of the two kinds a row is — `account` or `anonymous`. A check
+constraint holds the pair together, so a row can neither claim an account it has
+no id for nor call an id anonymous.
+
 ## The page
 
 One screen. Until something is asked it shows a greeting — *Ask anything*, the
 verb in the wordmark script — the composer under it and four openers that fill
-the box rather than send it; all three go the moment a conversation starts. The
+the box rather than send it; all three go the moment a conversation starts.
+The bar above is the whole of the state: signed in it reads `+`, history, sign
+out; signed out it reads `+`, **Login**, and one line under the composer saying
+which of the two this is. The
 palette is DigiArtz Charcoal and the type is the site's own, on the same size
 ramp its hero uses, so the two read as one product across two domains.
 

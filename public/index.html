@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Ored — DigiArtz's own AI</title>
-<meta name="description" content="Ored is DigiArtz's own AI model, built from scratch — no pretrained weights, no downloaded corpus — for simple tasks and problem solving. Sign in with your DigiArtz account.">
+<meta name="description" content="Ored is DigiArtz's own AI model, built from scratch — no pretrained weights, no downloaded corpus — for simple tasks and problem solving. Ask it anything, no account needed.">
 <link rel="canonical" href="https://ored.digiartz.net/">
 <meta name="robots" content="index, follow, max-image-preview:large">
 <meta name="color-scheme" content="dark">
@@ -26,7 +26,7 @@
 <link rel="manifest" href="/site.webmanifest">
 <link rel="preload" as="font" type="font/woff2" href="/fonts/open-sans-latin.woff2" crossorigin>
 <link rel="preload" as="font" type="font/woff2" href="/fonts/kaushan-script-latin.woff2" crossorigin>
-<link rel="stylesheet" href="/app.css?v=5">
+<link rel="stylesheet" href="/app.css?v=6">
 <script type="application/ld+json">
 {"@context":"https://schema.org","@graph":[
  {"@type":"Organization","@id":"https://digiartz.net/#organization","name":"DigiArtz","url":"https://digiartz.net/","logo":"https://digiartz.net/icon-512.png?v=4"},
@@ -56,6 +56,8 @@
         <path d="M15 17l5-5-5-5M20 12H9M13 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h7"></path>
       </svg>
     </button>
+    <button type="button" class="oPill" id="oLogin" title="Login"
+            aria-expanded="false" aria-controls="oAuth">Login</button>
   </div>
 </header>
 
@@ -85,12 +87,18 @@
     <button type="button" class="oSeed">Add 9 and 6</button>
   </div>
   <p class="oNote" id="oNote" role="status"></p>
+  <p class="oGuestNote" id="oGuestNote">Chatting as a guest. Login to keep your chats and history.</p>
 </div>
 
 <section class="oAuth" id="oAuth" hidden aria-labelledby="oAuthTitle">
   <div class="oAuthCard">
-    <h2 class="oAuthTitle" id="oAuthTitle">Login DigiArtz to continue</h2>
-    <p class="oAuthLede" id="oAuthLede">Ored runs on your DigiArtz account. Sign in there and you come straight back here.</p>
+    <button type="button" class="oCirc oCircSm oAuthBack" id="oAuthClose" aria-label="Back to chat" title="Back to chat">
+      <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <path d="M6 6l12 12M18 6L6 18"></path>
+      </svg>
+    </button>
+    <h2 class="oAuthTitle" id="oAuthTitle">Login to keep your chats</h2>
+    <p class="oAuthLede" id="oAuthLede">Ored runs on your DigiArtz account. Sign in there and you come straight back here, with your chats kept.</p>
     <button type="button" class="oBtn oGo" id="oAuthGo">
       <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false" class="oGoIcon">
         <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"></path>
@@ -120,7 +128,7 @@
 
 <script defer src="/js/vendor/supabase-js-2.112.2.min.js"></script>
 <script defer src="/config.js?v=2"></script>
-<script defer src="/app.js?v=5"></script>
+<script defer src="/app.js?v=6"></script>
 
 </body>
 </html>
