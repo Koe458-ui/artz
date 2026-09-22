@@ -37,18 +37,54 @@ def register_predictor(task: str):
     return decorator
 
 
-def read_tokenizer(payload: Dict[str, Any], path: str | Path) -> Tokenizer:
+# models whose output width is the vocabulary size: they cannot be built
+# without the tokenizer that was saved beside them.
+TEXT_MODELS = frozenset({"transformer", "bigram"})
+
+
+def find_tokenizer_data(payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     # the trainer files the tokenizer under "extra" (that is where
     # LanguageModelTask.checkpoint_extra() lands); older checkpoints wrote it at
     # the top level, so accept both.
     extra = payload.get("extra") or {}
-    data = extra.get("tokenizer") or payload.get("tokenizer")
+    return extra.get("tokenizer") or payload.get("tokenizer")
+
+
+def read_tokenizer(payload: Dict[str, Any], path: str | Path) -> Tokenizer:
+    data = find_tokenizer_data(payload)
     if not data:
         raise ValueError(
             f"{path} carries no tokenizer, so its token ids cannot be turned back "
             f"into text. Was it trained with task: language_model?"
         )
     return Tokenizer.from_dict(data)
+
+
+def resolve_task(payload: Dict[str, Any], cfg: Config, path: str | Path) -> str:
+    # config.task is only a label, and it defaults to "bit_addition" -- a
+    # checkpoint written before that field existed would send a char transformer
+    # down the bit-adder path and die on the missing vocab_size. So let the
+    # payload have the last word: a tokenizer beside a vocabulary-sized model
+    # means this is a language model, whatever the label says.
+    declared = (cfg.task or "").lower()
+    has_tokenizer = find_tokenizer_data(payload) is not None
+
+    if has_tokenizer or cfg.model.name.lower() in TEXT_MODELS:
+        if declared != "language_model":
+            logger.info(
+                f"{path} records task {declared or 'none'!r}, but carries a "
+                f"{cfg.model.name} model{' and a tokenizer' if has_tokenizer else ''}: "
+                f"reading it as a language model."
+            )
+        return "language_model"
+
+    if declared in PREDICTOR_REGISTRY:
+        return declared
+
+    raise ValueError(
+        f"{path} was trained for task {cfg.task!r}, which has no predictor. "
+        f"Known tasks: {sorted(PREDICTOR_REGISTRY)}"
+    )
 
 
 @dataclass
@@ -130,12 +166,7 @@ class BasePredictor:
         payload = load_checkpoint(path, map_location=resolved_device)
         cfg = config_from_dict(payload["config"])
 
-        key = cfg.task.lower()
-        if key not in PREDICTOR_REGISTRY:
-            raise ValueError(
-                f"{path} was trained for task {cfg.task!r}, which has no predictor. "
-                f"Known tasks: {sorted(PREDICTOR_REGISTRY)}"
-            )
+        key = resolve_task(payload, cfg, path)
         target = PREDICTOR_REGISTRY[key]
         if cls is not BasePredictor and target is not cls:
             logger.info(
@@ -383,9 +414,20 @@ def _run_language_model(predictor: LanguageModelPredictor, args: argparse.Namesp
     pairs.extend(_parse_pairs(args.pairs or []))
 
     if not pairs and not did_something and not args.interactive:
-        pairs = [(0, 0), (1, 1), (3, 4), (9, 6), (7, 8), (15, 15)]
+        # a language model answers by writing text, so show it writing: first a
+        # free continuation, then a few lines it has to finish itself.
         if not args.quiet:
             logger.info("(no input given -- showing a default sample)")
+            logger.info("")
+            logger.info("generated text:")
+            logger.info(predictor.generate(
+                max_new_tokens=args.tokens or 160,
+                temperature=args.temperature,
+                greedy=not args.sample,
+            ))
+            logger.info("")
+            logger.info("completions:")
+        pairs = [(0, 0), (1, 1), (3, 4), (9, 6), (7, 8), (15, 15)]
 
     for a, b in pairs:
         logger.info(predictor.predict_sum(a, b).format())

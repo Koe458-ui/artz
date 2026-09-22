@@ -4,7 +4,12 @@ import pytest
 import torch
 
 from ored.evaluation.evaluator import evaluate_checkpoint
-from ored.inference.predictor import LanguageModelPredictor, Predictor, load_predictor
+from ored.inference.predictor import (
+    LanguageModelPredictor,
+    Predictor,
+    load_predictor,
+    resolve_task,
+)
 from ored.inference.predictor import main as predictor_main
 from ored.training.trainer import Trainer
 
@@ -185,3 +190,106 @@ def test_default_checkpoint_falls_back_to_the_language_model(tmp_path, monkeypat
     (tmp_path / "checkpoints" / "bit_adder_mlp").mkdir(parents=True)
     (tmp_path / DEFAULT_CHECKPOINT).touch()
     assert resolve_checkpoint() == DEFAULT_CHECKPOINT
+
+
+# --- loading a char transformer checkpoint -------------------------------
+# the failure these cover: a language model checkpoint going down the bit-adder
+# path and dying on "Transformer needs vocab_size, which comes from the
+# tokenizer", because config.task defaults to "bit_addition".
+
+
+def _payload(path):
+    return torch.load(path, map_location="cpu", weights_only=True)
+
+
+def test_checkpoint_task_is_read_from_the_payload_not_just_the_label(trained_lm_checkpoint):
+    from ored.config import config_from_dict
+
+    payload = _payload(trained_lm_checkpoint)
+    cfg = config_from_dict(payload["config"])
+
+    assert resolve_task(payload, cfg, trained_lm_checkpoint) == "language_model"
+
+    # an older checkpoint, written before config carried a task field, falls
+    # back to the "bit_addition" default -- the tokenizer must still win.
+    payload["config"]["task"] = "bit_addition"
+    stale = config_from_dict(payload["config"])
+    assert resolve_task(payload, stale, trained_lm_checkpoint) == "language_model"
+
+
+def test_stale_task_label_still_loads_the_char_transformer(trained_lm_checkpoint, tmp_path):
+    payload = _payload(trained_lm_checkpoint)
+    payload["config"]["task"] = "bit_addition"
+    mislabelled = tmp_path / "mislabelled.pt"
+    torch.save(payload, mislabelled)
+
+    predictor = load_predictor(mislabelled, device="cpu")
+
+    assert isinstance(predictor, LanguageModelPredictor)
+    assert predictor.model.describe()["vocab_size"] == predictor.tokenizer.vocab_size
+    # strict loading: every weight in the checkpoint reached the model
+    state = predictor.model.state_dict()
+    assert set(state) == set(payload["model_state"])
+
+
+def test_tokenizer_saved_at_the_top_level_is_accepted(trained_lm_checkpoint, tmp_path):
+    payload = _payload(trained_lm_checkpoint)
+    payload["tokenizer"] = payload["extra"].pop("tokenizer")
+    top_level = tmp_path / "top_level_tokenizer.pt"
+    torch.save(payload, top_level)
+
+    predictor = load_predictor(top_level, device="cpu")
+    assert predictor.vocab_size == predictor.tokenizer.vocab_size
+
+
+def test_state_dict_loading_stays_strict(trained_lm_checkpoint, tmp_path):
+    payload = _payload(trained_lm_checkpoint)
+    payload["model_state"].pop(next(iter(payload["model_state"])))
+    incomplete = tmp_path / "incomplete.pt"
+    torch.save(payload, incomplete)
+
+    with pytest.raises(RuntimeError, match="Missing key"):
+        load_predictor(incomplete, device="cpu")
+
+
+def test_bit_adder_checkpoint_still_loads_as_a_bit_predictor(trained_checkpoint):
+    # the old path must survive the detection change
+    predictor = load_predictor(trained_checkpoint, device="cpu")
+
+    assert isinstance(predictor, Predictor)
+    assert not isinstance(predictor, LanguageModelPredictor)
+    assert predictor.predict(1, 2).expected == 3
+
+
+def test_char_transformer_checkpoint_runs_through_the_cli(trained_lm_checkpoint, tmp_path):
+    # mirrors "python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt":
+    # no prompt, no pairs, so the default language-model sample has to be text.
+    import io
+    import logging
+    import shutil
+
+    checkpoint = tmp_path / "checkpoints" / "char_transformer" / "best.pt"
+    checkpoint.parent.mkdir(parents=True)
+    shutil.copy(trained_lm_checkpoint, checkpoint)
+
+    stream = io.StringIO()
+    handler = logging.StreamHandler(stream)
+    ored_logger = logging.getLogger("ored")
+    ored_logger.addHandler(handler)
+    try:
+        exit_code = predictor_main(["--checkpoint", str(checkpoint), "--device", "cpu"])
+    finally:
+        ored_logger.removeHandler(handler)
+
+    output = stream.getvalue()
+    assert exit_code == 0
+    assert "task       : language_model" in output
+    assert "generated text:" in output
+    assert "3 + 4 = " in output
+    # no trace of the bit-adder path
+    assert "bits " not in output
+
+
+def test_bit_evaluator_refuses_a_language_model_checkpoint(trained_lm_checkpoint):
+    with pytest.raises(ValueError, match="holds a language model"):
+        evaluate_checkpoint(trained_lm_checkpoint, device="cpu", show_errors=0)
