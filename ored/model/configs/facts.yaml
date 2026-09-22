@@ -1,60 +1,1524 @@
 questions:
-  - "what is {subject} ?"
-  - "what is {subject} , really ?"
+  - "what is {subject} ."
   - "tell me what {subject} is ."
-  - "What is {subject}?"
+  - "explain {subject} ."
+  - "can you explain {subject} ."
+  - "define {subject} ."
+  - "what does {subject} mean ."
+  - "give me a simple meaning of {subject} ."
+  - "describe {subject} ."
+  - "tell me about {subject} ."
+  - "what do you know about {subject} ."
+  - "why is {subject} important ."
+  - "what is the simple idea of {subject} ."
+  - "how would you describe {subject} ."
+  - "what can you tell me about {subject} ."
+  - "give a short explanation of {subject} ."
+  - "what is meant by {subject} ."
+  - "help me understand {subject} ."
+  - "explain the idea of {subject} ."
+  - "what should i know about {subject} ."
+  - "give me a short description of {subject} ."
 
 facts:
-  - subject: ored
-    answer: ored is a small model that learns from the people who talk to it
-
-  - subject: a human
-    answer: a human is a person who thinks and feels
-
-  - subject: a friend
-    answer: a friend is a person you like and trust
-
   - subject: a cat
-    answer: a cat is a small animal that has soft fur
+    answer: a cat is a small domesticated animal with soft fur
 
   - subject: a dog
-    answer: a dog is an animal that is loyal to people
+    answer: a dog is a domesticated animal that often lives with people
+
+  - subject: a lion
+    answer: a lion is a large wild cat that lives in groups called prides
+
+  - subject: a tiger
+    answer: a tiger is a large wild cat with dark stripes
+
+  - subject: a leopard
+    answer: a leopard is a wild cat known for its spotted coat
+
+  - subject: a cheetah
+    answer: a cheetah is a fast wild cat that can run very quickly
+
+  - subject: a horse
+    answer: a horse is a large animal that people can ride
+
+  - subject: a cow
+    answer: a cow is a farm animal that can provide milk
+
+  - subject: a goat
+    answer: a goat is a farm animal that can eat many kinds of plants
+
+  - subject: a sheep
+    answer: a sheep is a farm animal that has wool
+
+  - subject: a pig
+    answer: a pig is a farm animal with a strong sense of smell
+
+  - subject: a rabbit
+    answer: a rabbit is a small animal with long ears
+
+  - subject: a mouse
+    answer: a mouse is a small mammal with a long tail
+
+  - subject: a rat
+    answer: a rat is a small mammal with a long tail
+
+  - subject: a monkey
+    answer: a monkey is a mammal that often lives in trees
+
+  - subject: a bear
+    answer: a bear is a large mammal with strong limbs
+
+  - subject: a wolf
+    answer: a wolf is a wild mammal that often lives in a group
+
+  - subject: a fox
+    answer: a fox is a small wild mammal with a long tail
+
+  - subject: a deer
+    answer: a deer is a plant eating mammal that can have antlers
+
+  - subject: a giraffe
+    answer: a giraffe is a tall animal with a very long neck
+
+  - subject: a elephant
+    answer: an elephant is a very large land animal with a trunk
+
+  - subject: a rhinoceros
+    answer: a rhinoceros is a large land animal with thick skin and a horn
+
+  - subject: a hippopotamus
+    answer: a hippopotamus is a large animal that spends much time in water
+
+  - subject: a kangaroo
+    answer: a kangaroo is an australian animal that moves by jumping
+
+  - subject: a panda
+    answer: a panda is a bear that mainly eats bamboo
+
+  - subject: a koala
+    answer: a koala is a tree dwelling australian animal that eats leaves
+
+  - subject: a camel
+    answer: a camel is a desert animal that can travel long distances without much water
+
+  - subject: a donkey
+    answer: a donkey is a strong animal related to the horse
+
+  - subject: a buffalo
+    answer: a buffalo is a large hoofed animal often found in grasslands
 
   - subject: a bird
-    answer: a bird is an animal that has wings and can fly
+    answer: a bird is an animal with feathers wings and a beak
 
-  - subject: a river
-    answer: a river is water that flows to the sea
+  - subject: a parrot
+    answer: a parrot is a bird with a curved beak that can copy sounds
 
-  - subject: a house
-    answer: a house is a building where people live
+  - subject: a eagle
+    answer: an eagle is a large bird of prey with strong claws
+
+  - subject: a owl
+    answer: an owl is a bird that is often active at night
+
+  - subject: a crow
+    answer: a crow is a dark bird known for problem solving
+
+  - subject: a pigeon
+    answer: a pigeon is a common bird that lives in many cities
+
+  - subject: a duck
+    answer: a duck is a bird that can swim and often lives near water
+
+  - subject: a goose
+    answer: a goose is a large water bird with a long neck
+
+  - subject: a swan
+    answer: a swan is a large water bird with a long curved neck
+
+  - subject: a penguin
+    answer: a penguin is a bird that cannot fly but can swim well
+
+  - subject: a fish
+    answer: a fish is an animal that usually lives in water and breathes with gills
+
+  - subject: a shark
+    answer: a shark is a fish with a strong body and sharp teeth
+
+  - subject: a whale
+    answer: a whale is a very large mammal that lives in the sea
+
+  - subject: a dolphin
+    answer: a dolphin is a smart sea mammal that breathes air
+
+  - subject: a turtle
+    answer: a turtle is a reptile with a hard shell
+
+  - subject: a snake
+    answer: a snake is a reptile with a long body and no legs
+
+  - subject: a frog
+    answer: a frog is an amphibian that can live in water and on land
+
+  - subject: a butterfly
+    answer: a butterfly is an insect with large wings covered in scales
+
+  - subject: a bee
+    answer: a bee is an insect that collects nectar and helps pollinate flowers
+
+  - subject: a tree
+    answer: a tree is a large plant with a trunk branches and leaves
 
   - subject: a flower
-    answer: a flower is the colourful part of a plant
+    answer: a flower is the part of a plant that can help it reproduce
+
+  - subject: a rose
+    answer: a rose is a flowering plant often grown for its fragrant flowers
+
+  - subject: a lotus
+    answer: a lotus is an aquatic flowering plant that can grow in still water
+
+  - subject: a sunflower
+    answer: a sunflower is a tall flowering plant with a large yellow flower
+
+  - subject: a grass
+    answer: grass is a group of plants with narrow leaves that often cover land
+
+  - subject: a bamboo
+    answer: bamboo is a tall grass with hard hollow stems
+
+  - subject: a cactus
+    answer: a cactus is a plant adapted to dry places and often has spines
+
+  - subject: a fern
+    answer: a fern is a plant with fronds that often grows in damp places
+
+  - subject: a moss
+    answer: moss is a small plant that often grows on damp surfaces
+
+  - subject: a pine
+    answer: a pine is a tree that makes cones and narrow leaves
+
+  - subject: a palm
+    answer: a palm is a tree with a tall stem and large leaves
+
+  - subject: a mango tree
+    answer: a mango tree is a tree that grows mango fruit
+
+  - subject: an apple tree
+    answer: an apple tree is a tree that grows apples
+
+  - subject: a banana plant
+    answer: a banana plant is a large herb that grows bananas
+
+  - subject: a wheat plant
+    answer: a wheat plant is a grass grown for grain
+
+  - subject: a rice plant
+    answer: a rice plant is a grass grown for rice grain
+
+  - subject: a corn plant
+    answer: a corn plant is a tall grass that produces ears of corn
+
+  - subject: a bean plant
+    answer: a bean plant is a plant that produces beans in pods
+
+  - subject: a pea plant
+    answer: a pea plant is a plant that produces peas in pods
+
+  - subject: a tomato plant
+    answer: a tomato plant is a plant that produces tomato fruit
+
+  - subject: a potato plant
+    answer: a potato plant is a plant that grows edible tubers underground
+
+  - subject: a carrot plant
+    answer: a carrot plant is a plant with an edible root
+
+  - subject: a onion plant
+    answer: an onion plant is a plant that grows a round edible bulb
+
+  - subject: a garlic plant
+    answer: a garlic plant is a plant that grows bulbs made of cloves
+
+  - subject: a mint
+    answer: mint is a fragrant herb often used in food and drinks
+
+  - subject: a basil
+    answer: basil is a fragrant herb often used in cooking
+
+  - subject: a tea plant
+    answer: a tea plant is a plant whose leaves can be used to make tea
+
+  - subject: a cotton plant
+    answer: a cotton plant is a plant that produces soft fibers
+
+  - subject: a sugarcane
+    answer: sugarcane is a tall grass used to make sugar
+
+  - subject: a grapevine
+    answer: a grapevine is a climbing plant that grows grapes
+
+  - subject: a coconut tree
+    answer: a coconut tree is a palm that grows coconuts
+
+  - subject: a fig tree
+    answer: a fig tree is a tree that grows sweet fig fruit
+
+  - subject: a lemon tree
+    answer: a lemon tree is a tree that grows sour yellow fruit
+
+  - subject: a orange tree
+    answer: an orange tree is a tree that grows orange fruit
+
+  - subject: a peach tree
+    answer: a peach tree is a tree that grows soft sweet fruit
+
+  - subject: a pear tree
+    answer: a pear tree is a tree that grows pear fruit
+
+  - subject: a cherry tree
+    answer: a cherry tree is a tree that grows small stone fruit
+
+  - subject: a watermelon plant
+    answer: a watermelon plant is a vine that grows large sweet fruit
+
+  - subject: a pumpkin plant
+    answer: a pumpkin plant is a vine that grows large round fruit
+
+  - subject: a chili plant
+    answer: a chili plant is a plant that grows hot edible fruit
+
+  - subject: a pepper plant
+    answer: a pepper plant is a plant that grows edible peppers
+
+  - subject: a tea bush
+    answer: a tea bush is a small plant grown for its leaves
+
+  - subject: a shrub
+    answer: a shrub is a woody plant that is usually smaller than a tree
+
+  - subject: a vine
+    answer: a vine is a plant with a long stem that can climb
+
+  - subject: a seed
+    answer: a seed is a part of a plant that can grow into a new plant
+
+  - subject: a root
+    answer: a root is a plant part that usually anchors the plant and takes in water
+
+  - subject: a stem
+    answer: a stem is a plant part that supports leaves and carries water
+
+  - subject: a leaf
+    answer: a leaf is a plant part that often uses light to make food
+
+  - subject: a river
+    answer: a river is flowing water that moves across land
+
+  - subject: a lake
+    answer: a lake is a body of water surrounded by land
+
+  - subject: an ocean
+    answer: an ocean is a very large body of salt water
+
+  - subject: a sea
+    answer: a sea is a large area of salt water connected to an ocean
+
+  - subject: a mountain
+    answer: a mountain is a large natural rise of land
+
+  - subject: a hill
+    answer: a hill is a natural rise of land that is lower than a mountain
+
+  - subject: a valley
+    answer: a valley is a low area of land between higher areas
+
+  - subject: a forest
+    answer: a forest is a large area with many trees and other plants
+
+  - subject: a desert
+    answer: a desert is a dry area that gets very little rain
+
+  - subject: a beach
+    answer: a beach is an area of land beside water often covered with sand
+
+  - subject: an island
+    answer: an island is land surrounded by water
+
+  - subject: a cave
+    answer: a cave is a natural hollow space in rock or under ground
+
+  - subject: a waterfall
+    answer: a waterfall is water that falls from a higher level to a lower level
+
+  - subject: a cloud
+    answer: a cloud is a visible group of tiny water drops or ice crystals in the sky
+
+  - subject: rain
+    answer: rain is water that falls from clouds to the ground
+
+  - subject: ice
+    answer: ice is water in a solid state
+
+  - subject: wind
+    answer: wind is moving air
+
+  - subject: air
+    answer: air is the mixture of gases around earth
+
+  - subject: fire
+    answer: fire is hot light and gas produced by burning material
+
+  - subject: a storm
+    answer: a storm is a period of strong wind rain or other harsh weather
+
+  - subject: a rainbow
+    answer: a rainbow is a band of colors that can appear when light passes through water drops
+
+  - subject: a thunder
+    answer: thunder is the sound caused by a sudden expansion of heated air
+
+  - subject: lightning
+    answer: lightning is a bright electrical event in the sky
+
+  - subject: sunlight
+    answer: sunlight is light that comes from the sun
+
+  - subject: a shadow
+    answer: a shadow is a dark area made when light is blocked
+
+  - subject: a rock
+    answer: a rock is a naturally formed solid piece of earth material
 
   - subject: a stone
     answer: a stone is a hard piece of rock
 
+  - subject: soil
+    answer: soil is the loose material in which many plants grow
+
+  - subject: sand
+    answer: sand is a collection of tiny pieces of rock or other material
+
+  - subject: mud
+    answer: mud is wet soil or dirt mixed with water
+
+  - subject: clay
+    answer: clay is fine earth material that can be shaped when wet
+
+  - subject: a volcano
+    answer: a volcano is an opening in earth through which hot material can escape
+
+  - subject: an earthquake
+    answer: an earthquake is a sudden movement of the ground caused by activity inside earth
+
+  - subject: a glacier
+    answer: a glacier is a large slow moving mass of ice
+
+  - subject: a fossil
+    answer: a fossil is preserved evidence of ancient life
+
+  - subject: a planet
+    answer: a planet is a large body that moves around a star
+
+  - subject: a star
+    answer: a star is a hot glowing ball of gas in space
+
+  - subject: a galaxy
+    answer: a galaxy is a huge group of stars gas and other matter
+
+  - subject: space
+    answer: space is the vast region beyond earth and between objects in the universe
+
+  - subject: an asteroid
+    answer: an asteroid is a rocky object that moves through space
+
+  - subject: a comet
+    answer: a comet is an icy space object that can form a bright tail near the sun
+
+  - subject: a moon
+    answer: a moon is a natural body that moves around a planet
+
+  - subject: a satellite
+    answer: a satellite is an object that moves around a larger object in space
+
+  - subject: earth
+    answer: earth is the planet on which humans live
+
   - subject: the sun
-    answer: the sun is a star that gives us light and heat
+    answer: the sun is a star that gives earth light and heat
 
   - subject: the moon
-    answer: the moon is a rock that goes around the earth
+    answer: the moon is earths natural satellite
+
+  - subject: an atmosphere
+    answer: an atmosphere is a layer of gases around a planet
+
+  - subject: a climate
+    answer: a climate is the usual pattern of weather in a place over a long time
+
+  - subject: weather
+    answer: weather is the condition of the atmosphere at a particular time and place
+
+  - subject: a bread
+    answer: bread is a food made from baked dough
+
+  - subject: a rice
+    answer: rice is a grain that is cooked and eaten in many places
+
+  - subject: a wheat
+    answer: wheat is a grain used to make many foods
+
+  - subject: an apple
+    answer: an apple is a round fruit with crisp flesh
+
+  - subject: a banana
+    answer: a banana is a soft fruit with a yellow peel when ripe
+
+  - subject: an orange
+    answer: an orange is a round citrus fruit with juicy flesh
+
+  - subject: a lemon
+    answer: a lemon is a yellow citrus fruit with a sour taste
+
+  - subject: a mango
+    answer: a mango is a sweet tropical fruit with soft flesh
+
+  - subject: a grape
+    answer: a grape is a small round fruit that grows in bunches
+
+  - subject: a peach
+    answer: a peach is a soft fruit with sweet flesh and a pit
+
+  - subject: a pear
+    answer: a pear is a sweet fruit that is often wider near the bottom
+
+  - subject: a cherry
+    answer: a cherry is a small fruit with a pit
+
+  - subject: a watermelon
+    answer: a watermelon is a large fruit with juicy sweet flesh
+
+  - subject: a melon
+    answer: a melon is a fruit with soft sweet flesh
+
+  - subject: a coconut
+    answer: a coconut is a fruit with a hard shell and white flesh
+
+  - subject: a pineapple
+    answer: a pineapple is a tropical fruit with rough skin and sweet flesh
+
+  - subject: a strawberry
+    answer: a strawberry is a small red fruit with tiny seeds on the outside
+
+  - subject: a blueberry
+    answer: a blueberry is a small round fruit with blue or dark skin
+
+  - subject: a raspberry
+    answer: a raspberry is a small soft fruit made of many tiny sections
+
+  - subject: a potato
+    answer: a potato is an edible tuber that grows underground
+
+  - subject: a tomato
+    answer: a tomato is a soft edible fruit often used in cooking
+
+  - subject: a carrot
+    answer: a carrot is an orange root vegetable
+
+  - subject: an onion
+    answer: an onion is a layered bulb used as a vegetable and seasoning
+
+  - subject: garlic
+    answer: garlic is a plant bulb made of small cloves used in cooking
+
+  - subject: a bean
+    answer: a bean is a seed that can be eaten as food
+
+  - subject: a pea
+    answer: a pea is a small round seed eaten as a vegetable
+
+  - subject: corn
+    answer: corn is a grain that grows on a tall grass plant
+
+  - subject: oats
+    answer: oats are grains often eaten as a breakfast food
+
+  - subject: a nut
+    answer: a nut is a hard shelled food that contains an edible seed
+
+  - subject: a peanut
+    answer: a peanut is a seed from a plant that grows underground pods
+
+  - subject: milk
+    answer: milk is a white liquid that can come from mammals and can be used as food
+
+  - subject: cheese
+    answer: cheese is a food made from milk
+
+  - subject: yogurt
+    answer: yogurt is a thick food made by fermenting milk
+
+  - subject: butter
+    answer: butter is a spread made from milk fat
+
+  - subject: egg
+    answer: an egg is a food produced by birds and some other animals
+
+  - subject: meat
+    answer: meat is animal tissue used as food
+
+  - subject: fish food
+    answer: fish food is food prepared for fish to eat
+
+  - subject: soup
+    answer: soup is a liquid food made by cooking ingredients in water or stock
+
+  - subject: salad
+    answer: a salad is a dish made from mixed vegetables or other ingredients
+
+  - subject: cake
+    answer: cake is a sweet baked food made from a mixture of ingredients
+
+  - subject: biscuit
+    answer: a biscuit is a small baked food that can be sweet or plain
+
+  - subject: cookie
+    answer: a cookie is a small sweet baked food
+
+  - subject: chocolate
+    answer: chocolate is a food made from cocoa and other ingredients
+
+  - subject: candy
+    answer: candy is a sweet food made mainly from sugar
+
+  - subject: jam
+    answer: jam is a sweet spread made from fruit and sugar
+
+  - subject: honey
+    answer: honey is a sweet food made by bees from nectar
+
+  - subject: salt
+    answer: salt is a mineral seasoning used to add a salty taste
+
+  - subject: sugar
+    answer: sugar is a sweet substance used in many foods and drinks
 
   - subject: water
-    answer: water is a clear liquid that all life needs
+    answer: water is a clear liquid needed by living things
 
-  - subject: fire
-    answer: fire is hot light that comes from burning
+  - subject: juice
+    answer: juice is liquid taken from fruit or vegetables
 
-  - subject: a book
-    answer: a book is paper with words that people read
+  - subject: a house
+    answer: a house is a building where people live
 
-  - subject: music
-    answer: music is sound that people make to feel joy
+  - subject: a room
+    answer: a room is a part of a building separated by walls
 
-  - subject: time
-    answer: time is what passes while things happen
+  - subject: a door
+    answer: a door is a movable barrier used to open or close an entrance
+
+  - subject: a window
+    answer: a window is an opening in a wall that can let in light and air
+
+  - subject: a wall
+    answer: a wall is a structure that forms or divides a space
+
+  - subject: a floor
+    answer: a floor is the lower surface of a room that people walk on
+
+  - subject: a roof
+    answer: a roof is the top covering of a building
+
+  - subject: a chair
+    answer: a chair is furniture made for sitting
+
+  - subject: a table
+    answer: a table is furniture with a flat top used for work or other activities
+
+  - subject: a bed
+    answer: a bed is furniture used for sleeping or resting
+
+  - subject: a sofa
+    answer: a sofa is a large seat made for more than one person
+
+  - subject: a desk
+    answer: a desk is a table used for work or study
+
+  - subject: a shelf
+    answer: a shelf is a flat surface used for holding objects
+
+  - subject: a box
+    answer: a box is a container with flat sides
+
+  - subject: a bag
+    answer: a bag is a container used for carrying things
+
+  - subject: a bottle
+    answer: a bottle is a container with a narrow opening
+
+  - subject: a cup
+    answer: a cup is a small container used for drinking
+
+  - subject: a glass
+    answer: a glass is a container used for drinking liquids
+
+  - subject: a plate
+    answer: a plate is a flat dish used for serving food
+
+  - subject: a bowl
+    answer: a bowl is a round deep dish used for food or liquid
+
+  - subject: a spoon
+    answer: a spoon is a utensil with a small bowl shaped end
+
+  - subject: a fork
+    answer: a fork is a utensil with several pointed prongs
+
+  - subject: a knife
+    answer: a knife is a tool with a sharp edge used for cutting
+
+  - subject: a key
+    answer: a key is a small object used to open or lock some devices
+
+  - subject: a lock
+    answer: a lock is a device used to keep something closed or secure
+
+  - subject: a clock
+    answer: a clock is a device that shows the time
+
+  - subject: a watch
+    answer: a watch is a small timekeeping device worn on the body
+
+  - subject: a lamp
+    answer: a lamp is a device that produces light
+
+  - subject: a mirror
+    answer: a mirror is a surface that reflects an image
+
+  - subject: a phone
+    answer: a phone is an electronic device used for communication
 
   - subject: a computer
-    answer: a computer is a machine that follows instructions
+    answer: a computer is a machine that follows instructions and processes information
+
+  - subject: a keyboard
+    answer: a keyboard is an input device with keys for entering information
+
+  - subject: a mouse device
+    answer: a mouse device is an input device used to control a pointer
+
+  - subject: a screen
+    answer: a screen is a surface that displays images or information
+
+  - subject: a camera
+    answer: a camera is a device that records images
+
+  - subject: a speaker
+    answer: a speaker is a device that produces sound
+
+  - subject: a headphone
+    answer: a headphone is a device worn near the ears for listening to sound
+
+  - subject: a television
+    answer: a television is a device that displays moving images and sound
+
+  - subject: a radio
+    answer: a radio is a device that receives and plays audio signals
+
+  - subject: a battery
+    answer: a battery is a device that stores and supplies electrical energy
+
+  - subject: a charger
+    answer: a charger is a device used to put energy into a battery
+
+  - subject: a fan
+    answer: a fan is a device that moves air
+
+  - subject: a heater
+    answer: a heater is a device that produces heat
+
+  - subject: a refrigerator
+    answer: a refrigerator is a machine used to keep food cold
+
+  - subject: a stove
+    answer: a stove is a device used for cooking with heat
+
+  - subject: a oven
+    answer: an oven is a closed device used for cooking food with heat
+
+  - subject: a pen
+    answer: a pen is a tool used to write with ink
+
+  - subject: a pencil
+    answer: a pencil is a writing tool that uses a graphite core
+
+  - subject: a book
+    answer: a book is a set of pages with written or printed information
+
+  - subject: a paper
+    answer: paper is a thin material used for writing printing and other tasks
+
+  - subject: internet
+    answer: the internet is a worldwide system that connects many computer networks
+
+  - subject: a website
+    answer: a website is a collection of pages available on the internet
+
+  - subject: a browser
+    answer: a browser is a program used to open and view web pages
+
+  - subject: a server
+    answer: a server is a computer or program that provides a service to other computers
+
+  - subject: a program
+    answer: a program is a set of instructions that a computer can follow
+
+  - subject: a file
+    answer: a file is a stored collection of digital information
+
+  - subject: a network
+    answer: a network is a group of connected computers or devices
+
+  - subject: a password
+    answer: a password is secret text used to help protect an account or system
+
+  - subject: an account
+    answer: an account is a record used to access a service or system
+
+  - subject: an app
+    answer: an app is a software program made for a specific task
+
+  - subject: an operating system
+    answer: an operating system is software that manages a computer or device
+
+  - subject: a processor
+    answer: a processor is a part of a computer that carries out instructions
+
+  - subject: memory
+    answer: memory in a computer is storage used to hold data for processing
+
+  - subject: a robot
+    answer: a robot is a machine that can perform tasks automatically
+
+  - subject: a sensor
+    answer: a sensor is a device that detects a physical condition
+
+  - subject: an algorithm
+    answer: an algorithm is a step by step method for solving a problem
+
+  - subject: a model
+    answer: a model is a simplified representation of something
+
+  - subject: a neural network
+    answer: a neural network is a computing model made of connected processing units
+
+  - subject: machine learning
+    answer: machine learning is a method in which a computer learns patterns from examples
+
+  - subject: artificial intelligence
+    answer: artificial intelligence is a field that builds systems able to perform tasks that often need human intelligence
+
+  - subject: a transformer
+    answer: a transformer is a neural network architecture that uses attention to process sequences
+
+  - subject: a token
+    answer: a token is a small unit of text used by a language model
+
+  - subject: a parameter
+    answer: a parameter is a learned number inside a machine learning model
+
+  - subject: a weight
+    answer: a weight is a learned value that affects how a neural network processes information
+
+  - subject: a dataset
+    answer: a dataset is a collection of examples used for analysis or machine learning
+
+  - subject: a checkpoint
+    answer: a checkpoint is a saved state of a model during training
+
+  - subject: an epoch
+    answer: an epoch is one complete pass through the training data
+
+  - subject: a batch
+    answer: a batch is a group of training examples processed together
+
+  - subject: a loss
+    answer: a loss is a number that measures how wrong a model prediction is
+
+  - subject: cuda
+    answer: cuda is a technology used to run certain computations on an nvidia gpu
+
+  - subject: a gpu
+    answer: a gpu is a processor designed to perform many calculations at the same time
+
+  - subject: a cpu
+    answer: a cpu is the main general purpose processor in a computer
+
+  - subject: a file path
+    answer: a file path tells a computer where a file or folder is located
+
+  - subject: a command
+    answer: a command is an instruction given to a computer program
+
+  - subject: a terminal
+    answer: a terminal is a program used to enter text commands
+
+  - subject: a shell
+    answer: a shell is a program that reads commands and runs programs
+
+  - subject: a compiler
+    answer: a compiler translates source code into a form a computer can run
+
+  - subject: python
+    answer: python is a programming language used for many kinds of software
+
+  - subject: code
+    answer: code is text that gives instructions to a computer
+
+  - subject: a variable
+    answer: a variable is a named place used to store a value in a program
+
+  - subject: a function
+    answer: a function is a named block of code that performs a task
+
+  - subject: a loop
+    answer: a loop is a program structure that repeats a block of code
+
+  - subject: a bug
+    answer: a bug is an error or problem in software
+
+  - subject: a test
+    answer: a test is a check used to see whether something works as expected
+
+  - subject: a debugger
+    answer: a debugger is a tool used to find and inspect software problems
+
+  - subject: math
+    answer: math is the study of numbers patterns shapes and logical relationships
+
+  - subject: a number
+    answer: a number is a value used to count measure or describe quantity
+
+  - subject: addition
+    answer: addition is the operation of combining values to find a total
+
+  - subject: subtraction
+    answer: subtraction is the operation of finding the difference between values
+
+  - subject: multiplication
+    answer: multiplication is repeated addition or scaling by a number
+
+  - subject: division
+    answer: division is the operation of splitting a value into equal parts
+
+  - subject: a fraction
+    answer: a fraction is a number that represents part of a whole
+
+  - subject: a decimal
+    answer: a decimal is a number written using a decimal point
+
+  - subject: a percentage
+    answer: a percentage is a part expressed out of one hundred
+
+  - subject: a shape
+    answer: a shape is the form or outline of an object or figure
+
+  - subject: a triangle
+    answer: a triangle is a shape with three sides
+
+  - subject: a square
+    answer: a square is a shape with four equal sides and four right angles
+
+  - subject: a circle
+    answer: a circle is a round shape whose points are equally distant from its center
+
+  - subject: a line
+    answer: a line is a straight path that can be extended in both directions
+
+  - subject: an angle
+    answer: an angle is formed by two lines or rays meeting at a point
+
+  - subject: algebra
+    answer: algebra is a part of math that uses symbols to represent values
+
+  - subject: probability
+    answer: probability is a measure of how likely an event is to happen
+
+  - subject: statistics
+    answer: statistics is the study of data and patterns in data
+
+  - subject: science
+    answer: science is the study of the natural world through observation and testing
+
+  - subject: physics
+    answer: physics is the study of matter energy motion and forces
+
+  - subject: chemistry
+    answer: chemistry is the study of matter and how substances change
+
+  - subject: biology
+    answer: biology is the study of living things
+
+  - subject: astronomy
+    answer: astronomy is the study of stars planets and other objects in space
+
+  - subject: geology
+    answer: geology is the study of earth rocks and its structure
+
+  - subject: a cell
+    answer: a cell is the basic unit of living things
+
+  - subject: a molecule
+    answer: a molecule is a group of atoms joined together
+
+  - subject: an atom
+    answer: an atom is a basic unit of matter
+
+  - subject: a proton
+    answer: a proton is a particle with a positive electric charge
+
+  - subject: a neutron
+    answer: a neutron is a particle with no electric charge in an atomic nucleus
+
+  - subject: an electron
+    answer: an electron is a particle with a negative electric charge
+
+  - subject: energy
+    answer: energy is the ability to cause change or do work
+
+  - subject: force
+    answer: a force is a push or pull that can change motion
+
+  - subject: motion
+    answer: motion is a change in position over time
+
+  - subject: gravity
+    answer: gravity is an attractive force between objects with mass
+
+  - subject: heat
+    answer: heat is energy transferred because of a temperature difference
+
+  - subject: temperature
+    answer: temperature is a measure related to how hot or cold something is
+
+  - subject: light
+    answer: light is electromagnetic energy that can be detected by the eyes
+
+  - subject: sound
+    answer: sound is a form of energy carried by vibrations through a medium
+
+  - subject: electricity
+    answer: electricity is the movement or presence of electric charge
+
+  - subject: current
+    answer: electric current is the flow of electric charge
+
+  - subject: voltage
+    answer: voltage is a difference in electric potential
+
+  - subject: matter
+    answer: matter is anything that has mass and takes up space
+
+  - subject: solid
+    answer: a solid is a state of matter with a stable shape and volume
+
+  - subject: liquid
+    answer: a liquid is a state of matter that has a fixed volume but takes the shape of its container
+
+  - subject: gas
+    answer: a gas is a state of matter that spreads to fill its container
+
+  - subject: water cycle
+    answer: the water cycle is the movement of water through evaporation condensation and precipitation
+
+  - subject: photosynthesis
+    answer: photosynthesis is the process by which plants use light to make food
+
+  - subject: ecosystem
+    answer: an ecosystem is a community of living things and their environment
+
+  - subject: dna
+    answer: dna is a molecule that carries genetic information in living things
+
+  - subject: a human
+    answer: a human is a person who can think learn communicate and feel
+
+  - subject: a child
+    answer: a child is a young human person
+
+  - subject: an adult
+    answer: an adult is a human who has reached maturity
+
+  - subject: a parent
+    answer: a parent is a person who raises or cares for a child
+
+  - subject: a teacher
+    answer: a teacher is a person who helps others learn
+
+  - subject: a student
+    answer: a student is a person who is learning something
+
+  - subject: a doctor
+    answer: a doctor is a trained professional who helps diagnose and treat illness
+
+  - subject: a nurse
+    answer: a nurse is a health professional who cares for patients
+
+  - subject: a farmer
+    answer: a farmer is a person who grows crops or raises animals
+
+  - subject: a driver
+    answer: a driver is a person who operates a vehicle
+
+  - subject: a pilot
+    answer: a pilot is a person trained to fly an aircraft
+
+  - subject: a sailor
+    answer: a sailor is a person who works on a ship or boat
+
+  - subject: a cook
+    answer: a cook is a person who prepares food
+
+  - subject: a chef
+    answer: a chef is a professional cook who prepares food
+
+  - subject: a baker
+    answer: a baker is a person who makes bread cakes and other baked foods
+
+  - subject: a writer
+    answer: a writer is a person who creates written work
+
+  - subject: an artist
+    answer: an artist is a person who creates art
+
+  - subject: a singer
+    answer: a singer is a person who uses the voice to make music
+
+  - subject: a musician
+    answer: a musician is a person who performs or creates music
+
+  - subject: a dancer
+    answer: a dancer is a person who performs movement as an art or activity
+
+  - subject: a player
+    answer: a player is a person who takes part in a game or sport
+
+  - subject: a coach
+    answer: a coach is a person who trains or guides players
+
+  - subject: a scientist
+    answer: a scientist is a person who studies the natural world
+
+  - subject: an engineer
+    answer: an engineer is a person who uses science and math to design or build things
+
+  - subject: a programmer
+    answer: a programmer is a person who writes computer code
+
+  - subject: a designer
+    answer: a designer is a person who plans how something should look or work
+
+  - subject: a builder
+    answer: a builder is a person who constructs buildings or other structures
+
+  - subject: a carpenter
+    answer: a carpenter is a worker who makes or repairs things from wood
+
+  - subject: an electrician
+    answer: an electrician is a worker who installs or repairs electrical systems
+
+  - subject: a mechanic
+    answer: a mechanic is a worker who repairs machines or vehicles
+
+  - subject: a police officer
+    answer: a police officer is a person who helps enforce laws and protect the public
+
+  - subject: a firefighter
+    answer: a firefighter is a trained worker who responds to fires and emergencies
+
+  - subject: a lawyer
+    answer: a lawyer is a trained professional who gives legal advice or represents clients
+
+  - subject: a judge
+    answer: a judge is a legal official who makes decisions in court
+
+  - subject: a leader
+    answer: a leader is a person who guides or directs a group
+
+  - subject: a friend
+    answer: a friend is a person you like and trust
+
+  - subject: a neighbor
+    answer: a neighbor is a person who lives near you
+
+  - subject: a customer
+    answer: a customer is a person who buys or uses a product or service
+
+  - subject: a worker
+    answer: a worker is a person who does a job or task
+
+  - subject: a researcher
+    answer: a researcher is a person who studies a subject to learn more about it
+
+  - subject: a reader
+    answer: a reader is a person who reads written material
+
+  - subject: a listener
+    answer: a listener is a person who pays attention to sound or speech
+
+  - subject: a learner
+    answer: a learner is a person who gains knowledge or skill through study or practice
+
+  - subject: a helper
+    answer: a helper is a person who gives assistance
+
+  - subject: a guest
+    answer: a guest is a person invited to a place or event
+
+  - subject: a host
+    answer: a host is a person who welcomes or receives guests
+
+  - subject: a partner
+    answer: a partner is a person who works or acts with another person
+
+  - subject: a word
+    answer: a word is a unit of language with meaning
+
+  - subject: a sentence
+    answer: a sentence is a group of words that expresses a complete idea
+
+  - subject: a question
+    answer: a question is a sentence or phrase used to ask for information
+
+  - subject: an answer
+    answer: an answer is a response to a question or problem
+
+  - subject: a story
+    answer: a story is a description of events that may be real or imagined
+
+  - subject: a letter
+    answer: a letter is a written message sent to another person
+
+  - subject: a message
+    answer: a message is information sent from one person or system to another
+
+  - subject: a language
+    answer: a language is a system people use to communicate
+
+  - subject: a name
+    answer: a name is a word or group of words used to identify something
+
+  - subject: a meaning
+    answer: meaning is the idea or sense expressed by a word or message
+
+  - subject: a fact
+    answer: a fact is information that can be checked against evidence
+
+  - subject: an idea
+    answer: an idea is a thought or plan formed in the mind
+
+  - subject: a thought
+    answer: a thought is something that appears in the mind
+
+  - subject: a memory
+    answer: a memory is information or an experience that a person can recall
+
+  - subject: a reason
+    answer: a reason is an explanation for why something happens or is done
+
+  - subject: a cause
+    answer: a cause is something that makes an event happen
+
+  - subject: an effect
+    answer: an effect is a result produced by a cause
+
+  - subject: a problem
+    answer: a problem is a question or situation that needs a solution
+
+  - subject: a solution
+    answer: a solution is an answer or method that deals with a problem
+
+  - subject: a rule
+    answer: a rule is a statement that tells what is allowed or expected
+
+  - subject: an example
+    answer: an example is a particular case used to explain an idea
+
+  - subject: a lesson
+    answer: a lesson is information or skill taught to a learner
+
+  - subject: a plan
+    answer: a plan is a set of steps prepared for a goal
+
+  - subject: a goal
+    answer: a goal is something a person or group aims to achieve
+
+  - subject: a choice
+    answer: a choice is an act of selecting one option from others
+
+  - subject: a decision
+    answer: a decision is a choice made after thinking about options
+
+  - subject: a habit
+    answer: a habit is a behavior that is repeated regularly
+
+  - subject: a skill
+    answer: a skill is an ability learned through practice or experience
+
+  - subject: an ability
+    answer: an ability is the power or skill to do something
+
+  - subject: knowledge
+    answer: knowledge is information and understanding gained through learning or experience
+
+  - subject: learning
+    answer: learning is the process of gaining knowledge or skill
+
+  - subject: understanding
+    answer: understanding is the ability to know what something means or how it works
+
+  - subject: curiosity
+    answer: curiosity is a desire to learn or know more
+
+  - subject: attention
+    answer: attention is the act of focusing the mind on something
+
+  - subject: patience
+    answer: patience is the ability to wait or continue calmly
+
+  - subject: kindness
+    answer: kindness is behavior that shows care and goodwill toward others
+
+  - subject: anger
+    answer: anger is a strong feeling of displeasure
+
+  - subject: happiness
+    answer: happiness is a feeling of pleasure or joy
+
+  - subject: sadness
+    answer: sadness is a feeling of sorrow or unhappiness
+
+  - subject: fear
+    answer: fear is a feeling caused by a sense of danger or threat
+
+  - subject: hope
+    answer: hope is a feeling that something good may happen
+
+  - subject: love
+    answer: love is a strong feeling of care or affection
+
+  - subject: trust
+    answer: trust is a belief that someone or something is reliable
+
+  - subject: respect
+    answer: respect is a feeling or action that shows regard for others
+
+  - subject: friendship
+    answer: friendship is a close relationship based on care trust or shared interests
+
+  - subject: freedom
+    answer: freedom is the ability to act or choose without unfair control
+
+  - subject: peace
+    answer: peace is a state without war violence or serious conflict
+
+  - subject: fairness
+    answer: fairness is treating people in a just and equal way
+
+  - subject: truth
+    answer: truth is what is in agreement with reality or the facts
+
+  - subject: run
+    answer: run is an action that means moving quickly on foot
+
+  - subject: walk
+    answer: walk is an action that means moving on foot at a normal pace
+
+  - subject: eat
+    answer: eat means to take food into the body
+
+  - subject: drink
+    answer: drink means to take liquid into the body
+
+  - subject: sleep
+    answer: sleep means to rest in a natural state of reduced activity
+
+  - subject: sit
+    answer: sit means to rest on a seat or surface
+
+  - subject: stand
+    answer: stand means to be upright on the feet
+
+  - subject: jump
+    answer: jump means to push off the ground and move upward
+
+  - subject: speak
+    answer: speak means to use the voice to communicate words
+
+  - subject: listen
+    answer: listen means to pay attention to sound
+
+  - subject: read
+    answer: read means to look at written words and understand them
+
+  - subject: write
+    answer: write means to make words or symbols on a surface
+
+  - subject: learn
+    answer: learn means to gain knowledge or skill
+
+  - subject: teach
+    answer: teach means to help another person learn
+
+  - subject: think
+    answer: think means to use the mind to consider ideas or problems
+
+  - subject: know
+    answer: know means to have information or understanding about something
+
+  - subject: understand
+    answer: understand means to know the meaning or working of something
+
+  - subject: remember
+    answer: remember means to keep or bring information back to mind
+
+  - subject: forget
+    answer: forget means to fail to remember something
+
+  - subject: help
+    answer: help means to give support or assistance
+
+  - subject: build
+    answer: build means to make something by putting parts together
+
+  - subject: make
+    answer: make means to create or produce something
+
+  - subject: use
+    answer: use means to do something with an object or tool for a purpose
+
+  - subject: give
+    answer: give means to provide something to another person
+
+  - subject: get
+    answer: get means to receive obtain or become something
+
+  - subject: find
+    answer: find means to discover or locate something
+
+  - subject: look
+    answer: look means to direct the eyes toward something
+
+  - subject: see
+    answer: see means to notice something with the eyes
+
+  - subject: hear
+    answer: hear means to receive sound through the ears
+
+  - subject: feel
+    answer: feel means to experience a physical or emotional sensation
+
+  - subject: good
+    answer: good is a word used to describe something positive useful or suitable
+
+  - subject: bad
+    answer: bad is a word used to describe something harmful poor or unwanted
+
+  - subject: fast
+    answer: fast is a word used to describe something that moves quickly
+
+  - subject: slow
+    answer: slow is a word used to describe something that moves with little speed
+
+  - subject: hot
+    answer: hot is a word used to describe something with a high temperature
+
+  - subject: cold
+    answer: cold is a word used to describe something with a low temperature
+
+  - subject: old
+    answer: old is a word used to describe something that has existed for a long time
+
+  - subject: new
+    answer: new is a word used to describe something that is recent or not used before
+
+  - subject: bright
+    answer: bright is a word used to describe something that gives or reflects much light
+
+  - subject: dark
+    answer: dark is a word used to describe something with little or no light
+
+  - subject: clean
+    answer: clean is a word used to describe something without dirt
+
+  - subject: dirty
+    answer: dirty is a word used to describe something with dirt or unwanted marks
+
+  - subject: full
+    answer: full is a word used to describe something containing as much as it can hold
+
+  - subject: empty
+    answer: empty is a word used to describe something containing nothing
+
+  - subject: hard
+    answer: hard is a word used to describe something that is not easy to bend or break
+
+  - subject: soft
+    answer: soft is a word used to describe something that gives easily when touched
+
+  - subject: quiet
+    answer: quiet is a word used to describe something with little sound
+
+  - subject: a color
+    answer: a color is a quality of light that people can see
+
+  - subject: a sound
+    answer: a sound is a form of energy made by vibrations
+
+  - subject: a place
+    answer: a place is a particular area or location
+
+  - subject: an object
+    answer: an object is a separate thing that can be seen or handled
+
+  - subject: a car
+    answer: a car is a road vehicle used to carry people
+
+  - subject: a bus
+    answer: a bus is a large road vehicle that carries many people
+
+  - subject: a train
+    answer: a train is a group of rail vehicles that carries people or goods
+
+  - subject: a road
+    answer: a road is a path made for people or vehicles to travel on
+
+  - subject: a school
+    answer: a school is a place where people learn
+
+  - subject: a city
+    answer: a city is a large place where many people live and work
+
+  - subject: a village
+    answer: a village is a small place where people live
+
+  - subject: a country
+    answer: a country is a land area with its own government
+
+  - subject: a map
+    answer: a map is a drawing that shows places and their locations
+
+  - subject: a bridge
+    answer: a bridge is a structure built to cross a gap or body of water
+
+  - subject: a boat
+    answer: a boat is a vehicle made to travel on water
+
+  - subject: a ship
+    answer: a ship is a large boat made for travel on water
+
+  - subject: a train station
+    answer: a train station is a place where trains stop for people or goods
+
+
