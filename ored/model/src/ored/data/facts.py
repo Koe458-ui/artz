@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import json
 import random
+from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Sequence
@@ -17,6 +18,7 @@ logger = get_logger(__name__)
 
 DEFAULT_FACTS = "configs/facts.yaml"
 PLACEHOLDER = "{subject}"
+SUBJECTS_LISTED = 20
 
 
 class FactsError(RuntimeError):
@@ -49,10 +51,13 @@ class FactSpec:
                 raise FactsError(
                     f"question template {question!r} has no {PLACEHOLDER} to fill in"
                 )
-        subjects = [fact.subject for fact in self.facts]
-        duplicates = sorted({s for s in subjects if subjects.count(s) > 1})
+        counts = Counter(fact.subject for fact in self.facts)
+        duplicates = sorted(subject for subject, seen in counts.items() if seen > 1)
         if duplicates:
-            raise FactsError(f"these subjects are listed more than once: {duplicates}")
+            raise FactsError(
+                f"these subjects are listed more than once: {duplicates[:10]}"
+                + (f" and {len(duplicates) - 10} more" if len(duplicates) > 10 else "")
+            )
         return self
 
     @property
@@ -167,8 +172,10 @@ def main(argv: Sequence[str] | None = None) -> int:
     logger.info(f"facts file : {args.facts}")
     logger.info(f"questions  : {len(spec.questions)} templates")
     logger.info(f"subjects   : {len(spec.facts)}")
-    for subject in spec.subjects:
+    for subject in spec.subjects[:SUBJECTS_LISTED]:
         logger.info(f"  {subject}")
+    if len(spec.facts) > SUBJECTS_LISTED:
+        logger.info(f"  ... and {len(spec.facts) - SUBJECTS_LISTED} more")
     logger.info("")
     logger.info("Train on it:")
     logger.info(f"  python scripts/train.py --config {args.config}")
