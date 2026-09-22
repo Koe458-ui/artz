@@ -137,6 +137,21 @@ repository and neither belongs in one.
 it. `ored/model/src/ored/learning/checkpoints.py` does, so it belongs wherever
 the trainer runs, and it defaults to `ored-checkpoints`.
 
+## Headers
+
+`public/_headers` covers the assets. It does not cover `worker.js`, because
+Workers apply that file to asset responses only — under Pages it reached the
+functions too, and moving to a Worker dropped it from every API reply without
+saying so. `worker.js` therefore carries the same baseline itself and sets it on
+everything it answers, plus `X-Robots-Tag`, since nothing it answers is a page.
+The page keeps no such header and stays indexable.
+
+The two lists are the same list written twice, and the second one is easy to
+forget. Change `_headers` and change `BASELINE` in `worker.js` with it. The
+Content-Security-Policy is deliberately not in the second: it is a document
+policy, and a script or a JSON reply is not a document, so it would be bytes on
+every API call for nothing.
+
 ## Day to day
 
 ```bash
