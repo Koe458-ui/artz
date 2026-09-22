@@ -7,6 +7,7 @@
   var TRIED_KEY = 'ored.sso.tried';
   var OFF_KEY = 'ored.sso.off';
   var SEEN_KEY = 'ored.sso.seen';
+  var GUEST = 'guest';
   var MAX_CHATS = 50;
   var MAX_HISTORY_TURNS = 20;
   var TITLE_CHARS = 60;
@@ -26,6 +27,7 @@
   var newBtn = document.getElementById('oNew');
   var menuBtn = document.getElementById('oMenu');
   var outBtn = document.getElementById('oOut');
+  var loginBtn = document.getElementById('oLogin');
   var panel = document.getElementById('oHistory');
   var panelClose = document.getElementById('oHistoryClose');
   var list = document.getElementById('oHistoryList');
@@ -34,6 +36,7 @@
 
   var auth = document.getElementById('oAuth');
   var authGo = document.getElementById('oAuthGo');
+  var authClose = document.getElementById('oAuthClose');
   var authJoin = document.getElementById('oAuthJoin');
   var authNote = document.getElementById('oAuthNote');
   var seeds = document.getElementById('oSeeds');
@@ -49,7 +52,7 @@
   }
 
   function storeKey() {
-    return userId ? STORE_PREFIX + ':' + userId : '';
+    return STORE_PREFIX + ':' + (userId || GUEST);
   }
 
   function flagGet(store, key) {
@@ -66,7 +69,6 @@
 
   function read() {
     var key = storeKey();
-    if (!key) return [];
     var parsed = [];
     try {
       var raw = window.localStorage.getItem(key);
@@ -80,7 +82,6 @@
 
   function write() {
     var key = storeKey();
-    if (!key) return;
     try {
       window.localStorage.setItem(key, JSON.stringify(chats.slice(0, MAX_CHATS)));
     } catch (e) {   }
@@ -183,28 +184,30 @@
     input.readOnly = value;
   }
 
-  function showAuth(message, bad) {
-    userId = '';
-    chats = [];
-    activeId = '';
+  function openAuth(message, bad) {
     closeHistory(false);
-    thread.textContent = '';
-    document.body.classList.add('oOut');
-    document.body.classList.remove('oEmpty');
     auth.hidden = false;
+    loginBtn.setAttribute('aria-expanded', 'true');
     settle();
-    say('');
     sayAuth(message || '', bad);
     authGo.disabled = false;
     try { authGo.focus({ preventScroll: true }); } catch (e) {   }
   }
 
-  function showChat(id) {
-    userId = id;
-    document.body.classList.remove('oOut');
+  function closeAuth(refocus) {
+    if (auth.hidden) return;
     auth.hidden = true;
-    settle();
+    loginBtn.setAttribute('aria-expanded', 'false');
     sayAuth('');
+    if (refocus) { try { loginBtn.focus(); } catch (e) {   } }
+  }
+
+  function showChat(id) {
+    userId = id || '';
+    document.body.classList.toggle('oOut', !userId);
+    if (!userId) closeHistory(false);
+    closeAuth(false);
+    settle();
     chats = read();
     if (!chats.length || chats[0].messages.length) startChat();
     else activeId = chats[0].id;
@@ -237,13 +240,7 @@
   async function send(text) {
     if (busy) return;
 
-    if (!sb) {
-      say('Ored cannot reach its server right now. Refresh and try again.', true);
-      return;
-    }
-
     var bearer = await token();
-    if (!bearer) { showAuth('Your session expired. Sign in again.', true); return; }
 
     var chat = current() || startChat();
     var past = chat.messages.slice(-MAX_HISTORY_TURNS).map(function (m) {
@@ -275,14 +272,21 @@
 
     setBusy(false);
 
-    if (answer.status === 401) { showAuth('Your session expired. Sign in again.', true); return; }
+    if (answer.status === 401) {
+      openAuth('Your session expired. Login again.', true);
+      say('');
+      return;
+    }
 
     if (!answer.body.ok) {
       say(answer.body.error || 'Ored could not answer that right now.', true);
       return;
     }
 
-    say('');
+    if (bearer && answer.body.signed_in === false)
+      say('Your session expired. That answer was kept as a guest — login again to save to your history.', true);
+    else
+      say('');
     chat.messages.push({
       role: 'assistant',
       content: answer.body.reply,
@@ -325,6 +329,12 @@
 
   authGo.addEventListener('click', signIn);
 
+  loginBtn.addEventListener('click', function () {
+    if (auth.hidden) openAuth(''); else closeAuth(true);
+  });
+
+  authClose.addEventListener('click', function () { closeAuth(true); });
+
   seeds.addEventListener('click', function (event) {
     var button = event.target.closest('.oSeed');
     if (!button) return;
@@ -337,7 +347,8 @@
     flagSet('sessionStorage', OFF_KEY, '1');
     flagDrop('localStorage', SEEN_KEY);
     if (sb) { try { await sb.auth.signOut(); } catch (e) {   } }
-    showAuth('Signed out. You are still signed in on DigiArtz.');
+    showChat('');
+    say('Signed out. You are still signed in on DigiArtz.');
   });
 
   form.addEventListener('submit', function (event) {
@@ -387,7 +398,9 @@
   });
 
   document.addEventListener('keydown', function (event) {
-    if (event.key === 'Escape' && !panel.hidden) closeHistory(true);
+    if (event.key !== 'Escape') return;
+    if (!auth.hidden) { closeAuth(true); return; }
+    if (!panel.hidden) closeHistory(true);
   });
 
   function settle() {
@@ -442,7 +455,7 @@
       if (next && next.user) {
         if (next.user.id !== userId) showChat(next.user.id);
       } else if (userId) {
-        showAuth('');
+        showChat('');
       }
     });
   }
@@ -472,8 +485,10 @@
     }
 
     if (!sb) {
-      showAuth('Ored is not configured. ORED_AUTH_URL and ORED_AUTH_KEY are not set on the Worker.', true);
+      showChat('');
+      loginBtn.disabled = true;
       authGo.disabled = true;
+      say('Login is unavailable right now. Ored is not configured.', true);
       return;
     }
 
@@ -487,7 +502,8 @@
         watch();
         return;
       }
-      showAuth('That sign-in did not go through. Try again.', true);
+      showChat('');
+      openAuth('That sign-in did not go through. Try again.', true);
       watch();
       return;
     }
@@ -504,24 +520,22 @@
       return;
     }
 
-    if (back && back.quiet) {
-      flagDrop('localStorage', SEEN_KEY);
-      showAuth('');
-    } else if (back && back.error) {
-      showAuth(back.error, true);
-    } else if (trySilently(back && back.invited)) {
-      if (handoff(true)) return;
-      showAuth(NO_SITE, true);
-    } else {
-      showAuth('');
-    }
+    var silent = !(back && (back.quiet || back.error)) && trySilently(back && back.invited);
+    if (silent && handoff(true)) return;
+
+    showChat('');
+
+    if (back && back.quiet) flagDrop('localStorage', SEEN_KEY);
+    else if (back && back.error) openAuth(back.error, true);
+    else if (silent) say(NO_SITE, true);
 
     watch();
   }
 
   function start() {
     boot().catch(function () {
-      showAuth('Ored could not start. Refresh and try again.', true);
+      showChat('');
+      say('Ored could not start. Refresh and try again.', true);
     });
   }
 

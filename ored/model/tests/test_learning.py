@@ -46,6 +46,25 @@ def store():
     return InMemoryStore()
 
 
+def test_a_visitor_without_an_account_is_stored_as_anonymous():
+    assert Conversation().visitor == "anonymous"
+    assert Conversation(user_id="member").visitor == "account"
+
+
+def test_anonymous_conversations_are_learned_from(store):
+    conversation = Conversation()
+    store.add_conversation(conversation)
+    store.add_messages([
+        Message(conversation_id=conversation.id, role=Role.USER,
+                content="a question here", created_at="2026-01-01T00:00:00Z"),
+        Message(conversation_id=conversation.id, role=Role.ASSISTANT,
+                content="an answer here", created_at="2026-01-01T00:00:01Z"),
+    ])
+    candidates = build_candidates(conversation.id, store.messages_for(conversation.id))
+    assert conversation.visitor == "anonymous"
+    assert len(candidates) == 1
+
+
 def test_stored_messages_are_not_learning_data(store):
     conversation = conversation_with(store, [("a question here", "an answer here")])
     assert store.messages_for(conversation.id)

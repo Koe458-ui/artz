@@ -1,9 +1,10 @@
 import { authUrl, authKey, oredUrl, oredSvc, oredUser, oredService, oredUnderLimit } from '../lib/ored-sb.js';
-import { UUID_RE, json, safeError, sameOrigin } from '../lib/ored-http.js';
+import { UUID_RE, caller, json, safeError, sameOrigin } from '../lib/ored-http.js';
 
 const MAX_MESSAGE_CHARS = 4000;
 const MAX_HISTORY_TURNS = 20;
 const SEND_LIMIT = 20;
+const GUEST_SEND_LIMIT = 8;
 const SEND_WINDOW = 60;
 const UPSTREAM_TIMEOUT_MS = 30000;
 
@@ -49,15 +50,22 @@ async function owns(env, conversationId, userId, title) {
   await oredService(env, '/ored_conversations', {
     method: 'POST',
     headers: { prefer: 'resolution=ignore-duplicates,return=minimal' },
-    body: JSON.stringify({ id: conversationId, user_id: userId, title: title }),
+    body: JSON.stringify({
+      id: conversationId,
+      user_id: userId,
+      visitor: userId ? 'account' : 'anonymous',
+      title: title,
+    }),
   });
+  const mine = userId ? `user_id=eq.${userId}` : 'user_id=is.null';
   const rows = await oredService(env,
-    `/ored_conversations?select=id&id=eq.${conversationId}&user_id=eq.${userId}&limit=1`);
+    `/ored_conversations?select=id&id=eq.${conversationId}&${mine}&limit=1`);
   return Array.isArray(rows) && rows.length === 1;
 }
 
 async function remember(env, conversationId, userId, message, answer) {
-  if (!oredSvc(env) || !UUID_RE.test(conversationId) || !UUID_RE.test(userId)) return;
+  if (!oredSvc(env) || !UUID_RE.test(conversationId)) return;
+  if (userId && !UUID_RE.test(userId)) return;
   try {
     const title = message.replace(/\s+/g, ' ').trim().slice(0, 80);
     if (!(await owns(env, conversationId, userId, title))) return;
@@ -88,12 +96,14 @@ const ACTIONS = {
   },
 
   send: {
-    auth: true,
-    async run({ env, body, user }) {
+    auth: false,
+    async run({ env, request, body, user }) {
       const message = text(body.message, MAX_MESSAGE_CHARS);
       if (!message) return json({ error: 'Write something first' }, 400);
 
-      if (!(await oredUnderLimit(env, 'ored:send:' + user.id, SEND_LIMIT, SEND_WINDOW)))
+      const bucket = user ? 'ored:send:' + user.id : 'ored:send:guest:' + caller(request);
+      const limit = user ? SEND_LIMIT : GUEST_SEND_LIMIT;
+      if (!(await oredUnderLimit(env, bucket, limit, SEND_WINDOW)))
         return json({ error: 'Too many messages — wait a moment' }, 429);
 
       if (!endpoint(env))
@@ -101,16 +111,17 @@ const ACTIONS = {
 
       const answer = await ask(env, {
         conversation_id: text(body.conversation_id, 64),
-        user_id: user.id,
+        user_id: user ? user.id : null,
+        visitor: user ? 'account' : 'anonymous',
         message,
         history: history(body.history),
       });
 
       if (!answer) return json({ error: 'Ored could not answer that right now' }, 502);
 
-      await remember(env, text(body.conversation_id, 64), user.id, message, answer);
+      await remember(env, text(body.conversation_id, 64), user ? user.id : null, message, answer);
 
-      return json({ ok: true, ...answer }, 200);
+      return json({ ok: true, signed_in: !!user, ...answer }, 200);
     },
   },
 };

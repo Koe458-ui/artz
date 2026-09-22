@@ -30,17 +30,32 @@ what is public is a place rather than a rule, and it cannot drift.
 and `worker.js` answers 404 for anything under `/ored/model/` as well, with the
 same `noindex` header every other 404 carries.
 
+## Asking without an account
+
+Ored answers signed-out visitors too — same page, same composer, same model.
+Signing in changes what is kept, not what is answered.
+
+| | Signed out | Signed in |
+|---|---|---|
+| Bar | `+`, Login | `+`, history, sign out |
+| Chats | this browser only | stored under the DigiArtz id |
+| Row | `user_id` null, `visitor` `anonymous` | `user_id` set, `visitor` `account` |
+| Rate limit | 8 a minute, per address | 20 a minute, per account |
+
+Both are learned from the same way. Nothing under `ored/model/` reads `user_id`:
+candidates are built from a conversation's message pairs, whoever asked, and
+`learning/candidates.py` redacts both alike.
+
 ## Sign-in
 
-Ored has no accounts and no sign-in form of its own. A signed-out visitor gets
-one card — *Login DigiArtz to continue* — and one button, and the button leaves
-for DigiArtz. Everything about proving who someone is happens over there, on the
-page that already does it: password, Google, Discord, Apple, the lot. Ored only
-receives the result.
+Ored has no accounts and no sign-in form of its own. **Login** opens one card
+and one button, and the button leaves for DigiArtz. Everything about proving who
+someone is happens over there, on the page that already does it: password,
+Google, Discord, Apple, the lot. Ored only receives the result.
 
 `functions/api/ored.js` still checks every token against the DigiArtz project
-before it writes anything, exactly as before. What changed is where the token
-comes from.
+before it writes anything. A request with no valid token is not refused; it is
+answered and stored as anonymous.
 
 ### The hand-off
 
@@ -86,11 +101,12 @@ and none of these is:
   Sign out mean something
 
 A cold visitor who has never signed in and did not come from DigiArtz is not
-bounced anywhere. They get the card, and the button is theirs to press.
+bounced anywhere. They get the chat, and the button is theirs to press.
 
-Signing out of Ored signs out of Ored. The DigiArtz session is untouched, the
-card says so, and the next press of the button will sign them back in without a
-prompt — which is what one account across two sites means.
+Signing out of Ored signs out of Ored, and drops back to the guest state rather
+than a wall. The DigiArtz session is untouched, the card says so, and the next
+press of the button will sign them back in without a prompt — which is what one
+account across two sites means.
 
 ### What has to be true
 
@@ -147,6 +163,9 @@ reaches this data, and forcing RLS holds the table owner to the same rule.
 `user_id`, `reviewed_by` and `approved_by` hold DigiArtz user ids as plain uuid
 columns. There is no foreign key, because the accounts they name live in another
 project.
+
+`ored_conversations.user_id` is null when nobody was signed in, and `visitor` is
+`account` or `anonymous`. A check constraint keeps the two in step.
 
 ## The page
 

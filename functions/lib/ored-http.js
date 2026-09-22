@@ -26,6 +26,13 @@ export function sameOrigin(request, env) {
   return false;
 }
 
+export function caller(request) {
+  const raw = request.headers.get('CF-Connecting-IP') ||
+              request.headers.get('X-Forwarded-For') || '';
+  const first = raw.split(',')[0].trim();
+  return first ? first.slice(0, 64) : 'unknown';
+}
+
 export function json(obj, status, extra) {
   return new Response(JSON.stringify(obj), {
     status,

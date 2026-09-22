@@ -53,10 +53,15 @@ class Conversation:
 
     id: str = field(default_factory=new_id)
     user_id: Optional[str] = None
+    visitor: str = ""
     title: str = ""
     created_at: str = field(default_factory=now)
     updated_at: str = field(default_factory=now)
     message_count: int = 0
+
+    def __post_init__(self) -> None:
+        if not self.visitor:
+            self.visitor = "account" if self.user_id else "anonymous"
 
 
 @dataclass
