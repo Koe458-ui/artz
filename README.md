@@ -16,6 +16,7 @@ own, listed in search separately from DigiArtz.
 | `public/fonts/` | the two typefaces the page uses, served from here rather than Google |
 | `public/robots.txt`, `public/sitemap.xml` | what crawlers are told, for the one page there is |
 | `worker.js`, `wrangler.jsonc` | the Worker: its entry, and the config the deploy reads |
+| | `worker.js` also answers `/config.js` from its variables |
 | `functions/api/ored.js` | the backend endpoint |
 | `functions/lib/ored-*.js` | its helpers |
 | `ored/model/` | the model, training, evaluation and learning code |
@@ -105,26 +106,51 @@ grants `'self'` and the Supabase project and nothing else, and it stays that way
 
 ## Configuration
 
-`config.js` is generated at deploy and git-ignored. Copy `config.example.js` to
-`public/config.js` — inside the published directory, which is where the page
-asks for it. It holds the DigiArtz project URL and its publishable key, and never
-anything secret.
+`/config.js` is not a file. `worker.js` answers that path from its own
+variables, so the DigiArtz project URL and publishable key are set once, on the
+server, and the page reads the same pair the backend verifies tokens with.
+There is nothing to generate at deploy and no second copy to keep in step. What
+it serves is public by definition — a project URL and a publishable key — and
+the secrets below are never in it.
 
-Everything else is an environment variable on the backend:
+Everything is a variable on the Worker:
 
 | Variable | Secret |
 |---|---|
 | `ORED_AUTH_URL` — DigiArtz project URL, to verify tokens | no |
 | `ORED_AUTH_KEY` — DigiArtz publishable key | no |
 | `ORED_SB_URL` — Ored project URL | no |
-| `ORED_SB_SERVICE_KEY` — Ored service-role key | **yes** |
+| `ORED_SB_SERVICE_KEY` — Ored secret key, `sb_secret_…` | **yes** |
 | `ORED_API_URL` — where `scripts/serve.py` is listening | no |
 | `ORED_API_KEY` — shared with the serving process | **yes** |
 | `ORED_ALLOWED_ORIGINS` — extra origins allowed to post | no |
-| `ORED_SB_CHECKPOINT_BUCKET` — defaults to `ored-checkpoints` | no |
+| `ORED_SITE_URL` — where "Create one on DigiArtz" points, defaults to `https://digiartz.net` | no |
+
+The first four are what sign-in needs; without the first two the page says so.
+`ORED_API_URL` and `ORED_API_KEY` are what answering needs, and until they are
+set the chat says Ored is still in training, which is true.
 
 The two secrets are set on the server only. Neither has ever been in this
 repository and neither belongs in one.
+
+`ORED_SB_CHECKPOINT_BUCKET` is not on this list because the Worker never reads
+it. `ored/model/src/ored/learning/checkpoints.py` does, so it belongs wherever
+the trainer runs, and it defaults to `ored-checkpoints`.
+
+## Headers
+
+`public/_headers` covers the assets. It does not cover `worker.js`, because
+Workers apply that file to asset responses only — under Pages it reached the
+functions too, and moving to a Worker dropped it from every API reply without
+saying so. `worker.js` therefore carries the same baseline itself and sets it on
+everything it answers, plus `X-Robots-Tag`, since nothing it answers is a page.
+The page keeps no such header and stays indexable.
+
+The two lists are the same list written twice, and the second one is easy to
+forget. Change `_headers` and change `BASELINE` in `worker.js` with it. The
+Content-Security-Policy is deliberately not in the second: it is a document
+policy, and a script or a JSON reply is not a document, so it would be bytes on
+every API call for nothing.
 
 ## Day to day
 
