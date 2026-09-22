@@ -10,6 +10,7 @@ import torch
 from ored.config import config_from_dict
 from ored.data.dataset import build_datasets
 from ored.data.preprocessing import bits_to_string
+from ored.inference.predictor import resolve_task
 from ored.models.registry import build_model
 from ored.training.metrics import bit_accuracy, exact_match_accuracy
 from ored.utils.checkpoint import load_checkpoint
@@ -33,6 +34,17 @@ def evaluate_checkpoint(
 
     payload = load_checkpoint(checkpoint_path, map_location=resolved_device)
     cfg = config_from_dict(payload["config"])
+
+    # this evaluator scores bit vectors; a language model checkpoint carries a
+    # tokenizer and is scored by lm_evaluator instead. Say so plainly rather
+    # than failing later on the vocab_size the tokenizer would have supplied.
+    if resolve_task(payload, cfg, checkpoint_path) == "language_model":
+        raise ValueError(
+            f"{checkpoint_path} holds a language model, which this evaluator cannot "
+            f"score. Use ored.evaluation.lm_evaluator.evaluate_language_model(), or "
+            f"run scripts/evaluate.py, which picks the right one."
+        )
+
     model = build_model(cfg).to(resolved_device)
     model.load_state_dict(payload["model_state"], strict=True)
     model.eval()
@@ -142,7 +154,7 @@ def main(argv: Optional[List[str]] = None) -> int:
     args = parser.parse_args(argv)
 
     payload = load_checkpoint(args.checkpoint, map_location="cpu")
-    task = config_from_dict(payload["config"]).task
+    task = resolve_task(payload, config_from_dict(payload["config"]), args.checkpoint)
 
     if task == "language_model":
         from ored.evaluation.lm_evaluator import evaluate_language_model

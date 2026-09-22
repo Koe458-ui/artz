@@ -6,6 +6,8 @@ from ored.inference.predictor import (
     Prediction,
     TextPrediction,
     load_predictor,
+    read_tokenizer,
+    resolve_task,
 )
 
 __all__ = [
@@ -15,6 +17,8 @@ __all__ = [
     "Prediction",
     "TextPrediction",
     "load_predictor",
+    "read_tokenizer",
+    "resolve_task",
     "generate_text",
     "generate_tokens",
     "complete",
