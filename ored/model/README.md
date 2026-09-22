@@ -463,6 +463,7 @@ Ored.ai/
 │   ├── generate_dataset.py     # Step 1 data
 │   ├── generate_corpus.py      # Step 2 text corpus
 │   ├── generate_facts.py       # corpus + the facts from configs/facts.yaml
+│   ├── recall.py               # ask a checkpoint every fact it was taught
 │   ├── vocab.py                # what a checkpoint can read, and what it was taught
 │   ├── train.py                # both steps, selected by --config
 │   ├── evaluate.py             # both steps, routed by the checkpoint
@@ -494,6 +495,7 @@ Ored.ai/
 │   ├── evaluation/
 │   │   ├── evaluator.py        # Step 1 scoring + error analysis
 │   │   ├── lm_evaluator.py     # Step 2 bpc, samples, held-out arithmetic
+│   │   ├── recall.py           # fact-by-fact scoring, broken down by category
 │   │   └── text_metrics.py     # grammaticality, arithmetic grading
 │   ├── inference/
 │   │   ├── predictor.py        # checkpoint → prediction
@@ -506,7 +508,7 @@ Ored.ai/
 │       ├── checkpoint.py       # save/load
 │       └── weight_stats.py     # measuring how far weights moved
 │
-└── tests/                      # 212 tests
+└── tests/                      # 231 tests
     ├── conftest.py
     ├── test_config.py
     ├── test_preprocessing.py
@@ -520,6 +522,7 @@ Ored.ai/
     ├── test_generation.py
     ├── test_schedules.py
     ├── test_facts.py
+    ├── test_recall.py
     ├── test_vocab.py
     └── test_tasks.py
 ```
@@ -919,8 +922,24 @@ Out of the box Ored knows about fifty words — the names, nouns, adjectives and
 verbs in `src/ored/data/corpus.py`, plus arithmetic. Ask it "what is a human"
 and it has never seen either word, so it cannot answer.
 
-`configs/facts.yaml` is where you say what it should be able to answer. Each
-entry is a subject and the sentence Ored should reply with:
+`configs/facts.yaml` is where you say what it should be able to answer, and it
+takes either of two shapes.
+
+Give each fact its own question when the wording matters:
+
+```yaml
+facts:
+  - id: "00001"
+    category: physics
+    question: "What is velocity?"
+    answer: "Velocity is speed together with a specified direction."
+```
+
+`id` and `category` are optional. `category` is carried through to the corpus
+and `scripts/recall.py` scores each one separately, which is how you find out
+that the model has learned your physics but not your civics.
+
+Or give a subject and let templates ask it several ways:
 
 ```yaml
 questions:
@@ -932,10 +951,14 @@ facts:
     answer: a human is a person who thinks and feels
 ```
 
-Every question template is filled in with every subject, so four templates and
-eighteen subjects give seventy-two ways of asking. The lines are mixed into the
-ordinary corpus rather than replacing it, so the grammar sentences and the
-arithmetic stay where they were.
+Every template is filled in with every subject, so four templates and eighteen
+subjects give seventy-two ways of asking. The two shapes can be mixed in one
+file; templates are only required for facts that give a subject rather than a
+question. An answer that already ends in `.`, `?` or `!` is left alone, and one
+that does not is given a full stop.
+
+Either way the lines are mixed into the ordinary corpus rather than replacing
+it, so the grammar sentences and the arithmetic stay where they were.
 
 ```bash
 python scripts/generate_facts.py
@@ -945,13 +968,46 @@ python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --text
 ```
 
 `--repeats` is how many times each fact appears in the training corpus; the
-validation and test corpora get `val_test_fraction` of that. The subjects are
-recorded in `facts.json` beside the corpus.
+validation and test corpora get `val_test_fraction` of that. The facts are
+recorded in `facts.json` beside the corpus, which is what `scripts/recall.py`
+reads back.
 
-Measured on a 25-epoch run over 18 facts, the answers come back exactly as
-written. They are memorised, not understood: a subject that was never listed
-returns another subject's answer, because completing the pattern is the only
-thing the model can do.
+**Watch the longest line.** `generate_facts.py` prints it, and anything longer
+than `data.block_size` is cut short during training, so the model learns a
+truncated answer. `block_size` is 256, which covers a question and answer of
+about forty words. Raise it, or shorten the answer.
+
+They are memorised, not understood: a subject that was never listed returns
+another subject's answer, because completing the pattern is the only thing the
+model can do.
+
+## Scoring what it remembers
+
+`scripts/recall.py` asks a checkpoint every question its corpus was built from
+and compares the answer word for word.
+
+```bash
+python scripts/recall.py --checkpoint checkpoints/char_transformer/best.pt
+python scripts/recall.py --checkpoint checkpoints/ored_v2/best.pt --corpus data/raw/corpus --misses 25
+```
+
+It prints one score, a breakdown by category when the facts carry one, and the
+answers it got wrong next to the answers it should have given. A wrong answer
+that belongs to a different fact means the model has run out of room; a wrong
+answer that is mush means it has not trained long enough.
+
+Measured on synthetic facts, 30 epochs each, with a 819,072-parameter model:
+
+| facts | corpus | recall |
+|---|---|---|
+| 50 | 146,739 characters | 100.0% |
+| 100 | 248,035 characters | 100.0% |
+| 200 | 457,203 characters | 100.0% |
+
+No degradation at 200, so the ceiling is somewhere above it and has not been
+measured. What is known is the other end: `TextDataset` holds the whole corpus
+in one `int64` tensor at eight bytes a character, so a million facts would need
+about 20 GB of memory before the first epoch.
 
 ## Checking what Ored knows
 
@@ -1170,7 +1226,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **83 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **86 files, 0 comments, 0 docstrings.**
 
 ---
 

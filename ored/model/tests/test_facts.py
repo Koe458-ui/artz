@@ -27,8 +27,8 @@ def spec():
     return FactSpec(
         questions=["what is {subject} ?", "tell me what {subject} is ."],
         facts=[
-            Fact("a human", "a human is a person who thinks and feels"),
-            Fact("ored", "ored is a small model that learns"),
+            Fact(subject="a human", answer="a human is a person who thinks and feels"),
+            Fact(subject="ored", answer="ored is a small model that learns"),
         ],
     ).validate()
 
@@ -51,14 +51,16 @@ def test_every_fact_appears_as_often_as_asked(spec):
 
 def test_a_question_template_without_a_subject_is_rejected():
     with pytest.raises(FactsError, match="no .subject."):
-        FactSpec(questions=["what is a human ?"], facts=[Fact("a", "b")]).validate()
+        FactSpec(questions=["what is a human ?"],
+                 facts=[Fact(subject="a", answer="b")]).validate()
 
 
 def test_a_repeated_subject_is_rejected():
     with pytest.raises(FactsError, match="more than once"):
         FactSpec(
             questions=["what is {subject} ?"],
-            facts=[Fact("a cat", "one"), Fact("a cat", "two")],
+            facts=[Fact(subject="a cat", answer="one"),
+                   Fact(subject="a cat", answer="two")],
         ).validate()
 
 
@@ -67,12 +69,60 @@ def test_an_empty_spec_is_rejected():
         FactSpec(questions=["what is {subject} ?"], facts=[]).validate()
 
 
+def test_a_subject_without_any_template_is_rejected():
+    with pytest.raises(FactsError, match="no question"):
+        FactSpec(questions=[], facts=[Fact(subject="a cat", answer="one")]).validate()
+
+
+def test_a_fact_may_carry_its_own_question():
+    fact = Fact(question="What is velocity?", category="physics",
+                answer="Velocity is speed together with a specified direction.")
+
+    assert fact.needs_a_template is False
+    assert fact.label == "What is velocity?"
+    assert fact.line() == (
+        "What is velocity? Velocity is speed together with a specified direction.")
+
+
+def test_an_answer_that_already_ends_a_sentence_is_not_given_a_second_full_stop():
+    assert Fact(question="Q?", answer="Ends here.").line() == "Q? Ends here."
+    assert Fact(question="Q?", answer="Ends here!").line() == "Q? Ends here!"
+    assert Fact(question="Q?", answer="No ending").line() == "Q? No ending ."
+
+
+def test_explicit_questions_need_no_templates():
+    spec = FactSpec(questions=[], facts=[
+        Fact(question="What is velocity?", answer="Speed with direction."),
+        Fact(question="What is force?", answer="Mass times acceleration."),
+    ]).validate()
+
+    assert spec.subjects == ["What is velocity?", "What is force?"]
+
+
+def test_two_facts_answering_the_same_question_are_rejected():
+    with pytest.raises(FactsError, match="more than once"):
+        FactSpec(questions=[], facts=[
+            Fact(question="What is force?", answer="one"),
+            Fact(question="What is force?", answer="two"),
+        ]).validate()
+
+
+def test_categories_and_longest_line_are_reported():
+    spec = FactSpec(questions=[], facts=[
+        Fact(question="What is force?", category="physics", answer="Mass times a."),
+        Fact(question="What is a verb?", category="english", answer="A doing word."),
+    ]).validate()
+
+    assert spec.categories == {"physics": 1, "english": 1}
+    assert spec.longest_line == len("What is a verb? A doing word.")
+
+
 def test_the_shipped_facts_file_loads():
     loaded = load_facts(CONFIGS / "facts.yaml")
 
-    assert loaded.questions
-    assert "ored" in loaded.subjects
-    assert "a human" in loaded.subjects
+    assert len(loaded.facts) > 100
+    assert all(fact.answer for fact in loaded.facts)
+    assert len(set(loaded.subjects)) == len(loaded.facts)
 
 
 def test_a_missing_facts_file_says_where_to_look(tmp_path):
@@ -85,7 +135,7 @@ def test_a_fact_without_an_answer_is_rejected(tmp_path):
     path.write_text("questions: ['what is {subject} ?']\nfacts:\n  - subject: a cat\n",
                     encoding="utf-8")
 
-    with pytest.raises(FactsError, match="subject and an answer"):
+    with pytest.raises(FactsError, match="either a question or a subject"):
         load_facts(path)
 
 
@@ -118,6 +168,7 @@ def test_the_subjects_are_recorded_beside_the_corpus(tiny_lm_cfg, spec):
 
     assert recorded["repeats"]["train"] == 4
     assert load_fact_subjects(tiny_lm_cfg.data.corpus.dir) == ["a human", "ored"]
+    assert recorded["facts"][0]["category"] == ""
 
 
 def test_no_subjects_when_the_corpus_has_no_facts(tmp_path):
@@ -148,7 +199,9 @@ def test_the_cli_writes_a_corpus_from_the_shipped_facts(tiny_lm_cfg, tmp_path):
     ])
 
     assert exit_code == 0
-    assert "ored is a small model" in read_corpus(tmp_path / "corpus", "train")
+    train = read_corpus(tmp_path / "corpus", "train")
+    shipped = load_facts(DEFAULT_FACTS)
+    assert shipped.facts[0].line() in train
 
 
 def test_the_cli_reports_a_missing_facts_file(tmp_path):

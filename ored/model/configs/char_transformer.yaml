@@ -5,8 +5,8 @@ deterministic: true
 
 data:
   tokenizer: char
-  block_size: 128
-  stride: 64
+  block_size: 256
+  stride: 128
   batch_size: 32
   shuffle_train: true
   corpus:
