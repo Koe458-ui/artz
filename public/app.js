@@ -440,7 +440,7 @@
 
     if (!sb) {
       socialBusy(true);
-      showAuth('Ored is not configured. Copy config.example.js to config.js.', true);
+      showAuth('Ored is not configured. ORED_AUTH_URL and ORED_AUTH_KEY are not set on the Worker.', true);
       return;
     }
 
