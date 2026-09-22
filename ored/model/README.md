@@ -441,7 +441,9 @@ Ored.ai/
 ├── .gitignore
 │
 ├── configs/
-│   └── bit_adder_mlp.yaml      # every hyperparameter, heavily commented
+│   ├── bit_adder_mlp.yaml      # every hyperparameter, heavily commented
+│   ├── char_transformer.yaml   # Step 2 hyperparameters
+│   └── facts.yaml              # the questions Ored should be able to answer
 │
 ├── data/
 │   ├── README.md               # dataset documentation
@@ -460,6 +462,8 @@ Ored.ai/
 │   ├── _bootstrap.py           # lets scripts run without `pip install`
 │   ├── generate_dataset.py     # Step 1 data
 │   ├── generate_corpus.py      # Step 2 text corpus
+│   ├── generate_facts.py       # corpus + the facts from configs/facts.yaml
+│   ├── vocab.py                # what a checkpoint can read, and what it was taught
 │   ├── train.py                # both steps, selected by --config
 │   ├── evaluate.py             # both steps, routed by the checkpoint
 │   ├── infer.py                # Step 1 prediction
@@ -473,6 +477,7 @@ Ored.ai/
 │   │   ├── preprocessing.py    # int ↔ bit-vector encoding
 │   │   ├── dataset.py          # Dataset + DataLoader (batching)
 │   │   ├── corpus.py           # text corpus, disjoint operand splits
+│   │   ├── facts.py            # question-and-answer lines mixed into the corpus
 │   │   ├── tokenizer.py        # char tokenizer + registry
 │   │   └── text_dataset.py     # sequence windows, shift-by-one targets
 │   ├── models/
@@ -493,14 +498,15 @@ Ored.ai/
 │   ├── inference/
 │   │   ├── predictor.py        # checkpoint → prediction
 │   │   ├── generator.py        # sampling: temperature, top-k, top-p
-│   │   └── generate_cli.py     # the generation command line
+│   │   ├── generate_cli.py     # the generation command line
+│   │   └── vocab_cli.py        # vocabulary and message check
 │   └── utils/
 │       ├── seed.py             # reproducibility
 │       ├── logging_utils.py    # console output
 │       ├── checkpoint.py       # save/load
 │       └── weight_stats.py     # measuring how far weights moved
 │
-└── tests/                      # 124 tests
+└── tests/                      # 212 tests
     ├── conftest.py
     ├── test_config.py
     ├── test_preprocessing.py
@@ -513,6 +519,8 @@ Ored.ai/
     ├── test_transformer.py
     ├── test_generation.py
     ├── test_schedules.py
+    ├── test_facts.py
+    ├── test_vocab.py
     └── test_tasks.py
 ```
 
@@ -905,6 +913,84 @@ The baseline, for comparison:
 python scripts/train.py --config configs/char_bigram.yaml
 ```
 
+## Teaching Ored to answer a question
+
+Out of the box Ored knows about fifty words — the names, nouns, adjectives and
+verbs in `src/ored/data/corpus.py`, plus arithmetic. Ask it "what is a human"
+and it has never seen either word, so it cannot answer.
+
+`configs/facts.yaml` is where you say what it should be able to answer. Each
+entry is a subject and the sentence Ored should reply with:
+
+```yaml
+questions:
+  - "what is {subject} ?"
+  - "What is {subject}?"
+
+facts:
+  - subject: a human
+    answer: a human is a person who thinks and feels
+```
+
+Every question template is filled in with every subject, so four templates and
+eighteen subjects give seventy-two ways of asking. The lines are mixed into the
+ordinary corpus rather than replacing it, so the grammar sentences and the
+arithmetic stay where they were.
+
+```bash
+python scripts/generate_facts.py
+python scripts/generate_facts.py --repeats 80
+python scripts/train.py --config configs/char_transformer.yaml
+python scripts/infer.py --checkpoint checkpoints/char_transformer/best.pt --text "what is a human ? "
+```
+
+`--repeats` is how many times each fact appears in the training corpus; the
+validation and test corpora get `val_test_fraction` of that. The subjects are
+recorded in `facts.json` beside the corpus.
+
+Measured on a 25-epoch run over 18 facts, the answers come back exactly as
+written. They are memorised, not understood: a subject that was never listed
+returns another subject's answer, because completing the pattern is the only
+thing the model can do.
+
+## Checking what Ored knows
+
+Two different questions, two different answers. Which **words** it was taught is
+decided by `data/raw/corpus/train.txt`. Which **characters** it can read at all
+is decided by the tokenizer saved inside the checkpoint — anything outside it
+becomes `<unk>` and is thrown away.
+
+`scripts/vocab.py` reports both, and whether `scripts/serve.py` would learn from
+a message or skip it:
+
+```bash
+python scripts/vocab.py
+python scripts/vocab.py --text "what is a human ?" --text "What is a Human? Explain!"
+```
+
+```
+tokenizer  : CharTokenizer | vocab_size=44 | symbols: ' +,.0123456789=?Wabcdefghijklmnopqrstuvwxy' + newline
+corpus     : data/raw/corpus  (136 distinct words)
+
+text           : 'what is a human ?'
+known          : 100.0%
+unknown chars  : none
+words not seen : none
+online learning: YES
+
+text           : 'What is a Human? Explain!'
+known          : 88.0%
+unknown chars  : ['!', 'E', 'H']
+words not seen : ['Explain']
+online learning: NO -- below 90%, the server skips it as outside the vocabulary
+```
+
+This matters before serving. `OnlinePolicy.min_known_ratio` is 0.9, so a message
+with more than a tenth of its characters outside the vocabulary is stored in
+Supabase but never trained on. A corpus written only in lower case has no
+capitals and no `?`, which is most of what a visitor types. Check a few real
+sentences against the checkpoint before pointing the website at it.
+
 ## How the Transformer works
 
 ```
@@ -1084,7 +1170,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **56 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **83 files, 0 comments, 0 docstrings.**
 
 ---
 

@@ -5,7 +5,7 @@ import json
 import random
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Sequence, Tuple
+from typing import Dict, List, Optional, Sequence, Tuple
 
 from ored.config import Config, load_config
 from ored.utils.logging_utils import get_logger, section
@@ -116,10 +116,12 @@ def build_corpus_text(
     repeats: int,
     rng: random.Random,
     reverse_answer: bool = False,
+    extra_lines: Sequence[str] = (),
 ) -> str:
     lines = [make_sentence(rng) for _ in range(sentence_lines)]
     for _ in range(repeats):
         lines.extend(make_arithmetic(a, b, reverse_answer) for a, b in pairs)
+    lines.extend(extra_lines)
 
     rng.shuffle(lines)
     return "\n".join(lines) + "\n"
@@ -134,9 +136,14 @@ class CorpusStats:
     sentence_lines: int
     arithmetic_lines: int
     pairs: int
+    fact_lines: int = 0
 
 
-def generate_corpus(cfg: Config, force: bool = False) -> Dict[str, CorpusStats]:
+def generate_corpus(
+    cfg: Config,
+    force: bool = False,
+    extra_lines: Optional[Dict[str, Sequence[str]]] = None,
+) -> Dict[str, CorpusStats]:
     corpus_cfg = cfg.data.corpus
     directory = Path(corpus_cfg.dir)
 
@@ -166,8 +173,9 @@ def generate_corpus(cfg: Config, force: bool = False) -> Dict[str, CorpusStats]:
         pairs = pairs_by_split[split]
         repeats = corpus_cfg.arithmetic_repeats if split == "train" else 1
 
+        added = list((extra_lines or {}).get(split, ()))
         text = build_corpus_text(sentence_counts[split], pairs, repeats, rng,
-                                 corpus_cfg.reverse_answer)
+                                 corpus_cfg.reverse_answer, added)
         path = directory / f"{split}.txt"
         path.write_text(text, encoding="utf-8")
 
@@ -179,6 +187,7 @@ def generate_corpus(cfg: Config, force: bool = False) -> Dict[str, CorpusStats]:
             sentence_lines=sentence_counts[split],
             arithmetic_lines=len(pairs) * repeats,
             pairs=len(pairs),
+            fact_lines=len(added),
         )
 
     (directory / "grammar.json").write_text(
@@ -251,13 +260,15 @@ def _log_summary(cfg, stats, pairs_by_split) -> None:
     logger.info(section("CORPUS GENERATED"))
     logger.info(f"directory : {cfg.data.corpus.dir}")
     logger.info("")
-    header = f"{'split':<8}{'characters':>12}{'lines':>10}{'sentences':>12}{'sums':>8}{'pairs':>8}"
+    header = (f"{'split':<8}{'characters':>12}{'lines':>10}{'sentences':>12}"
+              f"{'sums':>8}{'facts':>8}{'pairs':>8}")
     logger.info(header)
     logger.info("-" * len(header))
     for split in SPLITS:
         st = stats[split]
         logger.info(f"{split:<8}{st.characters:>12,}{st.lines:>10,}"
-                    f"{st.sentence_lines:>12,}{st.arithmetic_lines:>8,}{st.pairs:>8,}")
+                    f"{st.sentence_lines:>12,}{st.arithmetic_lines:>8,}"
+                    f"{st.fact_lines:>8,}{st.pairs:>8,}")
     logger.info("")
     logger.info(f"Operand pairs are disjoint across splits: "
                 f"{len(pairs_by_split['train'])} train / "

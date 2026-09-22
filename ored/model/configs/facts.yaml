@@ -1,0 +1,60 @@
+questions:
+  - "what is {subject} ?"
+  - "what is {subject} , really ?"
+  - "tell me what {subject} is ."
+  - "What is {subject}?"
+
+facts:
+  - subject: ored
+    answer: ored is a small model that learns from the people who talk to it
+
+  - subject: a human
+    answer: a human is a person who thinks and feels
+
+  - subject: a friend
+    answer: a friend is a person you like and trust
+
+  - subject: a cat
+    answer: a cat is a small animal that has soft fur
+
+  - subject: a dog
+    answer: a dog is an animal that is loyal to people
+
+  - subject: a bird
+    answer: a bird is an animal that has wings and can fly
+
+  - subject: a river
+    answer: a river is water that flows to the sea
+
+  - subject: a house
+    answer: a house is a building where people live
+
+  - subject: a flower
+    answer: a flower is the colourful part of a plant
+
+  - subject: a stone
+    answer: a stone is a hard piece of rock
+
+  - subject: the sun
+    answer: the sun is a star that gives us light and heat
+
+  - subject: the moon
+    answer: the moon is a rock that goes around the earth
+
+  - subject: water
+    answer: water is a clear liquid that all life needs
+
+  - subject: fire
+    answer: fire is hot light that comes from burning
+
+  - subject: a book
+    answer: a book is paper with words that people read
+
+  - subject: music
+    answer: music is sound that people make to feel joy
+
+  - subject: time
+    answer: time is what passes while things happen
+
+  - subject: a computer
+    answer: a computer is a machine that follows instructions

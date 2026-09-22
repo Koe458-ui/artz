@@ -37,15 +37,10 @@ def register_predictor(task: str):
     return decorator
 
 
-# models whose output width is the vocabulary size: they cannot be built
-# without the tokenizer that was saved beside them.
 TEXT_MODELS = frozenset({"transformer", "bigram"})
 
 
 def find_tokenizer_data(payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
-    # the trainer files the tokenizer under "extra" (that is where
-    # LanguageModelTask.checkpoint_extra() lands); older checkpoints wrote it at
-    # the top level, so accept both.
     extra = payload.get("extra") or {}
     return extra.get("tokenizer") or payload.get("tokenizer")
 
@@ -61,11 +56,6 @@ def read_tokenizer(payload: Dict[str, Any], path: str | Path) -> Tokenizer:
 
 
 def resolve_task(payload: Dict[str, Any], cfg: Config, path: str | Path) -> str:
-    # config.task is only a label, and it defaults to "bit_addition" -- a
-    # checkpoint written before that field existed would send a char transformer
-    # down the bit-adder path and die on the missing vocab_size. So let the
-    # payload have the last word: a tokenizer beside a vocabulary-sized model
-    # means this is a language model, whatever the label says.
     declared = (cfg.task or "").lower()
     has_tokenizer = find_tokenizer_data(payload) is not None
 
@@ -160,8 +150,6 @@ class BasePredictor:
         path: str | Path = DEFAULT_CHECKPOINT,
         device: str = "auto",
     ) -> "BasePredictor":
-        # the checkpoint says which task it was trained for, so the right
-        # predictor can be picked instead of assuming bit addition.
         resolved_device = resolve_device(device)
         payload = load_checkpoint(path, map_location=resolved_device)
         cfg = config_from_dict(payload["config"])
@@ -260,8 +248,6 @@ class LanguageModelPredictor(BasePredictor):
 
     @classmethod
     def _build(cls, payload, cfg, device, info):
-        # a transformer's output width is the vocabulary size, which only the
-        # saved tokenizer knows.
         tokenizer = read_tokenizer(payload, info["path"])
         model = build_model(cfg, vocab_size=tokenizer.vocab_size).to(device)
 
@@ -278,8 +264,6 @@ class LanguageModelPredictor(BasePredictor):
 
     def predict(self, prompt: str, max_new_tokens: int = 8,
                 expected: Optional[str] = None) -> TextPrediction:
-        # greedily finish the line the prompt starts -- the text equivalent of
-        # the bit model's single answer.
         written = complete(
             model=self.model,
             tokenizer=self.tokenizer,
@@ -330,8 +314,6 @@ class LanguageModelPredictor(BasePredictor):
 
 
 def resolve_checkpoint(path: str | Path | None = None) -> str:
-    # keep the bit adder as the default, but fall back to the language model
-    # when that is the only checkpoint on disk.
     if path is not None:
         return str(path)
     if not Path(DEFAULT_CHECKPOINT).exists() and Path(LM_CHECKPOINT).exists():
@@ -414,8 +396,6 @@ def _run_language_model(predictor: LanguageModelPredictor, args: argparse.Namesp
     pairs.extend(_parse_pairs(args.pairs or []))
 
     if not pairs and not did_something and not args.interactive:
-        # a language model answers by writing text, so show it writing: first a
-        # free continuation, then a few lines it has to finish itself.
         if not args.quiet:
             logger.info("(no input given -- showing a default sample)")
             logger.info("")
