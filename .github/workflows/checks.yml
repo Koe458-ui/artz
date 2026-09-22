@@ -84,6 +84,16 @@ jobs:
           node-version: '22'
       - run: node scripts/check-deferred-css.mjs
 
+  headers:
+    name: _headers stays within Cloudflare's deploy limits
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node scripts/check-headers.mjs
+
   csp:
     name: the report-only policy still names every inline script
     runs-on: ubuntu-latest
