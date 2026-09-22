@@ -1094,3 +1094,3922 @@ facts:
     question: "What is the capital of Mexico?"
     answer: "Mexico City."
     
+- id: "00217"
+  category: civics
+  question: "When did the Constitution of India come into effect?"
+  answer: "26 January 1950."
+
+- id: "00218"
+  category: civics
+  question: "When was the Constitution of India adopted?"
+  answer: "26 November 1949."
+
+- id: "00219"
+  category: civics
+  question: "Who chaired the Drafting Committee of the Indian Constituent Assembly?"
+  answer: "B. R. Ambedkar."
+
+- id: "00220"
+  category: civics
+  question: "Who was the president of the Constituent Assembly of India?"
+  answer: "Rajendra Prasad."
+
+- id: "00221"
+  category: civics
+  question: "Who served as the constitutional adviser to the Constituent Assembly?"
+  answer: "B. N. Rau."
+
+- id: "00222"
+  category: civics
+  question: "How many parts did the Constitution of India originally contain?"
+  answer: "22 parts."
+
+- id: "00223"
+  category: civics
+  question: "How many schedules did the Constitution of India originally contain?"
+  answer: "8 schedules."
+
+- id: "00224"
+  category: civics
+  question: "What is the Preamble of the Indian Constitution?"
+  answer: "It is the introductory statement that declares the Constitution's basic objectives and values."
+
+- id: "00225"
+  category: civics
+  question: "Which words begin the Preamble to the Constitution of India?"
+  answer: "We, the People of India."
+
+- id: "00226"
+  category: civics
+  question: "What does the word sovereign signify in the Indian Constitution?"
+  answer: "It signifies that India has supreme authority over its internal and external affairs."
+
+- id: "00227"
+  category: civics
+  question: "What does socialist mean in the Indian constitutional context?"
+  answer: "It refers to the constitutional commitment to social and economic justice and reduction of inequality."
+
+- id: "00228"
+  category: civics
+  question: "What does secular mean in the Indian constitutional context?"
+  answer: "It means the state does not establish an official religion and is to treat religions according to constitutional principles."
+
+- id: "00229"
+  category: civics
+  question: "What does democratic mean in the Indian Constitution?"
+  answer: "It means governmental authority ultimately derives from the people."
+
+- id: "00230"
+  category: civics
+  question: "What does republic mean in the Indian Constitution?"
+  answer: "It means the head of state is elected rather than holding office by hereditary succession."
+
+- id: "00231"
+  category: civics
+  question: "What are Directive Principles of State Policy?"
+  answer: "They are constitutional guidelines for the state in making laws and policies to promote social and economic welfare."
+
+- id: "00232"
+  category: civics
+  question: "Are Directive Principles of State Policy enforceable by courts?"
+  answer: "No, they are not directly enforceable by courts."
+
+- id: "00233"
+  category: civics
+  question: "What are Fundamental Duties?"
+  answer: "They are constitutional duties expected of citizens."
+
+- id: "00234"
+  category: civics
+  question: "Where are Fundamental Duties listed in the Indian Constitution?"
+  answer: "Article 51A."
+
+- id: "00235"
+  category: civics
+  question: "Which part of the Indian Constitution contains Fundamental Rights?"
+  answer: "Part III."
+
+- id: "00236"
+  category: civics
+  question: "Which part of the Indian Constitution contains Directive Principles?"
+  answer: "Part IV."
+
+- id: "00237"
+  category: civics
+  question: "Which part of the Indian Constitution contains Fundamental Duties?"
+  answer: "Part IVA."
+
+- id: "00238"
+  category: civics
+  question: "What is Article 14 of the Indian Constitution associated with?"
+  answer: "Equality before law and equal protection of the laws."
+
+- id: "00239"
+  category: civics
+  question: "What is Article 19 mainly associated with?"
+  answer: "Certain freedoms, including speech and expression, assembly, association, movement, residence, and occupation, subject to constitutional restrictions."
+
+- id: "00240"
+  category: civics
+  question: "What is Article 21 of the Indian Constitution associated with?"
+  answer: "Protection of life and personal liberty."
+
+- id: "00241"
+  category: civics
+  question: "What is Article 32 of the Indian Constitution known for?"
+  answer: "The right to approach the Supreme Court for enforcement of Fundamental Rights."
+
+- id: "00242"
+  category: civics
+  question: "What is Article 226 concerned with?"
+  answer: "The power of High Courts to issue writs for specified legal purposes."
+
+- id: "00243"
+  category: civics
+  question: "What is habeas corpus?"
+  answer: "A writ used to require that a detained person be brought before a court to examine the legality of the detention."
+
+- id: "00244"
+  category: civics
+  question: "What is mandamus?"
+  answer: "A writ directing a public authority to perform a legal duty."
+
+- id: "00245"
+  category: civics
+  question: "What is prohibition in constitutional law?"
+  answer: "A writ directing a lower court or tribunal to stop proceedings outside its jurisdiction."
+
+- id: "00246"
+  category: civics
+  question: "What is certiorari?"
+  answer: "A writ by which a higher court may review and quash a decision of a lower court or tribunal in appropriate cases."
+
+- id: "00247"
+  category: civics
+  question: "What is quo warranto?"
+  answer: "A writ used to question a person's legal authority to hold a public office."
+
+- id: "00248"
+  category: civics
+  question: "Who is the constitutional head of the Union executive in India?"
+  answer: "The President of India."
+
+- id: "00249"
+  category: civics
+  question: "Who is the real executive head of the Union government in India?"
+  answer: "The Prime Minister and the Council of Ministers."
+
+- id: "00250"
+  category: civics
+  question: "How is the President of India elected?"
+  answer: "By an electoral college consisting of elected members of Parliament and elected members of State Legislative Assemblies, according to the constitutional system."
+
+- id: "00251"
+  category: civics
+  question: "How long is the normal term of office of the President of India?"
+  answer: "Five years."
+
+- id: "00252"
+  category: civics
+  question: "What is the minimum age to become President of India?"
+  answer: "35 years."
+
+- id: "00253"
+  category: civics
+  question: "Who appoints the Prime Minister of India?"
+  answer: "The President of India."
+
+- id: "00254"
+  category: civics
+  question: "Who appoints the Chief Justice of India?"
+  answer: "The President of India."
+
+- id: "00255"
+  category: civics
+  question: "What is the Vice-President of India the ex officio chairperson of?"
+  answer: "The Rajya Sabha."
+
+- id: "00256"
+  category: civics
+  question: "What is the minimum age to become the Vice-President of India?"
+  answer: "35 years."
+
+- id: "00257"
+  category: civics
+  question: "What is the Union Council of Ministers collectively responsible to?"
+  answer: "The Lok Sabha."
+
+- id: "00258"
+  category: civics
+  question: "What is the maximum strength of the Lok Sabha under the Constitution?"
+  answer: "550 elected members from the States and Union territories, plus provisions historically allowing nominated Anglo-Indian members, which is no longer operative."
+
+- id: "00259"
+  category: civics
+  question: "What is the maximum strength of the Rajya Sabha?"
+  answer: "250 members."
+
+- id: "00260"
+  category: civics
+  question: "What is the normal term of a Rajya Sabha member?"
+  answer: "Six years."
+
+- id: "00261"
+  category: civics
+  question: "How often does one-third of Rajya Sabha members retire?"
+  answer: "Every two years."
+
+- id: "00262"
+  category: civics
+  question: "Can the Rajya Sabha be dissolved?"
+  answer: "No, it is a permanent House."
+
+- id: "00263"
+  category: civics
+  question: "What is the normal term of the Lok Sabha?"
+  answer: "Five years unless dissolved earlier or extended under constitutionally permitted circumstances."
+
+- id: "00264"
+  category: civics
+  question: "Who presides over the Lok Sabha?"
+  answer: "The Speaker."
+
+- id: "00265"
+  category: civics
+  question: "Who presides over a joint sitting of Parliament?"
+  answer: "The Speaker of the Lok Sabha."
+
+- id: "00266"
+  category: civics
+  question: "What is a Money Bill in India?"
+  answer: "A bill dealing exclusively with matters specified as financial matters under Article 110."
+
+- id: "00267"
+  category: civics
+  question: "Where can a Money Bill be introduced in Parliament?"
+  answer: "Only in the Lok Sabha."
+
+- id: "00268"
+  category: civics
+  question: "Who decides whether a bill is a Money Bill?"
+  answer: "The Speaker of the Lok Sabha."
+
+- id: "00269"
+  category: civics
+  question: "What is the annual financial statement of the Union government commonly called?"
+  answer: "The Union Budget."
+
+- id: "00270"
+  category: civics
+  question: "What is a joint sitting of Parliament?"
+  answer: "A meeting of both Houses convened to resolve a deadlock over certain bills."
+
+- id: "00271"
+  category: civics
+  question: "What is Question Hour in Parliament?"
+  answer: "A period during which members ask questions to ministers about government activities."
+
+- id: "00272"
+  category: civics
+  question: "What is Zero Hour in the Indian Parliament?"
+  answer: "A period used by members to raise matters of public importance without the formal notice requirements associated with Question Hour."
+
+- id: "00273"
+  category: civics
+  question: "What is a no-confidence motion?"
+  answer: "A motion that tests whether the government retains the confidence of the Lok Sabha."
+
+- id: "00274"
+  category: civics
+  question: "What is an adjournment motion?"
+  answer: "A parliamentary procedure for drawing attention to a definite matter of urgent public importance and seeking interruption of normal business."
+
+- id: "00275"
+  category: civics
+  question: "What is a whip in parliamentary practice?"
+  answer: "A direction issued by a political party to its legislators regarding attendance or voting."
+
+- id: "00276"
+  category: civics
+  question: "What is the Supreme Court of India?"
+  answer: "It is the highest court in the Indian judicial system."
+
+- id: "00277"
+  category: civics
+  question: "Where is the Supreme Court of India located?"
+  answer: "New Delhi."
+
+- id: "00278"
+  category: civics
+  question: "What is the retirement age of a Supreme Court judge in India?"
+  answer: "65 years."
+
+- id: "00279"
+  category: civics
+  question: "What is the retirement age of a High Court judge in India?"
+  answer: "62 years."
+
+- id: "00280"
+  category: civics
+  question: "What is an original jurisdiction of a court?"
+  answer: "It is the authority of a court to hear certain cases directly rather than on appeal."
+
+- id: "00281"
+  category: civics
+  question: "What is appellate jurisdiction?"
+  answer: "It is the authority of a higher court to review decisions made by lower courts."
+
+- id: "00282"
+  category: civics
+  question: "What is advisory jurisdiction?"
+  answer: "It is the authority of a court to provide a legal opinion when requested by an authorized constitutional authority."
+
+- id: "00283"
+  category: civics
+  question: "What is Public Interest Litigation?"
+  answer: "It is a legal proceeding brought to address matters affecting the public or disadvantaged groups."
+
+- id: "00284"
+  category: civics
+  question: "What is the Election Commission of India responsible for?"
+  answer: "It administers and supervises elections to Parliament, State Legislatures, and the offices specified by the Constitution."
+
+- id: "00285"
+  category: civics
+  question: "What is the constitutional status of the Election Commission of India?"
+  answer: "It is a constitutional body established under Article 324."
+
+- id: "00286"
+  category: civics
+  question: "What is the Comptroller and Auditor General of India responsible for?"
+  answer: "It audits specified government receipts and expenditures and reports according to constitutional requirements."
+
+- id: "00287"
+  category: civics
+  question: "What is the constitutional position of the CAG of India?"
+  answer: "It is an independent constitutional authority under Article 148."
+
+- id: "00288"
+  category: civics
+  question: "What is the Finance Commission of India?"
+  answer: "It is a constitutional body that recommends principles for distributing certain financial resources between the Union and the States."
+
+- id: "00289"
+  category: civics
+  question: "How often is the Finance Commission generally constituted?"
+  answer: "Every five years or earlier when necessary."
+
+- id: "00290"
+  category: civics
+  question: "What is the Union Public Service Commission?"
+  answer: "It is a constitutional body that conducts examinations and advises the government on certain public-service matters."
+
+- id: "00291"
+  category: civics
+  question: "What is the National Commission for Scheduled Castes?"
+  answer: "It is a constitutional body that safeguards the interests of Scheduled Castes and investigates related matters."
+
+- id: "00292"
+  category: civics
+  question: "What is the National Commission for Scheduled Tribes?"
+  answer: "It is a constitutional body concerned with safeguarding the interests of Scheduled Tribes."
+
+- id: "00293"
+  category: civics
+  question: "What is the Attorney General of India?"
+  answer: "The Attorney General is the chief legal adviser to the Government of India."
+
+- id: "00294"
+  category: civics
+  question: "Who appoints the Attorney General of India?"
+  answer: "The President of India."
+
+- id: "00295"
+  category: civics
+  question: "What is the Advocate General of a state?"
+  answer: "The Advocate General is the chief legal adviser to a state government."
+
+- id: "00296"
+  category: civics
+  question: "Who appoints the Advocate General of a state?"
+  answer: "The Governor of the state."
+
+- id: "00297"
+  category: civics
+  question: "What is Panchayati Raj?"
+  answer: "Panchayati Raj is the system of rural local self-government in India."
+
+- id: "00298"
+  category: civics
+  question: "Which constitutional amendment gave constitutional status to Panchayati Raj institutions?"
+  answer: "The 73rd Constitutional Amendment."
+
+- id: "00299"
+  category: civics
+  question: "Which constitutional amendment gave constitutional status to urban local bodies?"
+  answer: "The 74th Constitutional Amendment."
+
+- id: "00300"
+  category: civics
+  question: "What is Gram Sabha?"
+  answer: "Gram Sabha is the assembly of registered voters in a village or group of villages covered by a Panchayat."
+
+- id: "00301"
+  category: civics
+  question: "What is the lowest level of the Panchayati Raj system?"
+  answer: "The Gram Panchayat."
+
+- id: "00302"
+  category: civics
+  question: "What is a Zila Parishad?"
+  answer: "It is a local government body at the district level in the Panchayati Raj system."
+
+- id: "00303"
+  category: civics
+  question: "What is a Panchayat Samiti?"
+  answer: "It is a local government body generally operating at the intermediate or block level."
+
+- id: "00304"
+  category: civics
+  question: "What is a municipal corporation?"
+  answer: "It is an urban local government body generally established for large cities."
+
+- id: "00305"
+  category: civics
+  question: "What is a municipality?"
+  answer: "It is an urban local government body for a town or smaller urban area, depending on the state system."
+
+- id: "00306"
+  category: civics
+  question: "What is a cantonment board?"
+  answer: "It is a local authority responsible for civic administration in a notified cantonment area."
+
+- id: "00307"
+  category: civics
+  question: "What is the Eleventh Schedule of the Indian Constitution associated with?"
+  answer: "It lists subjects that may be entrusted to Panchayats."
+
+- id: "00308"
+  category: civics
+  question: "What is the Twelfth Schedule of the Indian Constitution associated with?"
+  answer: "It lists subjects that may be entrusted to municipalities."
+
+- id: "00309"
+  category: civics
+  question: "What is the Seventh Schedule of the Indian Constitution about?"
+  answer: "It contains the Union List, State List, and Concurrent List for distribution of legislative subjects."
+
+- id: "00310"
+  category: civics
+  question: "What is the Union List?"
+  answer: "It contains subjects on which Parliament has exclusive legislative authority, subject to constitutional provisions."
+
+- id: "00311"
+  category: civics
+  question: "What is the State List?"
+  answer: "It contains subjects generally within the legislative competence of state legislatures."
+
+- id: "00312"
+  category: civics
+  question: "What is the Concurrent List?"
+  answer: "It contains subjects on which both Parliament and state legislatures may legislate, subject to constitutional rules."
+
+- id: "00313"
+  category: civics
+  question: "What happens when a valid Parliamentary law conflicts with a state law on a Concurrent List subject?"
+  answer: "Generally, the Parliamentary law prevails to the extent of the conflict, subject to constitutional exceptions."
+
+- id: "00314"
+  category: civics
+  question: "What is an ordinance issued by the President under Article 123?"
+  answer: "It is a temporary law-making measure issued when Parliament is not in session and immediate action is considered necessary."
+
+- id: "00315"
+  category: civics
+  question: "What is a state Governor's ordinance-making power?"
+  answer: "Under Article 213, the Governor may promulgate ordinances when the state legislature is not in session, subject to constitutional conditions."
+
+- id: "00316"
+  category: civics
+  question: "What are the three types of constitutional emergencies in India?"
+  answer: "National Emergency, President's Rule in a state, and Financial Emergency."
+
+- id: "00317"
+  category: english
+  question: "What is the plural form of 'child'?"
+  answer: "Children."
+
+- id: "00318"
+  category: english
+  question: "What is the plural form of 'mouse'?"
+  answer: "Mice."
+
+- id: "00319"
+  category: english
+  question: "What is the plural form of 'tooth'?"
+  answer: "Teeth."
+
+- id: "00320"
+  category: english
+  question: "What is the plural form of 'foot'?"
+  answer: "Feet."
+
+- id: "00321"
+  category: english
+  question: "What is the plural form of 'goose'?"
+  answer: "Geese."
+
+- id: "00322"
+  category: english
+  question: "What is the plural form of 'man'?"
+  answer: "Men."
+
+- id: "00323"
+  category: english
+  question: "What is the plural form of 'woman'?"
+  answer: "Women."
+
+- id: "00324"
+  category: english
+  question: "What is the plural form of 'leaf'?"
+  answer: "Leaves."
+
+- id: "00325"
+  category: english
+  question: "What is the plural form of 'knife'?"
+  answer: "Knives."
+
+- id: "00326"
+  category: english
+  question: "What is the plural form of 'city'?"
+  answer: "Cities."
+
+- id: "00327"
+  category: english
+  question: "What is the comparative form of 'good'?"
+  answer: "Better."
+
+- id: "00328"
+  category: english
+  question: "What is the superlative form of 'good'?"
+  answer: "Best."
+
+- id: "00329"
+  category: english
+  question: "What is the comparative form of 'bad'?"
+  answer: "Worse."
+
+- id: "00330"
+  category: english
+  question: "What is the superlative form of 'bad'?"
+  answer: "Worst."
+
+- id: "00331"
+  category: english
+  question: "What is the comparative form of 'far'?"
+  answer: "Farther or further."
+
+- id: "00332"
+  category: english
+  question: "What is the past tense of 'go'?"
+  answer: "Went."
+
+- id: "00333"
+  category: english
+  question: "What is the past tense of 'eat'?"
+  answer: "Ate."
+
+- id: "00334"
+  category: english
+  question: "What is the past tense of 'write'?"
+  answer: "Wrote."
+
+- id: "00335"
+  category: english
+  question: "What is the past tense of 'see'?"
+  answer: "Saw."
+
+- id: "00336"
+  category: english
+  question: "What is the past tense of 'take'?"
+  answer: "Took."
+
+- id: "00337"
+  category: english
+  question: "What is the past participle of 'break'?"
+  answer: "Broken."
+
+- id: "00338"
+  category: english
+  question: "What is the past participle of 'choose'?"
+  answer: "Chosen."
+
+- id: "00339"
+  category: english
+  question: "What is the past participle of 'drive'?"
+  answer: "Driven."
+
+- id: "00340"
+  category: english
+  question: "What is the past participle of 'speak'?"
+  answer: "Spoken."
+
+- id: "00341"
+  category: english
+  question: "What is the past participle of 'begin'?"
+  answer: "Begun."
+
+- id: "00342"
+  category: english
+  question: "What is the present participle of 'run'?"
+  answer: "Running."
+
+- id: "00343"
+  category: english
+  question: "What is the present participle of 'lie'?"
+  answer: "Lying."
+
+- id: "00344"
+  category: english
+  question: "What is the present participle of 'swim'?"
+  answer: "Swimming."
+
+- id: "00345"
+  category: english
+  question: "What is the present participle of 'make'?"
+  answer: "Making."
+
+- id: "00346"
+  category: english
+  question: "Which article is used before a word beginning with a vowel sound?"
+  answer: "An."
+
+- id: "00347"
+  category: english
+  question: "Which article is generally used before a singular countable noun referring to one unspecified thing?"
+  answer: "A or an."
+
+- id: "00348"
+  category: english
+  question: "Which article is used for a specific or previously identified noun?"
+  answer: "The."
+
+- id: "00349"
+  category: english
+  question: "What part of speech is the word 'quickly'?"
+  answer: "Adverb."
+
+- id: "00350"
+  category: english
+  question: "What part of speech is the word 'beautiful'?"
+  answer: "Adjective."
+
+- id: "00351"
+  category: english
+  question: "What part of speech is the word 'honesty'?"
+  answer: "Noun."
+
+- id: "00352"
+  category: english
+  question: "What part of speech is the word 'they'?"
+  answer: "Pronoun."
+
+- id: "00353"
+  category: english
+  question: "What part of speech is the word 'under'?"
+  answer: "Preposition."
+
+- id: "00354"
+  category: english
+  question: "What part of speech is the word 'and'?"
+  answer: "Conjunction."
+
+- id: "00355"
+  category: english
+  question: "What part of speech is the word 'wow'?"
+  answer: "Interjection."
+
+- id: "00356"
+  category: english
+  question: "What is an auxiliary verb?"
+  answer: "A verb used with a main verb to express tense, mood, voice, or other grammatical information."
+
+- id: "00357"
+  category: english
+  question: "What is a modal verb?"
+  answer: "A verb such as can, may, must, or should used to express possibility, ability, obligation, or related meanings."
+
+- id: "00358"
+  category: english
+  question: "What is an infinitive?"
+  answer: "The base form of a verb, often preceded by 'to'."
+
+- id: "00359"
+  category: english
+  question: "What is a gerund?"
+  answer: "An -ing form of a verb that functions as a noun."
+
+- id: "00360"
+  category: english
+  question: "What is a participle?"
+  answer: "A verb form used in forming verb tenses or functioning as an adjective."
+
+- id: "00361"
+  category: english
+  question: "What is the subject of a sentence?"
+  answer: "The person, thing, or idea that performs the action or is described."
+
+- id: "00362"
+  category: english
+  question: "What is the predicate of a sentence?"
+  answer: "The part of a sentence that says something about the subject."
+
+- id: "00363"
+  category: english
+  question: "What is a direct object?"
+  answer: "The noun or pronoun that directly receives the action of a verb."
+
+- id: "00364"
+  category: english
+  question: "What is an indirect object?"
+  answer: "A noun or pronoun that indicates to whom or for whom an action is done."
+
+- id: "00365"
+  category: english
+  question: "What is subject-verb agreement?"
+  answer: "The grammatical matching of a subject with the appropriate form of its verb."
+
+- id: "00366"
+  category: english
+  question: "Which verb form agrees with 'he' in the present tense: 'run' or 'runs'?"
+  answer: "Runs."
+
+- id: "00367"
+  category: english
+  question: "Which verb form agrees with 'they' in the present tense: 'is' or 'are'?"
+  answer: "Are."
+
+- id: "00368"
+  category: english
+  question: "What is the first-person singular pronoun?"
+  answer: "I."
+
+- id: "00369"
+  category: english
+  question: "What is the second-person pronoun?"
+  answer: "You."
+
+- id: "00370"
+  category: english
+  question: "What is the third-person singular masculine pronoun?"
+  answer: "He."
+
+- id: "00371"
+  category: english
+  question: "What is the third-person singular feminine pronoun?"
+  answer: "She."
+
+- id: "00372"
+  category: english
+  question: "What is the third-person singular neuter pronoun?"
+  answer: "It."
+
+- id: "00373"
+  category: english
+  question: "What is the first-person plural pronoun?"
+  answer: "We."
+
+- id: "00374"
+  category: english
+  question: "What is the third-person plural pronoun?"
+  answer: "They."
+
+- id: "00375"
+  category: english
+  question: "What is the possessive form of 'I'?"
+  answer: "My."
+
+- id: "00376"
+  category: english
+  question: "What is the possessive form of 'we'?"
+  answer: "Our."
+
+- id: "00377"
+  category: english
+  question: "What is the possessive form of 'they'?"
+  answer: "Their."
+
+- id: "00378"
+  category: english
+  question: "What is the possessive form of 'he'?"
+  answer: "His."
+
+- id: "00379"
+  category: english
+  question: "What is the possessive form of 'she'?"
+  answer: "Her."
+
+- id: "00380"
+  category: english
+  question: "What is a contraction?"
+  answer: "A shortened form of words in which letters are omitted and usually replaced by an apostrophe."
+
+- id: "00381"
+  category: english
+  question: "What is the contraction of 'do not'?"
+  answer: "Don't."
+
+- id: "00382"
+  category: english
+  question: "What is the contraction of 'cannot'?"
+  answer: "Can't."
+
+- id: "00383"
+  category: english
+  question: "What is the contraction of 'they are'?"
+  answer: "They're."
+
+- id: "00384"
+  category: english
+  question: "What is the contraction of 'we have'?"
+  answer: "We've."
+
+- id: "00385"
+  category: english
+  question: "What is an active voice sentence?"
+  answer: "A sentence in which the subject performs the action."
+
+- id: "00386"
+  category: english
+  question: "What is a passive voice sentence?"
+  answer: "A sentence in which the subject receives the action."
+
+- id: "00387"
+  category: english
+  question: "What is a declarative sentence?"
+  answer: "A sentence that makes a statement."
+
+- id: "00388"
+  category: english
+  question: "What is an interrogative sentence?"
+  answer: "A sentence that asks a question."
+
+- id: "00389"
+  category: english
+  question: "What is an imperative sentence?"
+  answer: "A sentence that gives a command, instruction, or request."
+
+- id: "00390"
+  category: english
+  question: "What is an exclamatory sentence?"
+  answer: "A sentence that expresses strong emotion."
+
+- id: "00391"
+  category: english
+  question: "What is a compound sentence?"
+  answer: "A sentence containing two or more independent clauses joined appropriately."
+
+- id: "00392"
+  category: english
+  question: "What is a complex sentence?"
+  answer: "A sentence containing one independent clause and at least one dependent clause."
+
+- id: "00393"
+  category: english
+  question: "What is a compound-complex sentence?"
+  answer: "A sentence containing at least two independent clauses and at least one dependent clause."
+
+- id: "00394"
+  category: english
+  question: "What is a dependent clause?"
+  answer: "A clause that cannot normally stand alone as a complete sentence."
+
+- id: "00395"
+  category: english
+  question: "What is an independent clause?"
+  answer: "A clause that can stand alone as a complete sentence."
+
+- id: "00396"
+  category: english
+  question: "What is a relative clause?"
+  answer: "A dependent clause that modifies a noun or pronoun."
+
+- id: "00397"
+  category: english
+  question: "What is a coordinating conjunction?"
+  answer: "A conjunction that joins elements of equal grammatical status, such as 'and', 'but', or 'or'."
+
+- id: "00398"
+  category: english
+  question: "What is a subordinating conjunction?"
+  answer: "A conjunction that introduces a dependent clause."
+
+- id: "00399"
+  category: english
+  question: "What is a prepositional phrase?"
+  answer: "A phrase beginning with a preposition and usually ending with its object."
+
+- id: "00400"
+  category: english
+  question: "What is a noun phrase?"
+  answer: "A group of words centered on a noun or pronoun."
+
+- id: "00401"
+  category: english
+  question: "What is an oxymoron?"
+  answer: "A figure of speech that combines apparently contradictory terms."
+
+- id: "00402"
+  category: english
+  question: "What is hyperbole?"
+  answer: "A deliberate exaggeration used for emphasis or effect."
+
+- id: "00403"
+  category: english
+  question: "What is personification?"
+  answer: "A figure of speech that gives human qualities to nonhuman things."
+
+- id: "00404"
+  category: english
+  question: "What is alliteration?"
+  answer: "The repetition of the same or similar initial consonant sounds in nearby words."
+
+- id: "00405"
+  category: english
+  question: "What is assonance?"
+  answer: "The repetition of vowel sounds in nearby words."
+
+- id: "00406"
+  category: english
+  question: "What is consonance?"
+  answer: "The repetition of consonant sounds within nearby words."
+
+- id: "00407"
+  category: english
+  question: "What is onomatopoeia?"
+  answer: "A word that imitates or suggests a natural sound."
+
+- id: "00408"
+  category: english
+  question: "What is irony?"
+  answer: "A situation or expression in which the apparent meaning differs from the intended or actual meaning."
+
+- id: "00409"
+  category: english
+  question: "What is satire?"
+  answer: "A form of expression that uses humor, irony, or exaggeration to criticize human behavior or institutions."
+
+- id: "00410"
+  category: english
+  question: "What is foreshadowing?"
+  answer: "A literary technique that gives hints about events that may happen later."
+
+- id: "00411"
+  category: english
+  question: "What is a protagonist?"
+  answer: "The main character in a story."
+
+- id: "00412"
+  category: english
+  question: "What is an antagonist?"
+  answer: "A character or force that opposes the protagonist."
+
+- id: "00413"
+  category: english
+  question: "What is the setting of a story?"
+  answer: "The time and place in which a story occurs."
+
+- id: "00414"
+  category: english
+  question: "What is plot?"
+  answer: "The sequence of events that forms the structure of a story."
+
+- id: "00415"
+  category: english
+  question: "What is a narrator?"
+  answer: "The voice or character that tells a story."
+
+- id: "00416"
+  category: english
+  question: "What is theme in literature?"
+  answer: "A central idea or underlying message explored in a literary work."
+
+- id: "00417"
+  category: online_game
+  question: "What does MMORPG stand for?"
+  answer: "Massively Multiplayer Online Role-Playing Game."
+
+- id: "00418"
+  category: online_game
+  question: "What does FPS stand for in gaming?"
+  answer: "First-Person Shooter."
+
+- id: "00419"
+  category: online_game
+  question: "What does MOBA stand for?"
+  answer: "Multiplayer Online Battle Arena."
+
+- id: "00420"
+  category: online_game
+  question: "What does PvP mean in gaming?"
+  answer: "Player versus Player."
+
+- id: "00421"
+  category: online_game
+  question: "What does PvE mean in gaming?"
+  answer: "Player versus Environment."
+
+- id: "00422"
+  category: online_game
+  question: "What does NPC stand for?"
+  answer: "Non-Player Character."
+
+- id: "00423"
+  category: online_game
+  question: "What is a video game server?"
+  answer: "A computer or service that hosts game data and multiplayer sessions."
+
+- id: "00424"
+  category: online_game
+  question: "What is latency in an online game?"
+  answer: "The time taken for data to travel between a player's device and the game server."
+
+- id: "00425"
+  category: online_game
+  question: "What does ping measure in online gaming?"
+  answer: "Network latency, usually measured in milliseconds."
+
+- id: "00426"
+  category: online_game
+  question: "What is lag in an online game?"
+  answer: "A noticeable delay between player input and the game's response."
+
+- id: "00427"
+  category: online_game
+  question: "What is matchmaking?"
+  answer: "A system that finds and places players into suitable multiplayer matches."
+
+- id: "00428"
+  category: online_game
+  question: "What is a game lobby?"
+  answer: "A waiting area where players gather before a multiplayer match begins."
+
+- id: "00429"
+  category: online_game
+  question: "What is a multiplayer match?"
+  answer: "A game session involving multiple players."
+
+- id: "00430"
+  category: online_game
+  question: "What is cross-play?"
+  answer: "The ability for players on different supported platforms to play together."
+
+- id: "00431"
+  category: online_game
+  question: "What is cross-progression?"
+  answer: "The ability to carry game progress or account data across supported platforms."
+
+- id: "00432"
+  category: online_game
+  question: "What is an in-game avatar?"
+  answer: "A player's visual representation in a game."
+
+- id: "00433"
+  category: online_game
+  question: "What is a game account?"
+  answer: "A user account that stores a player's identity, progress, and other game-related data."
+
+- id: "00434"
+  category: online_game
+  question: "What is a player profile?"
+  answer: "A collection of information associated with a player's game account."
+
+- id: "00435"
+  category: online_game
+  question: "What is a clan in an online game?"
+  answer: "A group of players organized to play together."
+
+- id: "00436"
+  category: online_game
+  question: "What is a guild in an online game?"
+  answer: "An organized community of players within a game."
+
+- id: "00437"
+  category: online_game
+  question: "What is a party in multiplayer gaming?"
+  answer: "A temporary group of players who join the same game session."
+
+- id: "00438"
+  category: online_game
+  question: "What is a squad?"
+  answer: "A small organized team of players working together in a game."
+
+- id: "00439"
+  category: online_game
+  question: "What is a team deathmatch?"
+  answer: "A multiplayer mode where teams compete by eliminating opposing players."
+
+- id: "00440"
+  category: online_game
+  question: "What is a battle royale game?"
+  answer: "A game mode where many players compete until the final surviving player or team remains."
+
+- id: "00441"
+  category: online_game
+  question: "What is a respawn?"
+  answer: "The return of a defeated or eliminated game character to play."
+
+- id: "00442"
+  category: online_game
+  question: "What is a checkpoint?"
+  answer: "A saved point in a game from which progress can be resumed."
+
+- id: "00443"
+  category: online_game
+  question: "What is a leaderboard?"
+  answer: "A ranking system showing player scores or achievements."
+
+- id: "00444"
+  category: online_game
+  question: "What is an achievement in gaming?"
+  answer: "A reward or recognition given for completing a specified objective."
+
+- id: "00445"
+  category: online_game
+  question: "What is a daily quest?"
+  answer: "A game objective that can usually be completed once per day for rewards."
+
+- id: "00446"
+  category: online_game
+  question: "What is a season in an online game?"
+  answer: "A limited period with specific content, challenges, rewards, or competitive rankings."
+
+- id: "00447"
+  category: online_game
+  question: "What is a battle pass?"
+  answer: "A progression system that provides rewards as players complete objectives during a season."
+
+- id: "00448"
+  category: online_game
+  question: "What is an in-game item?"
+  answer: "A virtual object that exists within a game."
+
+- id: "00449"
+  category: online_game
+  question: "What is a cosmetic item?"
+  answer: "An item that primarily changes appearance without significantly changing gameplay ability."
+
+- id: "00450"
+  category: online_game
+  question: "What is a skin in a video game?"
+  answer: "A cosmetic appearance applied to a character, weapon, or other game element."
+
+- id: "00451"
+  category: online_game
+  question: "What is an emote?"
+  answer: "A visual animation or expression performed by a game character."
+
+- id: "00452"
+  category: online_game
+  question: "What is an inventory?"
+  answer: "The interface or storage system that holds a player's collected items."
+
+- id: "00453"
+  category: online_game
+  question: "What is crafting in an online game?"
+  answer: "The process of creating items by combining available materials."
+
+- id: "00454"
+  category: online_game
+  question: "What is looting?"
+  answer: "Collecting items or resources from defeated enemies, containers, or locations."
+
+- id: "00455"
+  category: online_game
+  question: "What is a loot box?"
+  answer: "A virtual container that provides one or more randomly selected items or rewards."
+
+- id: "00456"
+  category: online_game
+  question: "What is an in-game currency?"
+  answer: "A virtual currency used to buy or unlock things within a game."
+
+- id: "00457"
+  category: online_game
+  question: "What is a premium currency?"
+  answer: "A virtual currency that is commonly obtained through purchases and used for special content."
+
+- id: "00458"
+  category: online_game
+  question: "What is a microtransaction?"
+  answer: "A relatively small payment made for digital content or features within a game."
+
+- id: "00459"
+  category: online_game
+  question: "What is DLC?"
+  answer: "Downloadable Content released for a game after its original release."
+
+- id: "00460"
+  category: online_game
+  question: "What is a game expansion?"
+  answer: "A substantial additional package of content that expands an existing game."
+
+- id: "00461"
+  category: online_game
+  question: "What is a game patch?"
+  answer: "An update that fixes bugs, changes gameplay, or adds or adjusts content."
+
+- id: "00462"
+  category: online_game
+  question: "What is a hotfix?"
+  answer: "A small urgent update released to address a specific problem."
+
+- id: "00463"
+  category: online_game
+  question: "What is a game update?"
+  answer: "A new software version that changes, fixes, or adds features to a game."
+
+- id: "00464"
+  category: online_game
+  question: "What is server maintenance?"
+  answer: "A period when game servers are temporarily taken offline or restricted for technical work."
+
+- id: "00465"
+  category: online_game
+  question: "What is server downtime?"
+  answer: "A period during which a game server is unavailable."
+
+- id: "00466"
+  category: online_game
+  question: "What is a dedicated server?"
+  answer: "A server specifically assigned to host a game or multiplayer service."
+
+- id: "00467"
+  category: online_game
+  question: "What is peer-to-peer networking in games?"
+  answer: "A networking model where players' devices communicate directly rather than relying entirely on a dedicated server."
+
+- id: "00468"
+  category: online_game
+  question: "What is a client in online gaming?"
+  answer: "The player's game software that connects to the game service or server."
+
+- id: "00469"
+  category: online_game
+  question: "What is server tick rate?"
+  answer: "The number of times per second a server updates the game state."
+
+- id: "00470"
+  category: online_game
+  question: "What is a hitbox?"
+  answer: "An invisible collision area used by a game to detect hits or interactions."
+
+- id: "00471"
+  category: online_game
+  question: "What is aim assist?"
+  answer: "A gameplay feature that helps players target opponents more easily."
+
+- id: "00472"
+  category: online_game
+  question: "What is recoil?"
+  answer: "The movement or kick of a weapon after firing."
+
+- id: "00473"
+  category: online_game
+  question: "What is a cooldown?"
+  answer: "A waiting period before an ability or item can be used again."
+
+- id: "00474"
+  category: online_game
+  question: "What is a skill tree?"
+  answer: "A system that allows players to unlock abilities or upgrades along branching paths."
+
+- id: "00475"
+  category: online_game
+  question: "What is character leveling?"
+  answer: "A progression system in which a character gains levels by earning experience."
+
+- id: "00476"
+  category: online_game
+  question: "What is experience points, or XP?"
+  answer: "A numerical measure of progress commonly earned through gameplay activities."
+
+- id: "00477"
+  category: online_game
+  question: "What is grinding in gaming?"
+  answer: "Repeatedly performing activities to gain levels, resources, equipment, or other progress."
+
+- id: "00478"
+  category: online_game
+  question: "What is a boss fight?"
+  answer: "A challenging encounter against a powerful enemy, usually more difficult than ordinary opponents."
+
+- id: "00479"
+  category: online_game
+  question: "What is a raid in an online game?"
+  answer: "A large cooperative activity designed for a group of players, often involving difficult encounters."
+
+- id: "00480"
+  category: online_game
+  question: "What is a dungeon in gaming?"
+  answer: "A contained game area featuring enemies, challenges, exploration, and often rewards."
+
+- id: "00481"
+  category: online_game
+  question: "What is a quest?"
+  answer: "A task or objective that a player can complete within a game."
+
+- id: "00482"
+  category: online_game
+  question: "What is a side quest?"
+  answer: "An optional quest separate from the main storyline or primary objective."
+
+- id: "00483"
+  category: online_game
+  question: "What is a main quest?"
+  answer: "A quest that advances the primary storyline or central objective of a game."
+
+- id: "00484"
+  category: online_game
+  question: "What is fast travel?"
+  answer: "A game feature that allows a character to move quickly between discovered locations."
+
+- id: "00485"
+  category: online_game
+  question: "What is an open-world game?"
+  answer: "A game that provides a large environment where players can explore with relatively few restrictions on movement."
+
+- id: "00486"
+  category: online_game
+  question: "What is a sandbox game?"
+  answer: "A game that gives players substantial freedom to explore, build, create, or interact with systems."
+
+- id: "00487"
+  category: online_game
+  question: "What is a matchmaking rating?"
+  answer: "A numerical or hidden value used to help match players with opponents of similar skill."
+
+- id: "00488"
+  category: online_game
+  question: "What is ranked mode?"
+  answer: "A competitive game mode in which player performance affects a ranking or rating."
+
+- id: "00489"
+  category: online_game
+  question: "What is an unranked match?"
+  answer: "A multiplayer match that generally does not affect a player's competitive ranking."
+
+- id: "00490"
+  category: online_game
+  question: "What is skill-based matchmaking?"
+  answer: "A matchmaking method that attempts to pair players according to estimated skill."
+
+- id: "00491"
+  category: online_game
+  question: "What is griefing?"
+  answer: "Deliberately disrupting or annoying other players' gameplay."
+
+- id: "00492"
+  category: online_game
+  question: "What is cheating in an online game?"
+  answer: "Using unauthorized methods or software to gain an unfair advantage."
+
+- id: "00493"
+  category: online_game
+  question: "What is an aimbot?"
+  answer: "Unauthorized software that automatically assists or controls aiming."
+
+- id: "00494"
+  category: online_game
+  question: "What is wallhack?"
+  answer: "An unauthorized cheat that can reveal players or information normally hidden by game geometry."
+
+- id: "00495"
+  category: online_game
+  question: "What is account boosting?"
+  answer: "Having another person play or use an account to artificially increase its rank or progress."
+
+- id: "00496"
+  category: online_game
+  question: "What is a ban in online gaming?"
+  answer: "A restriction that prevents an account or player from accessing a game or service."
+
+- id: "00497"
+  category: online_game
+  question: "What is a temporary suspension?"
+  answer: "A time-limited restriction preventing an account from using certain game services."
+
+- id: "00498"
+  category: online_game
+  question: "What is voice chat?"
+  answer: "A feature that lets players communicate using spoken audio."
+
+- id: "00499"
+  category: online_game
+  question: "What is text chat in an online game?"
+  answer: "A system that allows players to communicate by typing messages."
+
+- id: "00500"
+  category: online_game
+  question: "What is a ping indicator used for?"
+  answer: "It shows a player's current network latency to the game service."
+
+- id: "00501"
+  category: online_game
+  question: "What is a minimap?"
+  answer: "A small map display that shows nearby locations, players, objectives, or other game information."
+
+- id: "00502"
+  category: online_game
+  question: "What is a waypoint?"
+  answer: "A marked location used to guide a player toward a destination or objective."
+
+- id: "00503"
+  category: online_game
+  question: "What is fog of war?"
+  answer: "A game mechanic that hides parts of the map until they are explored or revealed."
+
+- id: "00504"
+  category: online_game
+  question: "What is friendly fire?"
+  answer: "A game mechanic in which players can accidentally or intentionally damage teammates."
+
+- id: "00505"
+  category: online_game
+  question: "What is team balancing?"
+  answer: "The process of distributing players between teams to create reasonably balanced matches."
+
+- id: "00506"
+  category: online_game
+  question: "What is a tournament in online gaming?"
+  answer: "An organized competition in which players or teams compete through scheduled matches."
+
+- id: "00507"
+  category: online_game
+  question: "What is esports?"
+  answer: "Organized competitive video gaming played individually or in teams."
+
+- id: "00508"
+  category: online_game
+  question: "What is a spectator mode?"
+  answer: "A mode that allows a player to watch a game without directly participating."
+
+- id: "00509"
+  category: online_game
+  question: "What is a replay system?"
+  answer: "A feature that records or reconstructs gameplay so it can be viewed later."
+
+- id: "00510"
+  category: online_game
+  question: "What is a game stream?"
+  answer: "A live or recorded broadcast of gameplay over the internet."
+
+- id: "00511"
+  category: online_game
+  question: "What is a gaming community?"
+  answer: "A group of players who interact around a particular game or gaming interest."
+
+- id: "00512"
+  category: online_game
+  question: "What is a game moderator?"
+  answer: "A person or system responsible for enforcing rules and managing player behavior."
+
+- id: "00513"
+  category: online_game
+  question: "What is a report system in an online game?"
+  answer: "A feature that lets players submit complaints about suspected rule violations or abusive behavior."
+
+- id: "00514"
+  category: online_game
+  question: "What is server region selection?"
+  answer: "A setting that lets players choose or connect to a geographically appropriate server region."
+
+- id: "00515"
+  category: online_game
+  question: "Why can a geographically closer game server reduce latency?"
+  answer: "Data generally has a shorter network path to a geographically closer server."
+
+- id: "00516"
+  category: online_game
+  question: "What is a network disconnect in online gaming?"
+  answer: "A loss of the connection between the player's device and the game service."
+
+- id: "00517"
+  category: outdoor_sports
+  question: "How many players are on the field for one football team at the start of a standard match?"
+  answer: "11 players."
+
+- id: "00518"
+  category: outdoor_sports
+  question: "How long is a standard football match?"
+  answer: "90 minutes, divided into two 45-minute halves."
+
+- id: "00519"
+  category: outdoor_sports
+  question: "What is the main objective in football?"
+  answer: "To score more goals than the opposing team."
+
+- id: "00520"
+  category: outdoor_sports
+  question: "What part of the body may an outfield football player generally not use to deliberately handle the ball?"
+  answer: "The hands and arms."
+
+- id: "00521"
+  category: outdoor_sports
+  question: "What is a penalty kick in football?"
+  answer: "A direct free kick taken from the penalty mark after certain fouls inside the defending team's penalty area."
+
+- id: "00522"
+  category: outdoor_sports
+  question: "What is an offside position in football?"
+  answer: "A player is in an offside position if they are nearer to the opponents' goal line than both the ball and the second-last opponent when involved in active play, subject to the laws."
+
+- id: "00523"
+  category: outdoor_sports
+  question: "What is a corner kick in football?"
+  answer: "A restart awarded when the ball crosses the goal line after touching a defending player without entering the goal."
+
+- id: "00524"
+  category: outdoor_sports
+  question: "What is a throw-in in football?"
+  answer: "A restart awarded when the ball completely crosses the touchline."
+
+- id: "00525"
+  category: outdoor_sports
+  question: "What is a red card in football?"
+  answer: "A red card means the player is sent off and cannot continue in the match."
+
+- id: "00526"
+  category: outdoor_sports
+  question: "What is a yellow card in football?"
+  answer: "A yellow card is a caution issued to a player."
+
+- id: "00527"
+  category: outdoor_sports
+  question: "What is extra time in football?"
+  answer: "Additional playing time, usually two 15-minute periods, used in some knockout matches when a winner is required."
+
+- id: "00528"
+  category: outdoor_sports
+  question: "What is a penalty shootout in football?"
+  answer: "A method of deciding a winner by taking alternating kicks from the penalty mark."
+
+- id: "00529"
+  category: outdoor_sports
+  question: "How many players does a cricket team normally have?"
+  answer: "11 players."
+
+- id: "00530"
+  category: outdoor_sports
+  question: "What is the main objective in cricket?"
+  answer: "To score more runs than the opposing team."
+
+- id: "00531"
+  category: outdoor_sports
+  question: "What is a cricket pitch?"
+  answer: "The rectangular central area between the two wickets where most deliveries are bowled."
+
+- id: "00532"
+  category: outdoor_sports
+  question: "How many wickets are there at each end of a cricket pitch?"
+  answer: "One wicket at each end."
+
+- id: "00533"
+  category: outdoor_sports
+  question: "How many stumps make up one cricket wicket?"
+  answer: "Three stumps."
+
+- id: "00534"
+  category: outdoor_sports
+  question: "What is an over in cricket?"
+  answer: "A set of six legal deliveries bowled by one bowler from one end."
+
+- id: "00535"
+  category: outdoor_sports
+  question: "What is a batsman or batter trying to score in cricket?"
+  answer: "Runs."
+
+- id: "00536"
+  category: outdoor_sports
+  question: "What is a boundary worth four runs in cricket?"
+  answer: "Four runs."
+
+- id: "00537"
+  category: outdoor_sports
+  question: "What is a boundary worth six runs in cricket?"
+  answer: "Six runs."
+
+- id: "00538"
+  category: outdoor_sports
+  question: "What is a century in cricket?"
+  answer: "A batter scoring at least 100 runs in an innings."
+
+- id: "00539"
+  category: outdoor_sports
+  question: "What is a half-century in cricket?"
+  answer: "A batter scoring at least 50 runs in an innings."
+
+- id: "00540"
+  category: outdoor_sports
+  question: "What is a wicket in cricket?"
+  answer: "It can refer to the set of stumps and bails or to the dismissal of a batter, depending on context."
+
+- id: "00541"
+  category: outdoor_sports
+  question: "What does LBW stand for in cricket?"
+  answer: "Leg Before Wicket."
+
+- id: "00542"
+  category: outdoor_sports
+  question: "What is a no-ball in cricket?"
+  answer: "An illegal delivery that gives the batting side an extra run and may allow additional batting opportunities depending on the type."
+
+- id: "00543"
+  category: outdoor_sports
+  question: "What is a wide in cricket?"
+  answer: "A delivery judged too far from the batter to be a legal ball under the applicable playing conditions."
+
+- id: "00544"
+  category: outdoor_sports
+  question: "What is a maiden over in cricket?"
+  answer: "An over in which no runs are credited to the batter or batting team from the bowler's deliveries, excluding certain extras depending on the laws."
+
+- id: "00545"
+  category: outdoor_sports
+  question: "What is a hat-trick in cricket?"
+  answer: "A bowler taking three wickets with three consecutive legal deliveries."
+
+- id: "00546"
+  category: outdoor_sports
+  question: "What is a duck in cricket?"
+  answer: "A batter's score of zero."
+
+- id: "00547"
+  category: outdoor_sports
+  question: "What is a fielder in cricket?"
+  answer: "A player who fields the ball to stop runs and attempt dismissals."
+
+- id: "00548"
+  category: outdoor_sports
+  question: "What is a wicketkeeper in cricket?"
+  answer: "The player positioned behind the stumps at the striker's end to collect deliveries and attempt dismissals."
+
+- id: "00549"
+  category: outdoor_sports
+  question: "What is the role of a bowler in cricket?"
+  answer: "To deliver the ball toward the batter and attempt to restrict scoring or take wickets."
+
+- id: "00550"
+  category: outdoor_sports
+  question: "How many periods are there in a standard field hockey match?"
+  answer: "Four quarters."
+
+- id: "00551"
+  category: outdoor_sports
+  question: "How many players from one team are normally on the field in field hockey?"
+  answer: "11 players."
+
+- id: "00552"
+  category: outdoor_sports
+  question: "What is the main objective in field hockey?"
+  answer: "To score more goals than the opposing team."
+
+- id: "00553"
+  category: outdoor_sports
+  question: "What equipment is used to strike the ball in field hockey?"
+  answer: "A hockey stick."
+
+- id: "00554"
+  category: outdoor_sports
+  question: "What is a penalty corner in field hockey?"
+  answer: "A set play awarded to the attacking team for certain defensive fouls inside the circle."
+
+- id: "00555"
+  category: outdoor_sports
+  question: "What is a penalty stroke in field hockey?"
+  answer: "A one-on-one scoring opportunity awarded for certain serious defensive offenses."
+
+- id: "00556"
+  category: outdoor_sports
+  question: "What is a rugby try?"
+  answer: "A score made by grounding the ball in the opponents' in-goal area."
+
+- id: "00557"
+  category: outdoor_sports
+  question: "How many points is a try worth in rugby union?"
+  answer: "Five points."
+
+- id: "00558"
+  category: outdoor_sports
+  question: "How many points is a conversion worth in rugby union?"
+  answer: "Two points."
+
+- id: "00559"
+  category: outdoor_sports
+  question: "How many players are on the field for one rugby union team?"
+  answer: "15 players."
+
+- id: "00560"
+  category: outdoor_sports
+  question: "What shape is a rugby ball?"
+  answer: "Oval."
+
+- id: "00561"
+  category: outdoor_sports
+  question: "What is a scrum in rugby?"
+  answer: "A set-piece formation used to restart play after certain infringements."
+
+- id: "00562"
+  category: outdoor_sports
+  question: "What is a lineout in rugby union?"
+  answer: "A method of restarting play when the ball has gone into touch."
+
+- id: "00563"
+  category: outdoor_sports
+  question: "What is a tackle in rugby?"
+  answer: "A legal action used to bring a ball carrier to the ground."
+
+- id: "00564"
+  category: outdoor_sports
+  question: "What is a drop goal in rugby union?"
+  answer: "A kick through the goalposts after the ball has been dropped and kicked immediately."
+
+- id: "00565"
+  category: outdoor_sports
+  question: "How many players are on one baseball team while fielding?"
+  answer: "Nine players."
+
+- id: "00566"
+  category: outdoor_sports
+  question: "What is the main objective in baseball?"
+  answer: "To score more runs than the opposing team."
+
+- id: "00567"
+  category: outdoor_sports
+  question: "How many bases are there on a standard baseball field?"
+  answer: "Four bases."
+
+- id: "00568"
+  category: outdoor_sports
+  question: "What is a home run in baseball?"
+  answer: "A hit that allows the batter to circle all the bases and score, without being put out, under the applicable rules."
+
+- id: "00569"
+  category: outdoor_sports
+  question: "What is a strike in baseball?"
+  answer: "A pitch or attempted play that counts as a strike under the rules."
+
+- id: "00570"
+  category: outdoor_sports
+  question: "What is a ball in baseball?"
+  answer: "A pitch outside the strike zone that the batter does not swing at and that is not otherwise called a strike."
+
+- id: "00571"
+  category: outdoor_sports
+  question: "What is a strikeout in baseball?"
+  answer: "A batter being called out after accumulating three strikes."
+
+- id: "00572"
+  category: outdoor_sports
+  question: "What is a pitcher in baseball?"
+  answer: "The player who delivers the ball toward the batter."
+
+- id: "00573"
+  category: outdoor_sports
+  question: "What is a catcher in baseball?"
+  answer: "The player positioned behind home plate to receive pitches."
+
+- id: "00574"
+  category: outdoor_sports
+  question: "What is a home plate in baseball?"
+  answer: "The plate at which the batter stands and where runs are scored."
+
+- id: "00575"
+  category: outdoor_sports
+  question: "How many players are on a basketball team on the court at one time?"
+  answer: "Five players."
+
+- id: "00576"
+  category: outdoor_sports
+  question: "What is the main objective in basketball?"
+  answer: "To score more points than the opposing team."
+
+- id: "00577"
+  category: outdoor_sports
+  question: "How many points is a free throw worth in basketball?"
+  answer: "One point."
+
+- id: "00578"
+  category: outdoor_sports
+  question: "How many points is a successful shot from behind the three-point line worth?"
+  answer: "Three points."
+
+- id: "00579"
+  category: outdoor_sports
+  question: "What is dribbling in basketball?"
+  answer: "Bouncing the ball repeatedly while moving or controlling it."
+
+- id: "00580"
+  category: outdoor_sports
+  question: "What is a rebound in basketball?"
+  answer: "A recovery of the ball after a missed field goal or free throw."
+
+- id: "00581"
+  category: outdoor_sports
+  question: "What is a basketball dunk?"
+  answer: "A scoring play in which a player forcefully puts the ball directly through the basket."
+
+- id: "00582"
+  category: outdoor_sports
+  question: "What is a basketball assist?"
+  answer: "A pass that directly leads to a successful field goal, according to the scoring rules."
+
+- id: "00583"
+  category: outdoor_sports
+  question: "How many players are on one volleyball team on the court in indoor volleyball?"
+  answer: "Six players."
+
+- id: "00584"
+  category: outdoor_sports
+  question: "What is the objective in volleyball?"
+  answer: "To ground the ball on the opponent's court or force the opponent to commit a fault."
+
+- id: "00585"
+  category: outdoor_sports
+  question: "What is a volleyball serve?"
+  answer: "The action that starts a rally by sending the ball over the net."
+
+- id: "00586"
+  category: outdoor_sports
+  question: "What is a volleyball spike?"
+  answer: "A forceful attacking hit directed toward the opponent's court."
+
+- id: "00587"
+  category: outdoor_sports
+  question: "What is a volleyball block?"
+  answer: "A defensive action at the net intended to stop or deflect an opponent's attack."
+
+- id: "00588"
+  category: outdoor_sports
+  question: "What is a volleyball rally?"
+  answer: "The sequence of play beginning with a serve and ending when a point is won."
+
+- id: "00589"
+  category: outdoor_sports
+  question: "What is golf?"
+  answer: "A sport in which players attempt to complete a course using the fewest strokes."
+
+- id: "00590"
+  category: outdoor_sports
+  question: "How many holes are in a standard full round of golf?"
+  answer: "18 holes."
+
+- id: "00591"
+  category: outdoor_sports
+  question: "What is a golf par?"
+  answer: "The predetermined number of strokes expected for a skilled player to complete a hole or course."
+
+- id: "00592"
+  category: outdoor_sports
+  question: "What is a birdie in golf?"
+  answer: "A score of one stroke under par on a hole."
+
+- id: "00593"
+  category: outdoor_sports
+  question: "What is an eagle in golf?"
+  answer: "A score of two strokes under par on a hole."
+
+- id: "00594"
+  category: outdoor_sports
+  question: "What is a bogey in golf?"
+  answer: "A score of one stroke over par on a hole."
+
+- id: "00595"
+  category: outdoor_sports
+  question: "What is a golf putter?"
+  answer: "A club designed mainly for making short strokes on or near the putting green."
+
+- id: "00596"
+  category: outdoor_sports
+  question: "What is a golf bunker?"
+  answer: "A hazard area containing sand."
+
+- id: "00597"
+  category: outdoor_sports
+  question: "What is a golf tee?"
+  answer: "A small object used to elevate the ball for the start of a hole."
+
+- id: "00598"
+  category: outdoor_sports
+  question: "What is a golf green?"
+  answer: "The closely mown area surrounding the hole where putting is normally performed."
+
+- id: "00599"
+  category: outdoor_sports
+  question: "What is athletics?"
+  answer: "A group of sports involving running, jumping, and throwing events."
+
+- id: "00600"
+  category: outdoor_sports
+  question: "What is a sprint in athletics?"
+  answer: "A short-distance running race performed at high speed."
+
+- id: "00601"
+  category: outdoor_sports
+  question: "What is a marathon?"
+  answer: "A road running race with a distance of 42.195 kilometers."
+
+- id: "00602"
+  category: outdoor_sports
+  question: "What is a relay race?"
+  answer: "A race in which members of a team run successive sections of the course."
+
+- id: "00603"
+  category: outdoor_sports
+  question: "What is the baton in a relay race?"
+  answer: "The object passed between teammates during a relay."
+
+- id: "00604"
+  category: outdoor_sports
+  question: "What is the high jump?"
+  answer: "An athletics event in which competitors attempt to clear a horizontal bar."
+
+- id: "00605"
+  category: outdoor_sports
+  question: "What is the long jump?"
+  answer: "An athletics event in which competitors run up and jump horizontally for distance."
+
+- id: "00606"
+  category: outdoor_sports
+  question: "What is the shot put?"
+  answer: "An athletics event in which competitors put a heavy spherical implement for distance."
+
+- id: "00607"
+  category: outdoor_sports
+  question: "What is the javelin throw?"
+  answer: "An athletics event in which competitors throw a spear-like implement for distance."
+
+- id: "00608"
+  category: outdoor_sports
+  question: "What is discus throw?"
+  answer: "An athletics event in which competitors throw a heavy circular disc for distance."
+
+- id: "00609"
+  category: outdoor_sports
+  question: "What is a decathlon?"
+  answer: "A men's combined athletics competition consisting of ten events."
+
+- id: "00610"
+  category: outdoor_sports
+  question: "What is heptathlon?"
+  answer: "A combined athletics competition consisting of seven events."
+
+- id: "00611"
+  category: outdoor_sports
+  question: "What is kabaddi?"
+  answer: "A team sport in which a raider enters the opponents' half to tag opponents and return safely while following the game's rules."
+
+- id: "00612"
+  category: outdoor_sports
+  question: "What is kho-kho?"
+  answer: "A traditional team tag sport in which players chase and tag opponents according to specific rules."
+
+- id: "00613"
+  category: outdoor_sports
+  question: "What is archery?"
+  answer: "A sport in which participants shoot arrows at targets using bows."
+
+- id: "00614"
+  category: outdoor_sports
+  question: "What is cycling road racing?"
+  answer: "A form of cycling competition held on roads, where riders race over a defined course."
+
+- id: "00615"
+  category: outdoor_sports
+  question: "What is a triathlon?"
+  answer: "A multisport race combining swimming, cycling, and running."
+
+- id: "00616"
+  category: outdoor_sports
+  question: "What is a relay in athletics?"
+  answer: "A team race in which each athlete completes part of the distance before handing over to the next teammate."
+
+- id: "00617"
+  category: philosophy
+  question: "What is philosophy?"
+  answer: "Philosophy is the systematic study of fundamental questions about reality, knowledge, reason, values, and existence."
+
+- id: "00618"
+  category: philosophy
+  question: "What does the word philosophy literally mean?"
+  answer: "It comes from Greek roots meaning love of wisdom."
+
+- id: "00619"
+  category: philosophy
+  question: "What is metaphysics?"
+  answer: "Metaphysics is the branch of philosophy that investigates reality, existence, and the nature of being."
+
+- id: "00620"
+  category: philosophy
+  question: "What is epistemology?"
+  answer: "Epistemology is the branch of philosophy concerned with knowledge, belief, and justification."
+
+- id: "00621"
+  category: philosophy
+  question: "What is ethics?"
+  answer: "Ethics is the branch of philosophy that examines morality, values, and principles of right and wrong."
+
+- id: "00622"
+  category: philosophy
+  question: "What is logic?"
+  answer: "Logic is the study of valid reasoning and the structure of arguments."
+
+- id: "00623"
+  category: philosophy
+  question: "What is aesthetics?"
+  answer: "Aesthetics is the branch of philosophy concerned with beauty, art, taste, and aesthetic experience."
+
+- id: "00624"
+  category: philosophy
+  question: "What is political philosophy?"
+  answer: "Political philosophy examines questions about government, justice, authority, rights, and political organization."
+
+- id: "00625"
+  category: philosophy
+  question: "What is philosophy of mind?"
+  answer: "Philosophy of mind studies the nature of consciousness, thought, perception, and the relationship between mind and body."
+
+- id: "00626"
+  category: philosophy
+  question: "What is philosophy of science?"
+  answer: "Philosophy of science examines the methods, assumptions, limits, and foundations of scientific knowledge."
+
+- id: "00627"
+  category: philosophy
+  question: "Who is commonly regarded as the teacher of Plato?"
+  answer: "Socrates."
+
+- id: "00628"
+  category: philosophy
+  question: "Who was a student of Socrates?"
+  answer: "Plato."
+
+- id: "00629"
+  category: philosophy
+  question: "Who was a student of Plato?"
+  answer: "Aristotle."
+
+- id: "00630"
+  category: philosophy
+  question: "Which ancient Greek philosopher is associated with the Socratic method?"
+  answer: "Socrates."
+
+- id: "00631"
+  category: philosophy
+  question: "What is the Socratic method?"
+  answer: "It is a method of inquiry that uses questions and dialogue to examine ideas and assumptions."
+
+- id: "00632"
+  category: philosophy
+  question: "What is the Socratic paradox that connects knowledge and virtue?"
+  answer: "Socrates is associated with the idea that genuine knowledge of what is good is closely connected with acting well."
+
+- id: "00633"
+  category: philosophy
+  question: "Who wrote The Republic?"
+  answer: "Plato."
+
+- id: "00634"
+  category: philosophy
+  question: "What philosophical concept is central to Plato's theory of Forms?"
+  answer: "The idea that abstract Forms are more fundamental or perfect than their changing physical instances."
+
+- id: "00635"
+  category: philosophy
+  question: "What is Plato's allegory of the cave about?"
+  answer: "It illustrates the movement from ignorance and appearances toward deeper understanding and knowledge."
+
+- id: "00636"
+  category: philosophy
+  question: "Who wrote Nicomachean Ethics?"
+  answer: "Aristotle."
+
+- id: "00637"
+  category: philosophy
+  question: "What is Aristotle's concept of eudaimonia?"
+  answer: "Eudaimonia refers to human flourishing or living well."
+
+- id: "00638"
+  category: philosophy
+  question: "What is virtue ethics?"
+  answer: "Virtue ethics focuses on developing good character and virtues rather than only following rules or calculating consequences."
+
+- id: "00639"
+  category: philosophy
+  question: "What is a virtue?"
+  answer: "A virtue is a stable character trait regarded as morally good or excellent."
+
+- id: "00640"
+  category: philosophy
+  question: "What is the golden mean in Aristotelian ethics?"
+  answer: "It is the idea that virtue often lies between two extremes of excess and deficiency."
+
+- id: "00641"
+  category: philosophy
+  question: "What is consequentialism?"
+  answer: "Consequentialism judges actions primarily by the outcomes they produce."
+
+- id: "00642"
+  category: philosophy
+  question: "What is utilitarianism?"
+  answer: "Utilitarianism is a consequentialist theory that evaluates actions by their effects on overall well-being or utility."
+
+- id: "00643"
+  category: philosophy
+  question: "Who are major historical figures associated with utilitarianism?"
+  answer: "Jeremy Bentham and John Stuart Mill."
+
+- id: "00644"
+  category: philosophy
+  question: "What is deontology?"
+  answer: "Deontology is an ethical approach that emphasizes duties, rules, and moral constraints."
+
+- id: "00645"
+  category: philosophy
+  question: "Which philosopher is strongly associated with deontological ethics?"
+  answer: "Immanuel Kant."
+
+- id: "00646"
+  category: philosophy
+  question: "What is Kant's categorical imperative?"
+  answer: "It is a principle requiring moral actions to be based on rules that can be willed as universal principles."
+
+- id: "00647"
+  category: philosophy
+  question: "What is moral relativism?"
+  answer: "Moral relativism holds that moral judgments can depend on cultural, social, or other contextual standards."
+
+- id: "00648"
+  category: philosophy
+  question: "What is moral absolutism?"
+  answer: "Moral absolutism holds that at least some moral principles are universally valid regardless of circumstances."
+
+- id: "00649"
+  category: philosophy
+  question: "What is skepticism in philosophy?"
+  answer: "Skepticism is the practice of questioning whether certain beliefs or claims can be known or justified."
+
+- id: "00650"
+  category: philosophy
+  question: "What is philosophical skepticism about the senses?"
+  answer: "It questions whether sensory experience always provides reliable knowledge of the external world."
+
+- id: "00651"
+  category: philosophy
+  question: "What is rationalism?"
+  answer: "Rationalism emphasizes reason and a priori knowledge as important sources of knowledge."
+
+- id: "00652"
+  category: philosophy
+  question: "What is empiricism?"
+  answer: "Empiricism emphasizes experience and observation as major sources of knowledge."
+
+- id: "00653"
+  category: philosophy
+  question: "Which philosopher is associated with the statement 'I think, therefore I am'?"
+  answer: "René Descartes."
+
+- id: "00654"
+  category: philosophy
+  question: "What is Cartesian doubt?"
+  answer: "It is Descartes' method of systematically doubting beliefs that could be uncertain in order to find a secure foundation for knowledge."
+
+- id: "00655"
+  category: philosophy
+  question: "What is the mind-body problem?"
+  answer: "It is the philosophical question of how mental states are related to physical states and the body."
+
+- id: "00656"
+  category: philosophy
+  question: "What is dualism in philosophy of mind?"
+  answer: "Dualism is the view that mind and matter are fundamentally distinct in some significant sense."
+
+- id: "00657"
+  category: philosophy
+  question: "What is materialism in philosophy of mind?"
+  answer: "Materialism holds that reality is fundamentally physical or that mental phenomena depend on physical processes."
+
+- id: "00658"
+  category: philosophy
+  question: "What is idealism in metaphysics?"
+  answer: "Idealism gives a fundamental role to mind, ideas, or experience in explaining reality."
+
+- id: "00659"
+  category: philosophy
+  question: "What is free will?"
+  answer: "Free will is the capacity of an agent to make choices in a way that is relevant to responsibility and agency."
+
+- id: "00660"
+  category: philosophy
+  question: "What is determinism?"
+  answer: "Determinism is the view that events are fixed by prior conditions together with the laws governing them."
+
+- id: "00661"
+  category: philosophy
+  question: "What is compatibilism?"
+  answer: "Compatibilism is the view that free will can be compatible with determinism."
+
+- id: "00662"
+  category: philosophy
+  question: "What is existentialism?"
+  answer: "Existentialism is a family of philosophical views emphasizing existence, freedom, responsibility, choice, and meaning."
+
+- id: "00663"
+  category: philosophy
+  question: "Which philosopher is associated with Being and Time?"
+  answer: "Martin Heidegger."
+
+- id: "00664"
+  category: philosophy
+  question: "Who wrote The Myth of Sisyphus?"
+  answer: "Albert Camus."
+
+- id: "00665"
+  category: philosophy
+  question: "What philosophical movement is Albert Camus commonly associated with?"
+  answer: "Absurdism and existential thought."
+
+- id: "00666"
+  category: philosophy
+  question: "What is absurdism?"
+  answer: "Absurdism explores the tension between the human search for meaning and a universe that may not provide an inherent meaning."
+
+- id: "00667"
+  category: philosophy
+  question: "Who wrote Thus Spoke Zarathustra?"
+  answer: "Friedrich Nietzsche."
+
+- id: "00668"
+  category: philosophy
+  question: "What is Nietzsche's concept of the Übermensch?"
+  answer: "It describes an ideal of self-overcoming and the creation of one's own values."
+
+- id: "00669"
+  category: philosophy
+  question: "What does Nietzsche's phrase 'God is dead' mean philosophically?"
+  answer: "It refers to the decline of traditional religious foundations and the resulting challenge of creating values and meaning."
+
+- id: "00670"
+  category: philosophy
+  question: "What is nihilism?"
+  answer: "Nihilism is a family of views associated with the rejection or denial of objective meaning, value, or other purported foundations."
+
+- id: "00671"
+  category: philosophy
+  question: "What is stoicism?"
+  answer: "Stoicism is an ancient philosophy emphasizing virtue, rational judgment, and focusing on what lies within one's control."
+
+- id: "00672"
+  category: philosophy
+  question: "Which philosopher wrote Meditations?"
+  answer: "Marcus Aurelius."
+
+- id: "00673"
+  category: philosophy
+  question: "Who founded Stoicism?"
+  answer: "Zeno of Citium."
+
+- id: "00674"
+  category: philosophy
+  question: "What is Epicureanism?"
+  answer: "Epicureanism is a philosophy associated with Epicurus that emphasizes a tranquil life, moderation, friendship, and freedom from unnecessary fear and desire."
+
+- id: "00675"
+  category: philosophy
+  question: "Who founded Epicureanism?"
+  answer: "Epicurus."
+
+- id: "00676"
+  category: philosophy
+  question: "What is hedonism?"
+  answer: "Hedonism is the view that pleasure or the absence of suffering has a central role in determining value or a good life."
+
+- id: "00677"
+  category: philosophy
+  question: "What is skepticism in ancient Greek philosophy?"
+  answer: "It was a tradition emphasizing suspension of judgment or careful examination of claims."
+
+- id: "00678"
+  category: philosophy
+  question: "What is Pyrrhonism?"
+  answer: "Pyrrhonism is an ancient skeptical tradition associated with suspending judgment about disputed claims."
+
+- id: "00679"
+  category: philosophy
+  question: "What is a philosophical argument?"
+  answer: "A philosophical argument is a set of premises offered to support a conclusion."
+
+- id: "00680"
+  category: philosophy
+  question: "What is a premise?"
+  answer: "A premise is a statement offered as support for a conclusion."
+
+- id: "00681"
+  category: philosophy
+  question: "What is a conclusion in an argument?"
+  answer: "A conclusion is the claim that the premises are intended to support."
+
+- id: "00682"
+  category: philosophy
+  question: "What is a valid argument?"
+  answer: "A valid argument is one in which the conclusion follows necessarily if all the premises are true."
+
+- id: "00683"
+  category: philosophy
+  question: "What is a sound argument?"
+  answer: "A sound argument is valid and has true premises."
+
+- id: "00684"
+  category: philosophy
+  question: "What is an inductive argument?"
+  answer: "An inductive argument supports a conclusion as probable rather than guaranteeing it."
+
+- id: "00685"
+  category: philosophy
+  question: "What is a deductive argument?"
+  answer: "A deductive argument aims to establish its conclusion necessarily from its premises."
+
+- id: "00686"
+  category: philosophy
+  question: "What is a syllogism?"
+  answer: "A syllogism is a deductive argument typically consisting of two premises and a conclusion."
+
+- id: "00687"
+  category: philosophy
+  question: "Who developed classical syllogistic logic in ancient Greece?"
+  answer: "Aristotle."
+
+- id: "00688"
+  category: philosophy
+  question: "What is the principle of non-contradiction?"
+  answer: "It states that a proposition and its negation cannot both be true in the same respect at the same time."
+
+- id: "00689"
+  category: philosophy
+  question: "What is the law of excluded middle?"
+  answer: "In classical logic, it states that a proposition is either true or its negation is true."
+
+- id: "00690"
+  category: philosophy
+  question: "What is the principle of identity?"
+  answer: "It is the logical principle that a thing is identical with itself."
+
+- id: "00691"
+  category: philosophy
+  question: "What is the problem of induction?"
+  answer: "It is the problem of justifying the inference from past observations to general or future conclusions."
+
+- id: "00692"
+  category: philosophy
+  question: "Which philosopher famously formulated the problem of induction?"
+  answer: "David Hume."
+
+- id: "00693"
+  category: philosophy
+  question: "What is the is-ought problem?"
+  answer: "It is the difficulty of deriving a normative statement about what ought to be directly from purely descriptive statements about what is."
+
+- id: "00694"
+  category: philosophy
+  question: "What is the philosophical concept of causation?"
+  answer: "Causation concerns the relation by which one event, state, or condition brings about or contributes to another."
+
+- id: "00695"
+  category: philosophy
+  question: "What is the problem of other minds?"
+  answer: "It is the philosophical problem of how we can know that other people have minds and conscious experiences."
+
+- id: "00696"
+  category: philosophy
+  question: "What is personal identity?"
+  answer: "Personal identity concerns what makes a person the same individual over time."
+
+- id: "00697"
+  category: philosophy
+  question: "What is the ship of Theseus thought experiment about?"
+  answer: "It examines whether an object remains the same object after all of its parts have been replaced."
+
+- id: "00698"
+  category: philosophy
+  question: "What is a thought experiment?"
+  answer: "A thought experiment is an imagined scenario used to explore a concept or test philosophical reasoning."
+
+- id: "00699"
+  category: philosophy
+  question: "What is the trolley problem?"
+  answer: "It is a family of thought experiments about moral choices involving harm, responsibility, and competing outcomes."
+
+- id: "00700"
+  category: philosophy
+  question: "What is philosophical naturalism?"
+  answer: "Naturalism is the view that philosophical explanations should be continuous with or compatible with the natural world and its sciences."
+
+- id: "00701"
+  category: philosophy
+  question: "What is dualism in metaphysics?"
+  answer: "Metaphysical dualism holds that reality contains two fundamentally different kinds of substances, properties, or principles."
+
+- id: "00702"
+  category: philosophy
+  question: "What is monism?"
+  answer: "Monism is the view that reality is fundamentally of one kind or unified in a basic sense."
+
+- id: "00703"
+  category: philosophy
+  question: "What is pluralism in metaphysics?"
+  answer: "Metaphysical pluralism holds that reality is fundamentally composed of more than one basic kind or principle."
+
+- id: "00704"
+  category: philosophy
+  question: "What is the cosmological argument?"
+  answer: "It is a family of arguments that infer the existence of a first cause, necessary being, or similar explanation from features of the universe."
+
+- id: "00705"
+  category: philosophy
+  question: "What is the teleological argument?"
+  answer: "It is a family of arguments that infer a designer or purposive explanation from apparent order, complexity, or purpose in nature."
+
+- id: "00706"
+  category: philosophy
+  question: "What is the ontological argument?"
+  answer: "It is a family of arguments attempting to establish the existence of God from premises about the concept or nature of a maximally great or necessary being."
+
+- id: "00707"
+  category: philosophy
+  question: "What is the problem of evil?"
+  answer: "It is the philosophical challenge of reconciling the existence of suffering or evil with claims about an all-powerful, all-knowing, and perfectly good God."
+
+- id: "00708"
+  category: philosophy
+  question: "What is the free will defense?"
+  answer: "It is a response to the problem of evil that argues that significant freedom may help explain why a world permits some wrongdoing or suffering."
+
+- id: "00709"
+  category: philosophy
+  question: "What is social contract theory?"
+  answer: "It is a group of political theories explaining political authority or obligations in terms of an agreement, hypothetical or historical, among individuals."
+
+- id: "00710"
+  category: philosophy
+  question: "Which philosophers are strongly associated with social contract theory?"
+  answer: "Thomas Hobbes, John Locke, and Jean-Jacques Rousseau."
+
+- id: "00711"
+  category: philosophy
+  question: "What is the state of nature in political philosophy?"
+  answer: "It is a hypothetical condition of human life without an established political authority."
+
+- id: "00712"
+  category: philosophy
+  question: "What is John Rawls known for in political philosophy?"
+  answer: "He is known for his theory of justice and the idea of the original position."
+
+- id: "00713"
+  category: philosophy
+  question: "What is Rawls's original position?"
+  answer: "It is a hypothetical decision-making situation in which people choose principles of justice behind a veil of ignorance."
+
+- id: "00714"
+  category: philosophy
+  question: "What is the veil of ignorance?"
+  answer: "It is a condition in Rawls's theory where decision-makers do not know their own future social position or personal characteristics."
+
+- id: "00715"
+  category: philosophy
+  question: "What is libertarianism in political philosophy?"
+  answer: "It is a family of views that gives strong importance to individual liberty and limits on coercive government power."
+
+- id: "00716"
+  category: philosophy
+  question: "What is communitarianism?"
+  answer: "Communitarianism emphasizes the importance of communities, social relationships, and shared practices in understanding political and moral life."
+
+- id: "00717"
+  category: commerce
+  question: "What is commerce?"
+  answer: "Commerce is the exchange and distribution of goods and services between producers and consumers."
+
+- id: "00718"
+  category: commerce
+  question: "What is trade?"
+  answer: "Trade is the buying and selling of goods and services."
+
+- id: "00719"
+  category: commerce
+  question: "What is internal trade?"
+  answer: "Internal trade is trade conducted within the boundaries of a country."
+
+- id: "00720"
+  category: commerce
+  question: "What is international trade?"
+  answer: "International trade is the exchange of goods and services between countries."
+
+- id: "00721"
+  category: commerce
+  question: "What is import?"
+  answer: "An import is a good or service purchased from another country."
+
+- id: "00722"
+  category: commerce
+  question: "What is export?"
+  answer: "An export is a good or service sold to another country."
+
+- id: "00723"
+  category: commerce
+  question: "What is a business?"
+  answer: "A business is an organized activity involving the production, sale, or provision of goods or services."
+
+- id: "00724"
+  category: commerce
+  question: "What is a business objective?"
+  answer: "A business objective is a specific goal that a business seeks to achieve."
+
+- id: "00725"
+  category: commerce
+  question: "What is profit?"
+  answer: "Profit is the excess of revenue over the costs incurred to earn that revenue."
+
+- id: "00726"
+  category: commerce
+  question: "What is a loss in business?"
+  answer: "A loss occurs when business costs exceed the revenue earned."
+
+- id: "00727"
+  category: commerce
+  question: "What is revenue?"
+  answer: "Revenue is the income earned from the sale of goods or services."
+
+- id: "00728"
+  category: commerce
+  question: "What is an expense?"
+  answer: "An expense is a cost incurred in operating a business or generating revenue."
+
+- id: "00729"
+  category: commerce
+  question: "What is capital in business?"
+  answer: "Capital is money or other resources invested in a business for its operations and growth."
+
+- id: "00730"
+  category: commerce
+  question: "What is an asset?"
+  answer: "An asset is a resource controlled by a business that has economic value."
+
+- id: "00731"
+  category: commerce
+  question: "What is a liability?"
+  answer: "A liability is a present obligation of a business arising from past events."
+
+- id: "00732"
+  category: commerce
+  question: "What is owner's equity?"
+  answer: "Owner's equity is the owner's residual interest in the assets of a business after deducting liabilities."
+
+- id: "00733"
+  category: commerce
+  question: "What is accounting?"
+  answer: "Accounting is the systematic recording, classification, summarizing, and interpretation of financial transactions."
+
+- id: "00734"
+  category: commerce
+  question: "What is bookkeeping?"
+  answer: "Bookkeeping is the systematic recording of financial transactions."
+
+- id: "00735"
+  category: commerce
+  question: "What is a financial transaction?"
+  answer: "A financial transaction is an economic event that can be measured in monetary terms and recorded in accounting."
+
+- id: "00736"
+  category: commerce
+  question: "What is a journal in accounting?"
+  answer: "A journal is a book or record where financial transactions are initially recorded."
+
+- id: "00737"
+  category: commerce
+  question: "What is a ledger?"
+  answer: "A ledger is a record containing individual accounts used to classify and summarize transactions."
+
+- id: "00738"
+  category: commerce
+  question: "What is a trial balance?"
+  answer: "A trial balance is a statement of ledger balances prepared to check the arithmetical accuracy of bookkeeping."
+
+- id: "00739"
+  category: commerce
+  question: "What is a balance sheet?"
+  answer: "A balance sheet is a financial statement showing assets, liabilities, and equity at a particular date."
+
+- id: "00740"
+  category: commerce
+  question: "What is an income statement?"
+  answer: "An income statement shows revenue, expenses, and the resulting profit or loss for a period."
+
+- id: "00741"
+  category: commerce
+  question: "What is cash flow?"
+  answer: "Cash flow is the movement of cash and cash equivalents into and out of a business."
+
+- id: "00742"
+  category: commerce
+  question: "What is working capital?"
+  answer: "Working capital is the excess of current assets over current liabilities."
+
+- id: "00743"
+  category: commerce
+  question: "What are current assets?"
+  answer: "Current assets are assets expected to be converted into cash, sold, or used within a relatively short period, usually one year."
+
+- id: "00744"
+  category: commerce
+  question: "What are current liabilities?"
+  answer: "Current liabilities are obligations expected to be settled within a relatively short period, usually one year."
+
+- id: "00745"
+  category: commerce
+  question: "What is depreciation?"
+  answer: "Depreciation is the systematic allocation of the depreciable amount of a tangible asset over its useful life."
+
+- id: "00746"
+  category: commerce
+  question: "What is inventory?"
+  answer: "Inventory is the stock of goods and materials held by a business for sale or production."
+
+- id: "00747"
+  category: commerce
+  question: "What are accounts receivable?"
+  answer: "Accounts receivable are amounts owed to a business by customers who bought goods or services on credit."
+
+- id: "00748"
+  category: commerce
+  question: "What are accounts payable?"
+  answer: "Accounts payable are amounts a business owes to suppliers or other creditors."
+
+- id: "00749"
+  category: commerce
+  question: "What is a balance sheet equation?"
+  answer: "The basic accounting equation is Assets = Liabilities + Equity."
+
+- id: "00750"
+  category: commerce
+  question: "What is double-entry bookkeeping?"
+  answer: "Double-entry bookkeeping records every transaction with corresponding debit and credit entries."
+
+- id: "00751"
+  category: commerce
+  question: "What is a debit in accounting?"
+  answer: "A debit is an entry recorded on the debit side of an account according to the rules of double-entry accounting."
+
+- id: "00752"
+  category: commerce
+  question: "What is a credit in accounting?"
+  answer: "A credit is an entry recorded on the credit side of an account according to the rules of double-entry accounting."
+
+- id: "00753"
+  category: commerce
+  question: "What is a capital expenditure?"
+  answer: "A capital expenditure is spending on acquiring or improving long-term assets."
+
+- id: "00754"
+  category: commerce
+  question: "What is a revenue expenditure?"
+  answer: "A revenue expenditure is spending incurred for the regular operation and maintenance of a business."
+
+- id: "00755"
+  category: commerce
+  question: "What is a bank?"
+  answer: "A bank is a financial institution that accepts deposits and provides services such as lending and payments."
+
+- id: "00756"
+  category: commerce
+  question: "What is a savings account?"
+  answer: "A savings account is a bank account designed primarily for saving money and earning interest."
+
+- id: "00757"
+  category: commerce
+  question: "What is a current account?"
+  answer: "A current account is a bank account generally designed for frequent business transactions."
+
+- id: "00758"
+  category: commerce
+  question: "What is a fixed deposit?"
+  answer: "A fixed deposit is a bank deposit kept for a specified period, usually at an agreed interest rate."
+
+- id: "00759"
+  category: commerce
+  question: "What is a loan?"
+  answer: "A loan is money or another form of credit provided to a borrower with an obligation to repay it."
+
+- id: "00760"
+  category: commerce
+  question: "What is interest?"
+  answer: "Interest is the cost of borrowing money or the return earned on deposited or invested money."
+
+- id: "00761"
+  category: commerce
+  question: "What is a cheque?"
+  answer: "A cheque is a written instrument directing a bank to pay a specified amount from an account."
+
+- id: "00762"
+  category: commerce
+  question: "What is a demand draft?"
+  answer: "A demand draft is a bank-issued payment instrument directing payment of a specified amount to a named recipient."
+
+- id: "00763"
+  category: commerce
+  question: "What is digital banking?"
+  answer: "Digital banking is the delivery of banking services through electronic channels such as websites and mobile applications."
+
+- id: "00764"
+  category: commerce
+  question: "What is an ATM?"
+  answer: "An ATM is an automated teller machine that allows customers to perform certain banking transactions."
+
+- id: "00765"
+  category: commerce
+  question: "What is a credit card?"
+  answer: "A credit card allows its holder to make purchases using a line of credit and repay the amount later."
+
+- id: "00766"
+  category: commerce
+  question: "What is a debit card?"
+  answer: "A debit card allows payments to be made using funds available in a linked bank account."
+
+- id: "00767"
+  category: commerce
+  question: "What is insurance?"
+  answer: "Insurance is a contract under which an insurer provides financial protection against specified risks in exchange for a premium."
+
+- id: "00768"
+  category: commerce
+  question: "What is a premium in insurance?"
+  answer: "A premium is the amount paid by the policyholder to obtain insurance coverage."
+
+- id: "00769"
+  category: commerce
+  question: "What is an insurance policy?"
+  answer: "An insurance policy is the contract describing the terms and conditions of insurance coverage."
+
+- id: "00770"
+  category: commerce
+  question: "What is risk in business?"
+  answer: "Business risk is the possibility that actual results will differ from expected results and may cause loss."
+
+- id: "00771"
+  category: commerce
+  question: "What is entrepreneurship?"
+  answer: "Entrepreneurship is the process of identifying opportunities and organizing resources to create and operate a business."
+
+- id: "00772"
+  category: commerce
+  question: "Who is an entrepreneur?"
+  answer: "An entrepreneur is a person who organizes and manages a business venture while taking associated risks."
+
+- id: "00773"
+  category: commerce
+  question: "What is a sole proprietorship?"
+  answer: "A sole proprietorship is a business owned and controlled by one person."
+
+- id: "00774"
+  category: commerce
+  question: "What is a partnership?"
+  answer: "A partnership is a business structure in which two or more persons agree to carry on a business and share its results according to their agreement."
+
+- id: "00775"
+  category: commerce
+  question: "What is a company?"
+  answer: "A company is a legally recognized business organization that has a separate legal identity from its members in applicable corporate law."
+
+- id: "00776"
+  category: commerce
+  question: "What is a private company?"
+  answer: "A private company is a company whose shares are privately held and whose transfer and membership are subject to applicable legal restrictions."
+
+- id: "00777"
+  category: commerce
+  question: "What is a public company?"
+  answer: "A public company is a company whose securities may be offered to the public, subject to applicable law."
+
+- id: "00778"
+  category: commerce
+  question: "What is a cooperative society?"
+  answer: "A cooperative society is an organization formed by people who voluntarily join together to meet common economic or social needs."
+
+- id: "00779"
+  category: commerce
+  question: "What is limited liability?"
+  answer: "Limited liability means an owner's financial responsibility for business debts is generally limited to the amount specified by law or the investment structure."
+
+- id: "00780"
+  category: commerce
+  question: "What is a shareholder?"
+  answer: "A shareholder is a person or entity that owns shares in a company."
+
+- id: "00781"
+  category: commerce
+  question: "What is a share?"
+  answer: "A share is a unit representing ownership interest in a company."
+
+- id: "00782"
+  category: commerce
+  question: "What is a dividend?"
+  answer: "A dividend is a distribution of part of a company's profits or reserves to shareholders, subject to applicable rules."
+
+- id: "00783"
+  category: commerce
+  question: "What is a bond?"
+  answer: "A bond is a debt instrument through which an issuer borrows money and promises repayment according to specified terms."
+
+- id: "00784"
+  category: commerce
+  question: "What is a debenture?"
+  answer: "A debenture is a form of debt instrument issued by a company or other entity."
+
+- id: "00785"
+  category: commerce
+  question: "What is a stock exchange?"
+  answer: "A stock exchange is an organized market where securities are bought and sold according to established rules."
+
+- id: "00786"
+  category: commerce
+  question: "What is a stockbroker?"
+  answer: "A stockbroker is an intermediary that facilitates the buying and selling of securities."
+
+- id: "00787"
+  category: commerce
+  question: "What is a market?"
+  answer: "A market is a system or place where buyers and sellers exchange goods, services, or financial assets."
+
+- id: "00788"
+  category: commerce
+  question: "What is demand?"
+  answer: "Demand is the quantity of a good or service that consumers are willing and able to purchase at given conditions."
+
+- id: "00789"
+  category: commerce
+  question: "What is supply?"
+  answer: "Supply is the quantity of a good or service that producers are willing and able to offer at given conditions."
+
+- id: "00790"
+  category: commerce
+  question: "What is a price?"
+  answer: "Price is the amount of money charged or paid for a good, service, or asset."
+
+- id: "00791"
+  category: commerce
+  question: "What is market equilibrium?"
+  answer: "Market equilibrium is a situation in which quantity demanded equals quantity supplied at a given price."
+
+- id: "00792"
+  category: commerce
+  question: "What is inflation?"
+  answer: "Inflation is a sustained increase in the general level of prices over time."
+
+- id: "00793"
+  category: commerce
+  question: "What is deflation?"
+  answer: "Deflation is a sustained decrease in the general level of prices."
+
+- id: "00794"
+  category: commerce
+  question: "What is gross domestic product?"
+  answer: "Gross domestic product is the monetary value of final goods and services produced within a country's borders during a specified period."
+
+- id: "00795"
+  category: commerce
+  question: "What is per capita income?"
+  answer: "Per capita income is average income per person, commonly calculated by dividing total income by population."
+
+- id: "00796"
+  category: commerce
+  question: "What is marketing?"
+  answer: "Marketing is the process of identifying, communicating, delivering, and exchanging offerings that provide value to customers."
+
+- id: "00797"
+  category: commerce
+  question: "What is market research?"
+  answer: "Market research is the systematic collection and analysis of information about customers, competitors, and markets."
+
+- id: "00798"
+  category: commerce
+  question: "What is advertising?"
+  answer: "Advertising is paid communication intended to inform or persuade an audience about a product, service, idea, or organization."
+
+- id: "00799"
+  category: commerce
+  question: "What is branding?"
+  answer: "Branding is the process of creating and managing the identity and perception of a product, service, or organization."
+
+- id: "00800"
+  category: commerce
+  question: "What is a brand?"
+  answer: "A brand is a distinctive identity associated with a product, service, organization, or business."
+
+- id: "00801"
+  category: commerce
+  question: "What is packaging?"
+  answer: "Packaging is the design and physical protection or presentation of a product for storage, transport, and sale."
+
+- id: "00802"
+  category: commerce
+  question: "What is a supply chain?"
+  answer: "A supply chain is the network involved in sourcing, producing, moving, and delivering goods or services."
+
+- id: "00803"
+  category: commerce
+  question: "What is logistics?"
+  answer: "Logistics is the planning and management of the movement and storage of goods, services, and related information."
+
+- id: "00804"
+  category: commerce
+  question: "What is wholesale trade?"
+  answer: "Wholesale trade involves selling goods in relatively large quantities, usually to retailers or other businesses."
+
+- id: "00805"
+  category: commerce
+  question: "What is retail trade?"
+  answer: "Retail trade involves selling goods or services directly to final consumers."
+
+- id: "00806"
+  category: commerce
+  question: "What is e-commerce?"
+  answer: "E-commerce is the buying and selling of goods or services through electronic networks, especially the internet."
+
+- id: "00807"
+  category: commerce
+  question: "What is a marketplace in e-commerce?"
+  answer: "An e-commerce marketplace is an online platform where multiple sellers offer products or services to customers."
+
+- id: "00808"
+  category: commerce
+  question: "What is B2B commerce?"
+  answer: "B2B commerce refers to transactions between businesses."
+
+- id: "00809"
+  category: commerce
+  question: "What is B2C commerce?"
+  answer: "B2C commerce refers to transactions in which businesses sell directly to consumers."
+
+- id: "00810"
+  category: commerce
+  question: "What is inventory turnover?"
+  answer: "Inventory turnover measures how many times a business sells and replaces its inventory during a period."
+
+- id: "00811"
+  category: commerce
+  question: "What is break-even point?"
+  answer: "The break-even point is the level of sales at which total revenue equals total costs."
+
+- id: "00812"
+  category: commerce
+  question: "What is fixed cost?"
+  answer: "A fixed cost is a cost that does not change directly with the level of output within a relevant range."
+
+- id: "00813"
+  category: commerce
+  question: "What is variable cost?"
+  answer: "A variable cost changes with the level of production or activity."
+
+- id: "00814"
+  category: commerce
+  question: "What is gross profit?"
+  answer: "Gross profit is revenue minus the cost of goods sold."
+
+- id: "00815"
+  category: commerce
+  question: "What is net profit?"
+  answer: "Net profit is the amount remaining after all applicable expenses and costs have been deducted from revenue."
+
+- id: "00816"
+  category: commerce
+  question: "What is solvency?"
+  answer: "Solvency is the ability of a business to meet its long-term financial obligations."
+
+- id: "00817"
+  category: language_studies
+  question: "What is linguistics?"
+  answer: "Linguistics is the scientific study of human language."
+
+- id: "00818"
+  category: language_studies
+  question: "What is phonetics?"
+  answer: "Phonetics is the study of speech sounds and how they are produced, transmitted, and perceived."
+
+- id: "00819"
+  category: language_studies
+  question: "What is phonology?"
+  answer: "Phonology is the study of how sounds function and are organized within a particular language."
+
+- id: "00820"
+  category: language_studies
+  question: "What is morphology?"
+  answer: "Morphology is the study of the internal structure and formation of words."
+
+- id: "00821"
+  category: language_studies
+  question: "What is syntax?"
+  answer: "Syntax is the study of how words and phrases are arranged to form sentences."
+
+- id: "00822"
+  category: language_studies
+  question: "What is semantics?"
+  answer: "Semantics is the study of meaning in language."
+
+- id: "00823"
+  category: language_studies
+  question: "What is pragmatics?"
+  answer: "Pragmatics is the study of how context affects the interpretation of language."
+
+- id: "00824"
+  category: language_studies
+  question: "What is sociolinguistics?"
+  answer: "Sociolinguistics studies the relationship between language and society."
+
+- id: "00825"
+  category: language_studies
+  question: "What is psycholinguistics?"
+  answer: "Psycholinguistics studies the mental processes involved in producing and understanding language."
+
+- id: "00826"
+  category: language_studies
+  question: "What is historical linguistics?"
+  answer: "Historical linguistics studies how languages change over time."
+
+- id: "00827"
+  category: language_studies
+  question: "What is applied linguistics?"
+  answer: "Applied linguistics uses knowledge about language to address practical language-related problems."
+
+- id: "00828"
+  category: language_studies
+  question: "What is a phoneme?"
+  answer: "A phoneme is a contrastive sound unit that can distinguish meaning in a particular language."
+
+- id: "00829"
+  category: language_studies
+  question: "What is an allophone?"
+  answer: "An allophone is a phonetic variant of a phoneme that does not normally create a difference in meaning."
+
+- id: "00830"
+  category: language_studies
+  question: "What is a morpheme?"
+  answer: "A morpheme is the smallest linguistic unit that carries meaning or grammatical function."
+
+- id: "00831"
+  category: language_studies
+  question: "What is a free morpheme?"
+  answer: "A free morpheme can occur independently as a word."
+
+- id: "00832"
+  category: language_studies
+  question: "What is a bound morpheme?"
+  answer: "A bound morpheme cannot normally occur independently and must attach to another morpheme."
+
+- id: "00833"
+  category: language_studies
+  question: "What is an affix?"
+  answer: "An affix is a bound morpheme attached to a word stem or root."
+
+- id: "00834"
+  category: language_studies
+  question: "What is a prefix?"
+  answer: "A prefix is an affix placed before a root or stem."
+
+- id: "00835"
+  category: language_studies
+  question: "What is a suffix?"
+  answer: "A suffix is an affix placed after a root or stem."
+
+- id: "00836"
+  category: language_studies
+  question: "What is an infix?"
+  answer: "An infix is an affix inserted within a root or stem."
+
+- id: "00837"
+  category: language_studies
+  question: "What is a root in morphology?"
+  answer: "A root is the core part of a word from which other forms may be built."
+
+- id: "00838"
+  category: language_studies
+  question: "What is a stem?"
+  answer: "A stem is the form to which an inflectional affix can be added."
+
+- id: "00839"
+  category: language_studies
+  question: "What is inflection?"
+  answer: "Inflection is a change in word form that expresses grammatical information such as tense, number, or case."
+
+- id: "00840"
+  category: language_studies
+  question: "What is derivation?"
+  answer: "Derivation is a word-forming process that creates a new word or changes its grammatical category or meaning."
+
+- id: "00841"
+  category: language_studies
+  question: "What is compounding?"
+  answer: "Compounding is the process of forming a word by combining two or more words or roots."
+
+- id: "00842"
+  category: language_studies
+  question: "What is reduplication?"
+  answer: "Reduplication is a word-forming process in which all or part of a form is repeated."
+
+- id: "00843"
+  category: language_studies
+  question: "What is borrowing in linguistics?"
+  answer: "Borrowing is the adoption of words or other linguistic features from another language."
+
+- id: "00844"
+  category: language_studies
+  question: "What is a loanword?"
+  answer: "A loanword is a word adopted from one language into another."
+
+- id: "00845"
+  category: language_studies
+  question: "What is a cognate?"
+  answer: "A cognate is a word in different languages descended from a common ancestral form."
+
+- id: "00846"
+  category: language_studies
+  question: "What is a language family?"
+  answer: "A language family is a group of languages descended from a common ancestral language."
+
+- id: "00847"
+  category: language_studies
+  question: "What is a dialect?"
+  answer: "A dialect is a language variety associated with a particular region or social group."
+
+- id: "00848"
+  category: language_studies
+  question: "What is an accent?"
+  answer: "An accent is a characteristic way of pronouncing a language."
+
+- id: "00849"
+  category: language_studies
+  question: "What is a register?"
+  answer: "A register is a variety of language associated with a particular situation, purpose, or level of formality."
+
+- id: "00850"
+  category: language_studies
+  question: "What is a lingua franca?"
+  answer: "A lingua franca is a language used for communication between people who have different native languages."
+
+- id: "00851"
+  category: language_studies
+  question: "What is bilingualism?"
+  answer: "Bilingualism is the ability to use two languages."
+
+- id: "00852"
+  category: language_studies
+  question: "What is multilingualism?"
+  answer: "Multilingualism is the use or knowledge of more than two languages."
+
+- id: "00853"
+  category: language_studies
+  question: "What is code-switching?"
+  answer: "Code-switching is the use of more than one language or variety within a conversation or communicative setting."
+
+- id: "00854"
+  category: language_studies
+  question: "What is code-mixing?"
+  answer: "Code-mixing is the combination of elements from different languages or varieties within speech or writing."
+
+- id: "00855"
+  category: language_studies
+  question: "What is language shift?"
+  answer: "Language shift is the gradual movement of a community from using one language toward another."
+
+- id: "00856"
+  category: language_studies
+  question: "What is language death?"
+  answer: "Language death occurs when a language ceases to have native speakers and is no longer used as a community language."
+
+- id: "00857"
+  category: language_studies
+  question: "What is language revitalization?"
+  answer: "Language revitalization is the effort to strengthen or restore the use of a declining language."
+
+- id: "00858"
+  category: language_studies
+  question: "What is a speech community?"
+  answer: "A speech community is a group of people who share norms or conventions for using language."
+
+- id: "00859"
+  category: language_studies
+  question: "What is a standard language?"
+  answer: "A standard language is a socially established variety used widely in formal communication, education, or public institutions."
+
+- id: "00860"
+  category: language_studies
+  question: "What is language variation?"
+  answer: "Language variation refers to differences in language use across speakers, regions, social groups, and situations."
+
+- id: "00861"
+  category: language_studies
+  question: "What is language change?"
+  answer: "Language change is the alteration of linguistic forms or usage across time."
+
+- id: "00862"
+  category: language_studies
+  question: "What is a language isolate?"
+  answer: "A language isolate is a language with no demonstrated genealogical relationship to another known language."
+
+- id: "00863"
+  category: language_studies
+  question: "What is a proto-language?"
+  answer: "A proto-language is a reconstructed ancestral language from which related languages are believed to have developed."
+
+- id: "00864"
+  category: language_studies
+  question: "What is the comparative method?"
+  answer: "The comparative method is a technique used to reconstruct ancestral languages by comparing related languages."
+
+- id: "00865"
+  category: language_studies
+  question: "What is an etymology?"
+  answer: "Etymology is the study of the origin and historical development of a word."
+
+- id: "00866"
+  category: language_studies
+  question: "What is a corpus in linguistics?"
+  answer: "A corpus is a structured collection of spoken or written language data used for linguistic analysis."
+
+- id: "00867"
+  category: language_studies
+  question: "What is corpus linguistics?"
+  answer: "Corpus linguistics is the study of language using large collections of real language data."
+
+- id: "00868"
+  category: language_studies
+  question: "What is frequency in corpus linguistics?"
+  answer: "Frequency is the number of times a linguistic item occurs in a corpus."
+
+- id: "00869"
+  category: language_studies
+  question: "What is a concordance in corpus analysis?"
+  answer: "A concordance is a collection of occurrences of a word or phrase shown with surrounding context."
+
+- id: "00870"
+  category: language_studies
+  question: "What is a collocation?"
+  answer: "A collocation is a word combination that occurs together more often than would be expected by chance."
+
+- id: "00871"
+  category: language_studies
+  question: "What is lexical ambiguity?"
+  answer: "Lexical ambiguity occurs when a word or expression has more than one possible meaning."
+
+- id: "00872"
+  category: language_studies
+  question: "What is structural ambiguity?"
+  answer: "Structural ambiguity occurs when a sentence or phrase can have more than one grammatical interpretation."
+
+- id: "00873"
+  category: language_studies
+  question: "What is polysemy?"
+  answer: "Polysemy occurs when one word has several related meanings."
+
+- id: "00874"
+  category: language_studies
+  question: "What is homonymy?"
+  answer: "Homonymy occurs when different words share the same form but have unrelated meanings."
+
+- id: "00875"
+  category: language_studies
+  question: "What are homophones?"
+  answer: "Homophones are words that sound alike but differ in meaning and often in spelling."
+
+- id: "00876"
+  category: language_studies
+  question: "What are homographs?"
+  answer: "Homographs are words that share the same spelling but may differ in meaning and pronunciation."
+
+- id: "00877"
+  category: language_studies
+  question: "What is synonymy?"
+  answer: "Synonymy is a semantic relationship between words with similar meanings."
+
+- id: "00878"
+  category: language_studies
+  question: "What is antonymy in semantics?"
+  answer: "Antonymy is a semantic relationship involving contrast in meaning."
+
+- id: "00879"
+  category: language_studies
+  question: "What is hyponymy?"
+  answer: "Hyponymy is a relationship in which the meaning of one word is included within the meaning of another."
+
+- id: "00880"
+  category: language_studies
+  question: "What is a hypernym?"
+  answer: "A hypernym is a broader term whose meaning includes that of a more specific term."
+
+- id: "00881"
+  category: language_studies
+  question: "What is deixis?"
+  answer: "Deixis is the use of expressions whose interpretation depends on context, such as who is speaking, where, or when."
+
+- id: "00882"
+  category: language_studies
+  question: "What is anaphora?"
+  answer: "Anaphora occurs when an expression refers back to an earlier linguistic element."
+
+- id: "00883"
+  category: language_studies
+  question: "What is a presupposition?"
+  answer: "A presupposition is information that a speaker assumes is already accepted or taken for granted when making an utterance."
+
+- id: "00884"
+  category: language_studies
+  question: "What is an implicature?"
+  answer: "An implicature is meaning that is suggested or inferred rather than directly stated."
+
+- id: "00885"
+  category: language_studies
+  question: "What is a speech act?"
+  answer: "A speech act is an action performed through language, such as requesting, promising, or apologizing."
+
+- id: "00886"
+  category: language_studies
+  question: "What is a performative utterance?"
+  answer: "A performative utterance performs an action by being spoken under appropriate conditions."
+
+- id: "00887"
+  category: language_studies
+  question: "What is conversational implicature?"
+  answer: "Conversational implicature is meaning inferred from an utterance based on context and conversational expectations."
+
+- id: "00888"
+  category: language_studies
+  question: "What is Grice's cooperative principle?"
+  answer: "It is the idea that conversational participants generally contribute in ways appropriate to the purpose and direction of the conversation."
+
+- id: "00889"
+  category: language_studies
+  question: "What is a discourse marker?"
+  answer: "A discourse marker is a word or expression that helps organize or signal relationships within conversation or text."
+
+- id: "00890"
+  category: language_studies
+  question: "What is discourse analysis?"
+  answer: "Discourse analysis studies language as it is used across connected speech, writing, and social interaction."
+
+- id: "00891"
+  category: language_studies
+  question: "What is cohesion in linguistics?"
+  answer: "Cohesion is the use of linguistic devices that connect parts of a text together."
+
+- id: "00892"
+  category: language_studies
+  question: "What is coherence?"
+  answer: "Coherence is the meaningful organization and connectedness of ideas in a text or discourse."
+
+- id: "00893"
+  category: language_studies
+  question: "What is a speech sound?"
+  answer: "A speech sound is a sound produced by the human vocal system for spoken communication."
+
+- id: "00894"
+  category: language_studies
+  question: "What is the International Phonetic Alphabet?"
+  answer: "The International Phonetic Alphabet is a standardized system of symbols for representing speech sounds."
+
+- id: "00895"
+  category: language_studies
+  question: "What is a vowel?"
+  answer: "A vowel is a speech sound produced with relatively open airflow through the vocal tract."
+
+- id: "00896"
+  category: language_studies
+  question: "What is a consonant?"
+  answer: "A consonant is a speech sound involving a significant constriction or obstruction of airflow."
+
+- id: "00897"
+  category: language_studies
+  question: "What is voicing in phonetics?"
+  answer: "Voicing is the vibration of the vocal folds during the production of a speech sound."
+
+- id: "00898"
+  category: language_studies
+  question: "What is a syllable?"
+  answer: "A syllable is a unit of spoken language organized around a central peak of sonority, typically a vowel."
+
+- id: "00899"
+  category: language_studies
+  question: "What is stress in linguistics?"
+  answer: "Stress is the relative prominence given to a syllable in speech."
+
+- id: "00900"
+  category: language_studies
+  question: "What is intonation?"
+  answer: "Intonation is the pattern of pitch variation across an utterance."
+
+- id: "00901"
+  category: language_studies
+  question: "What is tone in linguistics?"
+  answer: "Tone is the use of pitch to distinguish lexical or grammatical meaning in a language."
+
+- id: "00902"
+  category: language_studies
+  question: "What is a mora?"
+  answer: "A mora is a unit used in some linguistic analyses to measure syllable weight."
+
+- id: "00903"
+  category: language_studies
+  question: "What is assimilation in phonology?"
+  answer: "Assimilation is a process in which one sound becomes more similar to a neighboring sound."
+
+- id: "00904"
+  category: language_studies
+  question: "What is elision?"
+  answer: "Elision is the omission of a sound in speech, often in particular phonetic environments."
+
+- id: "00905"
+  category: language_studies
+  question: "What is metathesis?"
+  answer: "Metathesis is a linguistic change in which sounds or segments switch positions."
+
+- id: "00906"
+  category: language_studies
+  question: "What is code-switching often used to signal socially?"
+  answer: "It can signal identity, group membership, topic changes, relationships, or communicative context."
+
+- id: "00907"
+  category: language_studies
+  question: "What is language acquisition?"
+  answer: "Language acquisition is the process through which people develop knowledge and use of a language."
+
+- id: "00908"
+  category: language_studies
+  question: "What is first-language acquisition?"
+  answer: "First-language acquisition is the natural development of a person's initial language during childhood."
+
+- id: "00909"
+  category: language_studies
+  question: "What is second-language acquisition?"
+  answer: "Second-language acquisition is the process of learning or developing competence in a language after the first language."
+
+- id: "00910"
+  category: language_studies
+  question: "What is a child-directed speech?"
+  answer: "Child-directed speech is speech adapted in vocabulary, rhythm, pronunciation, or structure when communicating with young children."
+
+- id: "00911"
+  category: language_studies
+  question: "What is a writing system?"
+  answer: "A writing system is a conventional method of representing language through visible or other graphic symbols."
+
+- id: "00912"
+  category: language_studies
+  question: "What is an alphabet?"
+  answer: "An alphabet is a writing system using symbols that generally represent consonant and vowel sounds."
+
+- id: "00913"
+  category: language_studies
+  question: "What is a syllabary?"
+  answer: "A syllabary is a writing system in which symbols generally represent syllables."
+
+- id: "00914"
+  category: language_studies
+  question: "What is a logographic writing system?"
+  answer: "A logographic writing system uses symbols that primarily represent words or morphemes."
+
+- id: "00915"
+  category: language_studies
+  question: "What is transliteration?"
+  answer: "Transliteration is the conversion of text from one writing system into another using a systematic correspondence between characters."
+
+- id: "00916"
+  category: language_studies
+  question: "What is translation?"
+  answer: "Translation is the process of expressing the meaning of a text or message from one language in another language."
+
+- id: "00917"
+  category: art_and_artists
+  question: "What is visual art?"
+  answer: "Visual art is art primarily experienced through sight, including painting, drawing, sculpture, photography, and related forms."
+
+- id: "00918"
+  category: art_and_artists
+  question: "What is painting?"
+  answer: "Painting is the creation of images or visual compositions by applying pigment or other colored material to a surface."
+
+- id: "00919"
+  category: art_and_artists
+  question: "What is drawing?"
+  answer: "Drawing is the creation of images or marks using tools such as pencils, pens, charcoal, or digital instruments."
+
+- id: "00920"
+  category: art_and_artists
+  question: "What is sculpture?"
+  answer: "Sculpture is a three-dimensional art form created by shaping, carving, modeling, assembling, or casting materials."
+
+- id: "00921"
+  category: art_and_artists
+  question: "What is a portrait?"
+  answer: "A portrait is an artwork representing a particular person or group of people."
+
+- id: "00922"
+  category: art_and_artists
+  question: "What is a landscape in art?"
+  answer: "A landscape is an artwork depicting natural scenery such as mountains, rivers, forests, or fields."
+
+- id: "00923"
+  category: art_and_artists
+  question: "What is a still life?"
+  answer: "A still life is an artwork depicting arranged inanimate objects."
+
+- id: "00924"
+  category: art_and_artists
+  question: "What is abstract art?"
+  answer: "Abstract art uses forms, colors, lines, or shapes that may not directly represent recognizable objects."
+
+- id: "00925"
+  category: art_and_artists
+  question: "What is realism in art?"
+  answer: "Realism is an approach that seeks to represent subjects in a recognizable and relatively naturalistic manner."
+
+- id: "00926"
+  category: art_and_artists
+  question: "What is impressionism?"
+  answer: "Impressionism is an art movement known for emphasis on light, color, visible brushwork, and everyday scenes."
+
+- id: "00927"
+  category: art_and_artists
+  question: "Which artist painted Impression, Sunrise?"
+  answer: "Claude Monet."
+
+- id: "00928"
+  category: art_and_artists
+  question: "Who painted Water Lilies?"
+  answer: "Claude Monet."
+
+- id: "00929"
+  category: art_and_artists
+  question: "Who painted The Starry Night?"
+  answer: "Vincent van Gogh."
+
+- id: "00930"
+  category: art_and_artists
+  question: "Who painted Sunflowers?"
+  answer: "Vincent van Gogh."
+
+- id: "00931"
+  category: art_and_artists
+  question: "Who painted The Persistence of Memory?"
+  answer: "Salvador Dalí."
+
+- id: "00932"
+  category: art_and_artists
+  question: "What art movement is Salvador Dalí strongly associated with?"
+  answer: "Surrealism."
+
+- id: "00933"
+  category: art_and_artists
+  question: "What is surrealism?"
+  answer: "Surrealism is an art and literary movement that explores dreams, the unconscious, unexpected combinations, and non-rational imagery."
+
+- id: "00934"
+  category: art_and_artists
+  question: "Who co-founded Cubism with Georges Braque?"
+  answer: "Pablo Picasso."
+
+- id: "00935"
+  category: art_and_artists
+  question: "What is Cubism?"
+  answer: "Cubism is an art movement that represents subjects through fragmented geometric forms and multiple viewpoints."
+
+- id: "00936"
+  category: art_and_artists
+  question: "Who painted Guernica?"
+  answer: "Pablo Picasso."
+
+- id: "00937"
+  category: art_and_artists
+  question: "What does Guernica depict?"
+  answer: "It depicts the suffering and destruction associated with war and the bombing of the Spanish town of Guernica."
+
+- id: "00938"
+  category: art_and_artists
+  question: "Who painted The Scream?"
+  answer: "Edvard Munch."
+
+- id: "00939"
+  category: art_and_artists
+  question: "What artistic movement is Edvard Munch associated with?"
+  answer: "Expressionism."
+
+- id: "00940"
+  category: art_and_artists
+  question: "What is Expressionism?"
+  answer: "Expressionism emphasizes the artist's emotional or subjective experience rather than objective visual accuracy."
+
+- id: "00941"
+  category: art_and_artists
+  question: "Who painted Girl with a Pearl Earring?"
+  answer: "Johannes Vermeer."
+
+- id: "00942"
+  category: art_and_artists
+  question: "What Dutch artistic period is Johannes Vermeer associated with?"
+  answer: "The Dutch Golden Age."
+
+- id: "00943"
+  category: art_and_artists
+  question: "Who painted The Night Watch?"
+  answer: "Rembrandt van Rijn."
+
+- id: "00944"
+  category: art_and_artists
+  question: "What is chiaroscuro?"
+  answer: "Chiaroscuro is the strong use of contrasts between light and dark to create volume and dramatic effect."
+
+- id: "00945"
+  category: art_and_artists
+  question: "Which artist is famous for the ceiling of the Sistine Chapel?"
+  answer: "Michelangelo."
+
+- id: "00946"
+  category: art_and_artists
+  question: "What is Michelangelo's famous sculpture of David?"
+  answer: "David."
+
+- id: "00947"
+  category: art_and_artists
+  question: "Who painted the Mona Lisa?"
+  answer: "Leonardo da Vinci."
+
+- id: "00948"
+  category: art_and_artists
+  question: "Where is the Mona Lisa displayed?"
+  answer: "The Louvre Museum in Paris."
+
+- id: "00949"
+  category: art_and_artists
+  question: "Who painted The Last Supper?"
+  answer: "Leonardo da Vinci."
+
+- id: "00950"
+  category: art_and_artists
+  question: "What does sfumato refer to in art?"
+  answer: "Sfumato is a technique using subtle transitions between colors and tones without sharp outlines."
+
+- id: "00951"
+  category: art_and_artists
+  question: "What is Renaissance art?"
+  answer: "Renaissance art is European art associated with renewed interest in classical antiquity, humanism, naturalism, and observation."
+
+- id: "00952"
+  category: art_and_artists
+  question: "Which city is strongly associated with the early Renaissance?"
+  answer: "Florence."
+
+- id: "00953"
+  category: art_and_artists
+  question: "Who painted The Birth of Venus?"
+  answer: "Sandro Botticelli."
+
+- id: "00954"
+  category: art_and_artists
+  question: "What is Baroque art?"
+  answer: "Baroque art is known for dramatic movement, strong contrasts, emotional intensity, and elaborate detail."
+
+- id: "00955"
+  category: art_and_artists
+  question: "Who painted The Calling of Saint Matthew?"
+  answer: "Caravaggio."
+
+- id: "00956"
+  category: art_and_artists
+  question: "What artistic technique is Caravaggio especially known for?"
+  answer: "Dramatic chiaroscuro, including strong light-dark contrast."
+
+- id: "00957"
+  category: art_and_artists
+  question: "What is Rococo art?"
+  answer: "Rococo is an ornamental style characterized by elegance, lightness, decorative detail, and often playful or pastoral subjects."
+
+- id: "00958"
+  category: art_and_artists
+  question: "What is Neoclassicism?"
+  answer: "Neoclassicism is an artistic movement inspired by the art and ideals of ancient Greece and Rome."
+
+- id: "00959"
+  category: art_and_artists
+  question: "Who painted The Oath of the Horatii?"
+  answer: "Jacques-Louis David."
+
+- id: "00960"
+  category: art_and_artists
+  question: "What is Romanticism in art?"
+  answer: "Romanticism emphasizes emotion, imagination, dramatic nature, and individual experience."
+
+- id: "00961"
+  category: art_and_artists
+  question: "Who painted Wanderer above the Sea of Fog?"
+  answer: "Caspar David Friedrich."
+
+- id: "00962"
+  category: art_and_artists
+  question: "What is Fauvism?"
+  answer: "Fauvism is an early twentieth-century movement known for intense colors and simplified forms."
+
+- id: "00963"
+  category: art_and_artists
+  question: "Which artist is strongly associated with Fauvism?"
+  answer: "Henri Matisse."
+
+- id: "00964"
+  category: art_and_artists
+  question: "Who painted The Dance?"
+  answer: "Henri Matisse."
+
+- id: "00965"
+  category: art_and_artists
+  question: "What is Dada?"
+  answer: "Dada was an avant-garde movement that challenged conventional ideas about art, logic, and culture."
+
+- id: "00966"
+  category: art_and_artists
+  question: "Which artist created Fountain?"
+  answer: "Marcel Duchamp."
+
+- id: "00967"
+  category: art_and_artists
+  question: "What is a ready-made in modern art?"
+  answer: "A ready-made is an ordinary manufactured object presented as art through selection, context, or designation."
+
+- id: "00968"
+  category: art_and_artists
+  question: "What is Pop Art?"
+  answer: "Pop Art is a movement that draws imagery and themes from popular culture, advertising, mass media, and consumer society."
+
+- id: "00969"
+  category: art_and_artists
+  question: "Which artist is strongly associated with Pop Art?"
+  answer: "Andy Warhol."
+
+- id: "00970"
+  category: art_and_artists
+  question: "What subject did Andy Warhol famously depict in repeated images?"
+  answer: "Campbell's soup cans."
+
+- id: "00971"
+  category: art_and_artists
+  question: "Who created the Campbell's Soup Cans series?"
+  answer: "Andy Warhol."
+
+- id: "00972"
+  category: art_and_artists
+  question: "What is Minimalism?"
+  answer: "Minimalism is an art movement emphasizing simple forms, repetition, geometric structures, and reduced visual elements."
+
+- id: "00973"
+  category: art_and_artists
+  question: "What is conceptual art?"
+  answer: "Conceptual art places the idea or concept at the center of the artwork."
+
+- id: "00974"
+  category: art_and_artists
+  question: "What is installation art?"
+  answer: "Installation art is an arranged environment or collection of objects designed to create an immersive artistic experience."
+
+- id: "00975"
+  category: art_and_artists
+  question: "What is performance art?"
+  answer: "Performance art uses actions, time, bodies, and live events as major elements of the artwork."
+
+- id: "00976"
+  category: art_and_artists
+  question: "What is printmaking?"
+  answer: "Printmaking is the creation of images by transferring ink from a prepared surface or matrix onto another surface."
+
+- id: "00977"
+  category: art_and_artists
+  question: "What is engraving?"
+  answer: "Engraving is a printmaking technique in which lines are incised into a hard surface and used to hold ink."
+
+- id: "00978"
+  category: art_and_artists
+  question: "What is etching?"
+  answer: "Etching is a printmaking process in which acid creates lines in a prepared metal plate."
+
+- id: "00979"
+  category: art_and_artists
+  question: "What is lithography?"
+  answer: "Lithography is a printing process based on the separation of oil-based and water-based materials on a flat surface."
+
+- id: "00980"
+  category: art_and_artists
+  question: "What is woodcut printing?"
+  answer: "Woodcut is a relief printing technique in which areas of a wooden block are carved away and the raised surface is inked."
+
+- id: "00981"
+  category: art_and_artists
+  question: "What is watercolor painting?"
+  answer: "Watercolor painting uses water-soluble pigments applied with water, commonly on paper."
+
+- id: "00982"
+  category: art_and_artists
+  question: "What is oil painting?"
+  answer: "Oil painting uses pigments suspended in drying oils such as linseed oil."
+
+- id: "00983"
+  category: art_and_artists
+  question: "What is acrylic painting?"
+  answer: "Acrylic painting uses pigments suspended in an acrylic polymer emulsion that usually dries quickly."
+
+- id: "00984"
+  category: art_and_artists
+  question: "What is fresco?"
+  answer: "Fresco is a painting technique in which pigment is applied to wet plaster."
+
+- id: "00985"
+  category: art_and_artists
+  question: "What is tempera painting?"
+  answer: "Tempera is a painting medium in which pigment is bound with an emulsion, traditionally including egg yolk."
+
+- id: "00986"
+  category: art_and_artists
+  question: "What is impasto?"
+  answer: "Impasto is a painting technique in which paint is applied thickly so that brushstrokes or texture remain visible."
+
+- id: "00987"
+  category: art_and_artists
+  question: "What is a palette in painting?"
+  answer: "A palette is a surface used to hold and mix paints or a selected range of colors."
+
+- id: "00988"
+  category: art_and_artists
+  question: "What are complementary colors?"
+  answer: "Complementary colors are pairs of colors positioned opposite each other on a traditional color wheel."
+
+- id: "00989"
+  category: art_and_artists
+  question: "What are primary colors in traditional pigment mixing?"
+  answer: "Red, yellow, and blue are traditionally taught as primary colors in the RYB model."
+
+- id: "00990"
+  category: art_and_artists
+  question: "What are secondary colors in the traditional RYB model?"
+  answer: "Orange, green, and violet."
+
+- id: "00991"
+  category: art_and_artists
+  question: "What is perspective in drawing?"
+  answer: "Perspective is a method of representing three-dimensional space on a two-dimensional surface."
+
+- id: "00992"
+  category: art_and_artists
+  question: "What is one-point perspective?"
+  answer: "One-point perspective uses a single vanishing point for sets of lines receding directly into depth."
+
+- id: "00993"
+  category: art_and_artists
+  question: "What is a vanishing point?"
+  answer: "A vanishing point is a point in a perspective drawing where parallel receding lines appear to converge."
+
+- id: "00994"
+  category: art_and_artists
+  question: "What is foreshortening in art?"
+  answer: "Foreshortening is a technique that makes an object or body part appear shorter because it extends toward or away from the viewer."
+
+- id: "00995"
+  category: art_and_artists
+  question: "What is composition in art?"
+  answer: "Composition is the arrangement of visual elements within an artwork."
+
+- id: "00996"
+  category: art_and_artists
+  question: "What is symmetry in art?"
+  answer: "Symmetry is a balanced arrangement in which corresponding parts have matching or related forms."
+
+- id: "00997"
+  category: art_and_artists
+  question: "What is negative space?"
+  answer: "Negative space is the area surrounding or between the main subjects of an artwork."
+
+- id: "00998"
+  category: art_and_artists
+  question: "What is texture in art?"
+  answer: "Texture is the visual or physical quality of a surface represented or created in an artwork."
+
+- id: "00999"
+  category: art_and_artists
+  question: "What is line as an element of art?"
+  answer: "Line is a visual element formed by a moving point and can define edges, shapes, movement, or direction."
+
+- id: "01000"
+  category: art_and_artists
+  question: "What is color theory?"
+  answer: "Color theory is the study of how colors relate, combine, contrast, and produce visual effects."
