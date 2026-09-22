@@ -32,23 +32,78 @@ same `noindex` header every other 404 carries.
 
 ## Sign-in
 
-Ored has no accounts. People sign in with their DigiArtz account — by password,
-or with Google or Discord, the same providers and the same project the site
-signs in against — and `functions/api/ored.js` checks that token against the
-DigiArtz project before it writes anything. Apple is listed, as it is on the
-site, and says it is unavailable until the provider is enabled.
+Ored has no accounts and no sign-in form of its own. A signed-out visitor gets
+one card — *Login DigiArtz to continue* — and one button, and the button leaves
+for DigiArtz. Everything about proving who someone is happens over there, on the
+page that already does it: password, Google, Discord, Apple, the lot. Ored only
+receives the result.
 
-One account therefore reaches both. Not one session, though: this is a domain of
-its own, so the sign-in the site stored is not one this origin can read, and a
-member signs in here once as well.
+`functions/api/ored.js` still checks every token against the DigiArtz project
+before it writes anything, exactly as before. What changed is where the token
+comes from.
 
-Two things hold that together, and both will break sign-in quietly if they drift:
+### The hand-off
+
+Ored sends the member to `https://digiartz.net/authorize` with three parameters:
+
+| Parameter | What |
+|---|---|
+| `redirect_uri` | where to come back to — always this origin's root |
+| `state` | a one-time value Ored keeps in `sessionStorage` |
+| `prompt` | `none` on the silent attempt, absent otherwise |
+
+DigiArtz answers by navigating back to `redirect_uri` with the result in the
+**fragment**, never the query, so nothing ends up in a server log or a referrer:
+
+* signed in → `#access_token=…&refresh_token=…&expires_in=…&token_type=bearer&state=…`
+* not signed in, `prompt=none` → `#error=login_required&state=…`
+* not signed in, no `prompt` → the DigiArtz login page, and the same hand-off
+  once they are through it
+
+Ored reads the fragment, refuses it unless `state` is the value it stored,
+strips the URL, and hands the pair to `supabase.auth.setSession`. From there the
+session is an ordinary Supabase session on this origin: stored here, refreshed
+here, and signed out here.
+
+The DigiArtz side must hold `redirect_uri` to an allow-list. It is the whole of
+the security of this flow: a hand-off that will return tokens to any address is
+a way to read any member's account.
+
+### Not showing a login page at all
+
+If a member arrives from DigiArtz already signed in there, they should not be
+asked anything. On load, with no session of its own, Ored tries the hand-off
+with `prompt=none` — a redirect out and straight back, no page shown — when any
+of these is true:
+
+* the referrer is DigiArtz, or the link carried `?from=digiartz` (or `?sso=1`)
+* this browser has signed in through DigiArtz before (`ored.sso.seen`)
+
+and none of these is:
+
+* this tab has already tried once (`ored.sso.tried`), which is what stops a loop
+* this tab signed out here on purpose (`ored.sso.off`), which is what makes
+  Sign out mean something
+
+A cold visitor who has never signed in and did not come from DigiArtz is not
+bounced anywhere. They get the card, and the button is theirs to press.
+
+Signing out of Ored signs out of Ored. The DigiArtz session is untouched, the
+card says so, and the next press of the button will sign them back in without a
+prompt — which is what one account across two sites means.
+
+### What has to be true
 
 * `config.js` must name the **DigiArtz** project, not Ored's own. `AUTH_URL` and
-  `AUTH_KEY` are the pair the site's own config carries.
-* The DigiArtz project's redirect allow-list must include
-  `https://ored.digiartz.net/**`. Without it a provider returns to the site
-  instead, and the member arrives back on DigiArtz rather than here.
+  `AUTH_KEY` are the pair the site's own config carries, and they are what
+  `setSession` and every refresh are spoken against.
+* `SITE_URL` must be the DigiArtz origin. It is where the button goes.
+* `https://digiartz.net/authorize` must exist and must allow this origin in its
+  `redirect_uri` list.
+
+The DigiArtz project's redirect allow-list no longer needs
+`https://ored.digiartz.net/**`: no provider returns here any more, because no
+provider is started here. Leaving it costs nothing.
 
 A DigiArtz token is signed by the DigiArtz project, so it means nothing to
 Ored's project. A browser therefore cannot reach Ored's database at all, and
