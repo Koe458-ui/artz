@@ -1,60 +1,1096 @@
-questions:
-  - "what is {subject} ?"
-  - "what is {subject} , really ?"
-  - "tell me what {subject} is ."
-  - "What is {subject}?"
-
 facts:
-  - subject: ored
-    answer: ored is a small model that learns from the people who talk to it
+  - id: "00001"
+    category: physics
+    question: "What is velocity?"
+    answer: "Velocity is speed together with a specified direction."
 
-  - subject: a human
-    answer: a human is a person who thinks and feels
+  - id: "00002"
+    category: physics
+    question: "What is acceleration?"
+    answer: "Acceleration is the rate of change of velocity with time."
 
-  - subject: a friend
-    answer: a friend is a person you like and trust
+  - id: "00003"
+    category: physics
+    question: "What is force?"
+    answer: "Force is an interaction that can change the motion of an object."
 
-  - subject: a cat
-    answer: a cat is a small animal that has soft fur
+  - id: "00004"
+    category: physics
+    question: "What is momentum?"
+    answer: "Momentum is the product of mass and velocity."
 
-  - subject: a dog
-    answer: a dog is an animal that is loyal to people
+  - id: "00005"
+    category: physics
+    question: "What is kinetic energy?"
+    answer: "Kinetic energy is the energy associated with motion."
 
-  - subject: a bird
-    answer: a bird is an animal that has wings and can fly
+  - id: "00006"
+    category: physics
+    question: "What is potential energy?"
+    answer: "Potential energy is energy associated with position or configuration."
 
-  - subject: a river
-    answer: a river is water that flows to the sea
+  - id: "00007"
+    category: physics
+    question: "What is power?"
+    answer: "Power is the rate of energy transfer or work done."
 
-  - subject: a house
-    answer: a house is a building where people live
+  - id: "00008"
+    category: physics
+    question: "What is density?"
+    answer: "Density is mass per unit volume."
 
-  - subject: a flower
-    answer: a flower is the colourful part of a plant
+  - id: "00009"
+    category: physics
+    question: "What is pressure?"
+    answer: "Pressure is force distributed over an area."
 
-  - subject: a stone
-    answer: a stone is a hard piece of rock
+  - id: "00010"
+    category: physics
+    question: "What is frequency?"
+    answer: "Frequency is the number of cycles occurring per unit time."
 
-  - subject: the sun
-    answer: the sun is a star that gives us light and heat
+  - id: "00011"
+    category: physics
+    question: "What is wavelength?"
+    answer: "Wavelength is the distance between corresponding points of successive waves."
 
-  - subject: the moon
-    answer: the moon is a rock that goes around the earth
+  - id: "00012"
+    category: physics
+    question: "What is a period in physics?"
+    answer: "A period is the time required for one complete cycle."
 
-  - subject: water
-    answer: water is a clear liquid that all life needs
+  - id: "00013"
+    category: physics
+    question: "What is electric charge?"
+    answer: "Electric charge is a physical property responsible for electrical interactions."
 
-  - subject: fire
-    answer: fire is hot light that comes from burning
+  - id: "00014"
+    category: physics
+    question: "What is electric current?"
+    answer: "Electric current is the rate of flow of electric charge."
 
-  - subject: a book
-    answer: a book is paper with words that people read
+  - id: "00015"
+    category: physics
+    question: "What is voltage?"
+    answer: "Voltage is electric potential difference between two points."
 
-  - subject: music
-    answer: music is sound that people make to feel joy
+  - id: "00016"
+    category: physics
+    question: "What is electrical resistance?"
+    answer: "Electrical resistance is opposition to the flow of electric current."
 
-  - subject: time
-    answer: time is what passes while things happen
+  - id: "00017"
+    category: physics
+    question: "What is capacitance?"
+    answer: "Capacitance is the ability of a system to store electric charge per unit voltage."
 
-  - subject: a computer
-    answer: a computer is a machine that follows instructions
+  - id: "00018"
+    category: physics
+    question: "What is inductance?"
+    answer: "Inductance is a property of a circuit that opposes changes in current through induced voltage."
+
+  - id: "00019"
+    category: physics
+    question: "What is torque?"
+    answer: "Torque is the turning effect of a force about an axis or point."
+
+  - id: "00020"
+    category: physics
+    question: "What is impulse?"
+    answer: "Impulse is the change in momentum produced by a force acting over time."
+
+  - id: "00021"
+    category: chemistry
+    question: "What is an atom?"
+    answer: "An atom is the smallest unit of an element that retains its chemical identity."
+
+  - id: "00022"
+    category: chemistry
+    question: "What is a proton?"
+    answer: "A proton is a positively charged particle found in an atomic nucleus."
+
+  - id: "00023"
+    category: chemistry
+    question: "What is a neutron?"
+    answer: "A neutron is an electrically neutral particle found in an atomic nucleus."
+
+  - id: "00024"
+    category: chemistry
+    question: "What is an electron?"
+    answer: "An electron is a negatively charged particle associated with an atom."
+
+  - id: "00025"
+    category: chemistry
+    question: "What is an element?"
+    answer: "An element is a substance whose atoms have the same number of protons."
+
+  - id: "00026"
+    category: chemistry
+    question: "What is a molecule?"
+    answer: "A molecule is a group of atoms held together by chemical bonds."
+
+  - id: "00027"
+    category: chemistry
+    question: "What is a compound?"
+    answer: "A compound contains atoms of different elements chemically combined."
+
+  - id: "00028"
+    category: chemistry
+    question: "What is pH?"
+    answer: "pH is a logarithmic measure related to hydrogen-ion concentration."
+
+  - id: "00029"
+    category: chemistry
+    question: "What is oxidation?"
+    answer: "Oxidation is commonly described as loss of electrons."
+
+  - id: "00030"
+    category: chemistry
+    question: "What is a catalyst?"
+    answer: "A catalyst changes the rate of a chemical reaction without being consumed overall."
+
+  - id: "00031"
+    category: chemistry
+    question: "What is the chemical symbol for hydrogen?"
+    answer: "H."
+
+  - id: "00032"
+    category: chemistry
+    question: "What is the atomic number of hydrogen?"
+    answer: "1."
+
+  - id: "00033"
+    category: chemistry
+    question: "What is the chemical symbol for helium?"
+    answer: "He."
+
+  - id: "00034"
+    category: chemistry
+    question: "What is the atomic number of helium?"
+    answer: "2."
+
+  - id: "00035"
+    category: chemistry
+    question: "What is the chemical symbol for lithium?"
+    answer: "Li."
+
+  - id: "00036"
+    category: chemistry
+    question: "What is the atomic number of lithium?"
+    answer: "3."
+
+  - id: "00037"
+    category: chemistry
+    question: "What is the chemical symbol for beryllium?"
+    answer: "Be."
+
+  - id: "00038"
+    category: chemistry
+    question: "What is the atomic number of beryllium?"
+    answer: "4."
+
+  - id: "00039"
+    category: chemistry
+    question: "What is the chemical symbol for boron?"
+    answer: "B."
+
+  - id: "00040"
+    category: chemistry
+    question: "What is the atomic number of boron?"
+    answer: "5."
+
+  - id: "00041"
+    category: chemistry
+    question: "What is the chemical symbol for carbon?"
+    answer: "C."
+
+  - id: "00042"
+    category: chemistry
+    question: "What is the atomic number of carbon?"
+    answer: "6."
+
+  - id: "00043"
+    category: chemistry
+    question: "What is the chemical symbol for nitrogen?"
+    answer: "N."
+
+  - id: "00044"
+    category: chemistry
+    question: "What is the atomic number of nitrogen?"
+    answer: "7."
+
+  - id: "00045"
+    category: chemistry
+    question: "What is the chemical symbol for oxygen?"
+    answer: "O."
+
+  - id: "00046"
+    category: chemistry
+    question: "What is the atomic number of oxygen?"
+    answer: "8."
+
+  - id: "00047"
+    category: chemistry
+    question: "What is the chemical symbol for fluorine?"
+    answer: "F."
+
+  - id: "00048"
+    category: chemistry
+    question: "What is the atomic number of fluorine?"
+    answer: "9."
+
+  - id: "00049"
+    category: chemistry
+    question: "What is the chemical symbol for neon?"
+    answer: "Ne."
+
+  - id: "00050"
+    category: chemistry
+    question: "What is the atomic number of neon?"
+    answer: "10."
+
+  - id: "00051"
+    category: biology
+    question: "What is a cell?"
+    answer: "A cell is the basic structural and functional unit of living organisms."
+
+  - id: "00052"
+    category: biology
+    question: "What is DNA?"
+    answer: "DNA is a molecule that stores hereditary information."
+
+  - id: "00053"
+    category: biology
+    question: "What is RNA?"
+    answer: "RNA is a nucleic acid involved in information transfer and gene expression."
+
+  - id: "00054"
+    category: biology
+    question: "What is a gene?"
+    answer: "A gene is a region of genetic material associated with a functional product or regulatory role."
+
+  - id: "00055"
+    category: biology
+    question: "What is a chromosome?"
+    answer: "A chromosome is a DNA-protein structure that carries genetic information."
+
+  - id: "00056"
+    category: biology
+    question: "What is a ribosome?"
+    answer: "A ribosome is a cellular structure that assembles proteins."
+
+  - id: "00057"
+    category: biology
+    question: "What is a mitochondrion?"
+    answer: "A mitochondrion is an organelle involved in cellular energy metabolism."
+
+  - id: "00058"
+    category: biology
+    question: "What is a chloroplast?"
+    answer: "A chloroplast is an organelle where photosynthesis occurs in plants and algae."
+
+  - id: "00059"
+    category: biology
+    question: "What is the nucleus?"
+    answer: "The nucleus is a membrane-bound organelle containing most eukaryotic genomic DNA."
+
+  - id: "00060"
+    category: biology
+    question: "What is an enzyme?"
+    answer: "An enzyme is a biological catalyst."
+
+  - id: "00061"
+    category: biology
+    question: "What is a protein?"
+    answer: "A protein is a biological polymer made from amino acids."
+
+  - id: "00062"
+    category: biology
+    question: "What is photosynthesis?"
+    answer: "Photosynthesis converts light energy into chemical energy."
+
+  - id: "00063"
+    category: biology
+    question: "What is cellular respiration?"
+    answer: "Cellular respiration is a set of reactions that releases usable energy from organic molecules."
+
+  - id: "00064"
+    category: biology
+    question: "What is mitosis?"
+    answer: "Mitosis is nuclear division that generally produces genetically similar daughter nuclei."
+
+  - id: "00065"
+    category: biology
+    question: "What is meiosis?"
+    answer: "Meiosis is specialized cell division that produces haploid cells."
+
+  - id: "00066"
+    category: biology
+    question: "What is homeostasis?"
+    answer: "Homeostasis is maintenance of relatively stable internal conditions."
+
+  - id: "00067"
+    category: biology
+    question: "What is evolution?"
+    answer: "Evolution is change in inherited characteristics of populations across generations."
+
+  - id: "00068"
+    category: biology
+    question: "What is natural selection?"
+    answer: "Natural selection is differential survival and reproduction associated with heritable variation."
+
+  - id: "00069"
+    category: biology
+    question: "What is an ecosystem?"
+    answer: "An ecosystem consists of organisms and their physical environment."
+
+  - id: "00070"
+    category: biology
+    question: "What is a population in biology?"
+    answer: "A population is a group of individuals of the same species living in an area."
+
+  - id: "00071"
+    category: computing
+    question: "What is a CPU?"
+    answer: "A CPU is the central processing unit that executes program instructions."
+
+  - id: "00072"
+    category: computing
+    question: "What is a GPU?"
+    answer: "A GPU is a processor designed for highly parallel computation and graphics workloads."
+
+  - id: "00073"
+    category: computing
+    question: "What is RAM?"
+    answer: "RAM is volatile memory used for active data and programs."
+
+  - id: "00074"
+    category: computing
+    question: "What is ROM?"
+    answer: "ROM is non-volatile memory used for persistent data in various forms."
+
+  - id: "00075"
+    category: computing
+    question: "What is cache memory?"
+    answer: "Cache is small, fast memory that stores frequently or recently used data."
+
+  - id: "00076"
+    category: computing
+    question: "What is an algorithm?"
+    answer: "An algorithm is a defined procedure for solving a problem or performing a computation."
+
+  - id: "00077"
+    category: computing
+    question: "What is a compiler?"
+    answer: "A compiler translates source code into another form, often machine or intermediate code."
+
+  - id: "00078"
+    category: computing
+    question: "What is an interpreter?"
+    answer: "An interpreter processes or executes source code through interpretation."
+
+  - id: "00079"
+    category: computing
+    question: "What is an operating system?"
+    answer: "An operating system manages hardware resources and provides services to applications."
+
+  - id: "00080"
+    category: computing
+    question: "What is a process?"
+    answer: "A process is a running instance of a program with associated execution state and resources."
+
+  - id: "00081"
+    category: computing
+    question: "What is a thread?"
+    answer: "A thread is a sequence of execution within a process."
+
+  - id: "00082"
+    category: computing
+    question: "What is a database?"
+    answer: "A database is an organized collection of data managed for storage and retrieval."
+
+  - id: "00083"
+    category: computing
+    question: "What is SQL?"
+    answer: "SQL is a language used to define, query, and manipulate relational data."
+
+  - id: "00084"
+    category: computing
+    question: "What is HTTP?"
+    answer: "HTTP is an application-layer protocol used for transferring web resources."
+
+  - id: "00085"
+    category: computing
+    question: "What is HTTPS?"
+    answer: "HTTPS is HTTP carried over an encrypted TLS connection."
+
+  - id: "00086"
+    category: computing
+    question: "What is DNS?"
+    answer: "DNS is a naming system that maps domain names to network information."
+
+  - id: "00087"
+    category: computing
+    question: "What is an API?"
+    answer: "An API is a defined interface through which software components communicate."
+
+  - id: "00088"
+    category: computing
+    question: "What is encryption?"
+    answer: "Encryption transforms data so it cannot be read without the required key."
+
+  - id: "00089"
+    category: computing
+    question: "What is a hash function?"
+    answer: "A hash function maps input data to a fixed-size output."
+
+  - id: "00090"
+    category: computing
+    question: "What is binary?"
+    answer: "Binary is a number system using two symbols, conventionally 0 and 1."
+
+  - id: "00091"
+    category: astronomy
+    question: "What is the closest planet to the Sun?"
+    answer: "Mercury."
+
+  - id: "00092"
+    category: astronomy
+    question: "What is the second planet from the Sun?"
+    answer: "Venus."
+
+  - id: "00093"
+    category: astronomy
+    question: "What is the third planet from the Sun?"
+    answer: "Earth."
+
+  - id: "00094"
+    category: astronomy
+    question: "What is the fourth planet from the Sun?"
+    answer: "Mars."
+
+  - id: "00095"
+    category: astronomy
+    question: "What is the fifth planet from the Sun?"
+    answer: "Jupiter."
+
+  - id: "00096"
+    category: astronomy
+    question: "What is the sixth planet from the Sun?"
+    answer: "Saturn."
+
+  - id: "00097"
+    category: astronomy
+    question: "What is the seventh planet from the Sun?"
+    answer: "Uranus."
+
+  - id: "00098"
+    category: astronomy
+    question: "What is the eighth planet from the Sun?"
+    answer: "Neptune."
+
+  - id: "00099"
+    category: astronomy
+    question: "What is a star?"
+    answer: "A star is a self-luminous astronomical object powered mainly by nuclear processes."
+
+  - id: "00100"
+    category: astronomy
+    question: "What is a planet?"
+    answer: "A planet is an astronomical body that orbits a star or stellar remnant and meets accepted planetary criteria."
+
+  - id: "00101"
+    category: mathematics
+    question: "What is 12 + 7?"
+    answer: "19."
+
+  - id: "00102"
+    category: mathematics
+    question: "What is 25 + 16?"
+    answer: "41."
+
+  - id: "00103"
+    category: mathematics
+    question: "What is 38 + 24?"
+    answer: "62."
+
+  - id: "00104"
+    category: mathematics
+    question: "What is 47 + 35?"
+    answer: "82."
+
+  - id: "00105"
+    category: mathematics
+    question: "What is 56 + 29?"
+    answer: "85."
+
+  - id: "00106"
+    category: mathematics
+    question: "What is 63 + 18?"
+    answer: "81."
+
+  - id: "00107"
+    category: mathematics
+    question: "What is 74 + 19?"
+    answer: "93."
+
+  - id: "00108"
+    category: mathematics
+    question: "What is 82 + 27?"
+    answer: "109."
+
+  - id: "00109"
+    category: mathematics
+    question: "What is 91 + 34?"
+    answer: "125."
+
+  - id: "00110"
+    category: mathematics
+    question: "What is 105 + 46?"
+    answer: "151."
+
+  - id: "00111"
+    category: mathematics
+    question: "What is 14 - 6?"
+    answer: "8."
+
+  - id: "00112"
+    category: mathematics
+    question: "What is 29 - 13?"
+    answer: "16."
+
+  - id: "00113"
+    category: mathematics
+    question: "What is 45 - 17?"
+    answer: "28."
+
+  - id: "00114"
+    category: mathematics
+    question: "What is 58 - 24?"
+    answer: "34."
+
+  - id: "00115"
+    category: mathematics
+    question: "What is 71 - 36?"
+    answer: "35."
+
+  - id: "00116"
+    category: mathematics
+    question: "What is 84 - 29?"
+    answer: "55."
+
+  - id: "00117"
+    category: mathematics
+    question: "What is 96 - 47?"
+    answer: "49."
+
+  - id: "00118"
+    category: mathematics
+    question: "What is 120 - 58?"
+    answer: "62."
+
+  - id: "00119"
+    category: mathematics
+    question: "What is 143 - 69?"
+    answer: "74."
+
+  - id: "00120"
+    category: mathematics
+    question: "What is 175 - 88?"
+    answer: "87."
+
+  - id: "00121"
+    category: mathematics
+    question: "What is 6 × 7?"
+    answer: "42."
+
+  - id: "00122"
+    category: mathematics
+    question: "What is 8 × 9?"
+    answer: "72."
+
+  - id: "00123"
+    category: mathematics
+    question: "What is 11 × 12?"
+    answer: "132."
+
+  - id: "00124"
+    category: mathematics
+    question: "What is 13 × 7?"
+    answer: "91."
+
+  - id: "00125"
+    category: mathematics
+    question: "What is 14 × 8?"
+    answer: "112."
+
+  - id: "00126"
+    category: mathematics
+    question: "What is 15 × 9?"
+    answer: "135."
+
+  - id: "00127"
+    category: mathematics
+    question: "What is 16 × 11?"
+    answer: "176."
+
+  - id: "00128"
+    category: mathematics
+    question: "What is 17 × 12?"
+    answer: "204."
+
+  - id: "00129"
+    category: mathematics
+    question: "What is 18 × 13?"
+    answer: "234."
+
+  - id: "00130"
+    category: mathematics
+    question: "What is 19 × 14?"
+    answer: "266."
+
+  - id: "00131"
+    category: mathematics
+    question: "What is 20 × 15?"
+    answer: "300."
+
+  - id: "00132"
+    category: mathematics
+    question: "What is 21 × 16?"
+    answer: "336."
+
+  - id: "00133"
+    category: mathematics
+    question: "What is 22 × 17?"
+    answer: "374."
+
+  - id: "00134"
+    category: mathematics
+    question: "What is 23 × 18?"
+    answer: "414."
+
+  - id: "00135"
+    category: mathematics
+    question: "What is 24 × 19?"
+    answer: "456."
+
+  - id: "00136"
+    category: mathematics
+    question: "What is 25 × 21?"
+    answer: "525."
+
+  - id: "00137"
+    category: mathematics
+    question: "What is 26 × 22?"
+    answer: "572."
+
+  - id: "00138"
+    category: mathematics
+    question: "What is 27 × 23?"
+    answer: "621."
+
+  - id: "00139"
+    category: mathematics
+    question: "What is 28 × 24?"
+    answer: "672."
+
+  - id: "00140"
+    category: mathematics
+    question: "What is 29 × 25?"
+    answer: "725."
+
+  - id: "00141"
+    category: mathematics
+    question: "What is 36 ÷ 6?"
+    answer: "6."
+
+  - id: "00142"
+    category: mathematics
+    question: "What is 48 ÷ 8?"
+    answer: "6."
+
+  - id: "00143"
+    category: mathematics
+    question: "What is 63 ÷ 7?"
+    answer: "9."
+
+  - id: "00144"
+    category: mathematics
+    question: "What is 72 ÷ 9?"
+    answer: "8."
+
+  - id: "00145"
+    category: mathematics
+    question: "What is 96 ÷ 12?"
+    answer: "8."
+
+  - id: "00146"
+    category: mathematics
+    question: "What is 108 ÷ 9?"
+    answer: "12."
+
+  - id: "00147"
+    category: mathematics
+    question: "What is 120 ÷ 10?"
+    answer: "12."
+
+  - id: "00148"
+    category: mathematics
+    question: "What is 144 ÷ 12?"
+    answer: "12."
+
+  - id: "00149"
+    category: mathematics
+    question: "What is 156 ÷ 13?"
+    answer: "12."
+
+  - id: "00150"
+    category: mathematics
+    question: "What is 168 ÷ 14?"
+    answer: "12."
+
+  - id: "00151"
+    category: physics
+    question: "What is mass?"
+    answer: "Mass is a measure of an object's inertia and amount of matter."
+
+  - id: "00152"
+    category: physics
+    question: "What is displacement?"
+    answer: "Displacement is the change in position of an object with direction."
+
+  - id: "00153"
+    category: physics
+    question: "What is distance?"
+    answer: "Distance is the total length of the path traveled by an object."
+
+  - id: "00154"
+    category: physics
+    question: "What is average speed?"
+    answer: "Average speed is total distance divided by total time."
+
+  - id: "00155"
+    category: physics
+    question: "What is average velocity?"
+    answer: "Average velocity is displacement divided by the elapsed time."
+
+  - id: "00156"
+    category: physics
+    question: "What is inertia?"
+    answer: "Inertia is the tendency of an object to resist changes in its state of motion."
+
+  - id: "00157"
+    category: physics
+    question: "What is gravity?"
+    answer: "Gravity is the interaction that causes masses to attract one another."
+
+  - id: "00158"
+    category: physics
+    question: "What is weight?"
+    answer: "Weight is the gravitational force acting on an object."
+
+  - id: "00159"
+    category: physics
+    question: "What is friction?"
+    answer: "Friction is a force that opposes relative motion or attempted motion between surfaces."
+
+  - id: "00160"
+    category: physics
+    question: "What is mechanical equilibrium?"
+    answer: "Mechanical equilibrium occurs when the net force and net torque on a system are zero."
+
+  - id: "00161"
+    category: physics
+    question: "What is a scalar quantity?"
+    answer: "A scalar quantity has magnitude but no direction."
+
+  - id: "00162"
+    category: physics
+    question: "What is a vector quantity?"
+    answer: "A vector quantity has both magnitude and direction."
+
+  - id: "00163"
+    category: physics
+    question: "What is Newton's first law?"
+    answer: "An object remains at rest or in uniform straight-line motion unless acted on by a net external force."
+
+  - id: "00164"
+    category: physics
+    question: "What is Newton's second law?"
+    answer: "The net force on an object equals its mass multiplied by its acceleration."
+
+  - id: "00165"
+    category: physics
+    question: "What is Newton's third law?"
+    answer: "Forces between interacting bodies occur in equal-magnitude and opposite-direction pairs."
+
+  - id: "00166"
+    category: physics
+    question: "What is the law of conservation of energy?"
+    answer: "Energy cannot be created or destroyed in an isolated system, although it can change form."
+
+  - id: "00167"
+    category: physics
+    question: "What is mechanical work?"
+    answer: "Mechanical work is energy transferred when a force causes displacement."
+
+  - id: "00168"
+    category: physics
+    question: "What is thermal energy?"
+    answer: "Thermal energy is energy associated with microscopic motion and interactions within matter."
+
+  - id: "00169"
+    category: physics
+    question: "What is heat?"
+    answer: "Heat is energy transferred because of a temperature difference."
+
+  - id: "00170"
+    category: physics
+    question: "What is thermal equilibrium?"
+    answer: "Thermal equilibrium occurs when systems in contact have no net heat transfer between them."
+
+  - id: "00171"
+    category: chemistry
+    question: "What is sodium's chemical symbol?"
+    answer: "Na."
+
+  - id: "00172"
+    category: chemistry
+    question: "What is magnesium's chemical symbol?"
+    answer: "Mg."
+
+  - id: "00173"
+    category: chemistry
+    question: "What is aluminium's chemical symbol?"
+    answer: "Al."
+
+  - id: "00174"
+    category: chemistry
+    question: "What is silicon's chemical symbol?"
+    answer: "Si."
+
+  - id: "00175"
+    category: chemistry
+    question: "What is phosphorus's chemical symbol?"
+    answer: "P."
+
+  - id: "00176"
+    category: chemistry
+    question: "What is sulfur's chemical symbol?"
+    answer: "S."
+
+  - id: "00177"
+    category: chemistry
+    question: "What is chlorine's chemical symbol?"
+    answer: "Cl."
+
+  - id: "00178"
+    category: chemistry
+    question: "What is argon's chemical symbol?"
+    answer: "Ar."
+
+  - id: "00179"
+    category: chemistry
+    question: "What is potassium's chemical symbol?"
+    answer: "K."
+
+  - id: "00180"
+    category: chemistry
+    question: "What is calcium's chemical symbol?"
+    answer: "Ca."
+
+  - id: "00181"
+    category: chemistry
+    question: "What is the atomic number of sodium?"
+    answer: "11."
+
+  - id: "00182"
+    category: chemistry
+    question: "What is the atomic number of magnesium?"
+    answer: "12."
+
+  - id: "00183"
+    category: chemistry
+    question: "What is the atomic number of aluminium?"
+    answer: "13."
+
+  - id: "00184"
+    category: chemistry
+    question: "What is the atomic number of silicon?"
+    answer: "14."
+
+  - id: "00185"
+    category: chemistry
+    question: "What is the atomic number of phosphorus?"
+    answer: "15."
+
+  - id: "00186"
+    category: chemistry
+    question: "What is the atomic number of sulfur?"
+    answer: "16."
+
+  - id: "00187"
+    category: chemistry
+    question: "What is the atomic number of chlorine?"
+    answer: "17."
+
+  - id: "00188"
+    category: chemistry
+    question: "What is the atomic number of argon?"
+    answer: "18."
+
+  - id: "00189"
+    category: chemistry
+    question: "What is the atomic number of potassium?"
+    answer: "19."
+
+  - id: "00190"
+    category: chemistry
+    question: "What is the atomic number of calcium?"
+    answer: "20."
+
+  - id: "00191"
+    category: biology
+    question: "What is a cell membrane?"
+    answer: "A cell membrane is a selectively permeable boundary surrounding a cell."
+
+  - id: "00192"
+    category: biology
+    question: "What is cytoplasm?"
+    answer: "Cytoplasm is the material inside a cell outside the nucleus in the usual eukaryotic description."
+
+  - id: "00193"
+    category: biology
+    question: "What is a tissue?"
+    answer: "A tissue is an organized group of similar cells performing related functions."
+
+  - id: "00194"
+    category: biology
+    question: "What is an organ?"
+    answer: "An organ is a structure made of different tissues working together for specific functions."
+
+  - id: "00195"
+    category: biology
+    question: "What is an organ system?"
+    answer: "An organ system is a group of organs that work together to perform major functions."
+
+  - id: "00196"
+    category: biology
+    question: "What is a mutation?"
+    answer: "A mutation is a change in genetic material."
+
+  - id: "00197"
+    category: biology
+    question: "What is heredity?"
+    answer: "Heredity is the transmission of genetic characteristics from parents to offspring."
+
+  - id: "00198"
+    category: biology
+    question: "What is a species?"
+    answer: "A species is a biological category used for groups of organisms sharing a common reproductive lineage concept."
+
+  - id: "00199"
+    category: biology
+    question: "What is an allele?"
+    answer: "An allele is one of two or more alternative forms of a genetic locus."
+
+  - id: "00200"
+    category: biology
+    question: "What is a genome?"
+    answer: "A genome is the complete genetic material of an organism or biological entity."
+
+  - id: "00201"
+    category: geography
+    question: "What is the capital of France?"
+    answer: "Paris."
+    
+  - id: "00202"
+    category: geography
+    question: "What is the capital of Japan?"
+    answer: "Tokyo."
+    
+  - id: "00203"
+    category: geography
+    question: "What is the capital of India?"
+    answer: "New Delhi."
+    
+  - id: "00204"
+    category: geography
+    question: "What is the capital of Australia?"
+    answer: "Canberra."
+    
+  - id: "00205"
+    category: geography
+    question: "What is the capital of Brazil?"
+    answer: "Brasília."
+    
+  - id: "00206"
+    category: geography
+    question: "What is the capital of Canada?"
+    answer: "Ottawa."
+    
+  - id: "00207"
+    category: geography
+    question: "What is the capital of China?"
+    answer: "Beijing."
+    
+  - id: "00208"
+    category: geography
+    question: "What is the capital of Germany?"
+    answer: "Berlin."
+    
+  - id: "00209"
+    category: geography
+    question: "What is the capital of Italy?"
+    answer: "Rome."
+    
+  - id: "00210"
+    category: geography
+    question: "What is the capital of Spain?"
+    answer: "Madrid."
+    
+  - id: "00211"
+    category: geography
+    question: "What is the capital of Russia?"
+    answer: "Moscow."
+    
+  - id: "00212"
+    category: geography
+    question: "What is the capital of Egypt?"
+    answer: "Cairo."
+    
+  - id: "00213"
+    category: geography
+    question: "What is the capital of Nepal?"
+    answer: "Kathmandu."
+    
+  - id: "00214"
+    category: geography
+    question: "What is the capital of Bhutan?"
+    answer: "Thimphu."
+    
+  - id: "00215"
+    category: geography
+    question: "What is the capital of Bangladesh?"
+    answer: "Dhaka."
+    
+  - id: "00216"
+    category: geography
+    question: "What is the capital of Thailand?"
+    answer: "Bangkok."
+    
+  - id: "00217"
+    category: geography
+    question: "What is the capital of South Korea?"
+    answer: "Seoul."
+    
+  - id: "00218"
+    category: geography
+    question: "What is the capital of Indonesia?"
+    answer: "Jakarta."
+    
+  - id: "00219"
+    category: geography
+    question: "What is the capital of Mexico?"
+    answer: "Mexico City."
+    
