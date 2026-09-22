@@ -3,6 +3,7 @@
   "main": "worker.js",
   "compatibility_date": "2026-09-21",
   "vars": {
+    "ORED_API_KEY": "tuevcwavgecjywtghkevujqkuiv3t4yCBEWAHUJLWEAIHCRUVGABLEWUCFAQKU_RTFYQLOIUWE9QYVUWVBCU",
     "ORED_AUTH_URL": "https://tmqzqlrpjpydiftlrzmj.supabase.co",
     "ORED_AUTH_KEY": "sb_publishable_x7xlsCx-ZsvpNLCXRxyvMw_PsJQT2xy",
     "ORED_SB_URL": "https://xoauguhlxjozpvukjtro.supabase.co",
