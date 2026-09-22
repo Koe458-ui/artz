@@ -7,8 +7,6 @@
   var TITLE_CHARS = 60;
 
   var cfg = window.ORED_CONFIG || {};
-  // Ored has no accounts of its own. AUTH_URL and AUTH_KEY name the DigiArtz project, so the account
-  // someone has on the site is the account they have here, by password or by the same providers.
   var AUTH_URL = String(cfg.AUTH_URL || '');
   var AUTH_KEY = String(cfg.AUTH_KEY || '');
   var SITE_URL = String(cfg.SITE_URL || 'https://digiartz.net');
@@ -315,8 +313,6 @@
     input.focus();
   });
 
-  // The site's providers, in the site's order. Apple is listed there and not yet enabled on the
-  // project, so it says so here rather than failing at Supabase with a provider error.
   var OAUTH_LABELS = { google: 'Google', discord: 'Discord', apple: 'Apple' };
 
   function socialBusy(value) {
@@ -337,7 +333,6 @@
     socialBusy(true);
     sayAuth('Opening ' + label + '\u2026');
 
-    // Back to this page. It is the whole of this site, so the origin is the address to return to
     var opts = { redirectTo: window.location.origin + '/' };
     if (provider === 'google') opts.queryParams = { prompt: 'select_account' };
 
@@ -359,7 +354,6 @@
     });
   });
 
-  // An opener fills the box rather than sending it, so the first message is still the member's own
   seeds.addEventListener('click', function (event) {
     var button = event.target.closest('.oSeed');
     if (!button) return;
@@ -423,8 +417,6 @@
     if (event.key === 'Escape' && !panel.hidden) closeHistory(true);
   });
 
-  // What a provider sent back. Supabase reads the code itself while the client initialises, so this
-  // runs after getSession() and only tidies the address bar and reports a refusal the member can read.
   function oauthNotice() {
     var query = new URLSearchParams(window.location.search);
     var hash = new URLSearchParams(String(window.location.hash || '').replace(/^#/, ''));
