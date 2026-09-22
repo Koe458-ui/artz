@@ -7,7 +7,6 @@
   Cross-Origin-Opener-Policy: same-origin
   Cross-Origin-Resource-Policy: same-origin
   X-Permitted-Cross-Domain-Policies: none
-  X-Robots-Tag: noindex, nofollow
   Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://tmqzqlrpjpydiftlrzmj.supabase.co; frame-src 'none'; form-action 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; upgrade-insecure-requests
 
 /app.css
@@ -24,6 +23,7 @@
 
 /config.js
   Cache-Control: public, max-age=300, must-revalidate
+  X-Robots-Tag: noindex, nofollow
 
 /favicon.svg
   Cache-Control: public, max-age=604800
@@ -32,5 +32,12 @@
 /apple-touch-icon.png
   Cache-Control: public, max-age=604800
 
+/robots.txt
+  Cache-Control: public, max-age=3600
+
+/sitemap.xml
+  Cache-Control: public, max-age=3600
+
 /api/*
   Cache-Control: no-store
+  X-Robots-Tag: noindex, nofollow
