@@ -5,13 +5,13 @@ deterministic: true
 
 data:
   tokenizer: char
-  block_size: 128
-  stride: 64
+  block_size: 256
+  stride: 128
   batch_size: 32
   shuffle_train: true
   corpus:
     dir: data/raw/corpus
-    sentence_lines: 12000
+    sentence_lines: 60000
     max_operand: 30
     arithmetic_repeats: 10
     pair_split:
