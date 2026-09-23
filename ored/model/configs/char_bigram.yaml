@@ -11,7 +11,7 @@ data:
   shuffle_train: true
   corpus:
     dir: data/raw/corpus
-    sentence_lines: 12000
+    sentence_lines: 60000
     max_operand: 30
     arithmetic_repeats: 10
     pair_split:
