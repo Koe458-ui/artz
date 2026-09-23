@@ -18,6 +18,7 @@ logger = get_logger(__name__)
 
 DEFAULT_FACTS = "configs/facts.yaml"
 PLACEHOLDER = "{subject}"
+TERMINATORS = ".?!"
 SUBJECTS_LISTED = 20
 
 
@@ -28,11 +29,27 @@ class FactsError(RuntimeError):
 @dataclass
 class Fact:
 
-    subject: str
     answer: str
+    subject: str = ""
+    question: str = ""
+    category: str = ""
 
-    def line(self, question: str) -> str:
-        return f"{question.replace(PLACEHOLDER, self.subject)} {self.answer} ."
+    @property
+    def label(self) -> str:
+        return self.subject or self.question
+
+    @property
+    def needs_a_template(self) -> bool:
+        return not self.question
+
+    def ask(self, template: str = "") -> str:
+        if self.question:
+            return self.question
+        return template.replace(PLACEHOLDER, self.subject)
+
+    def line(self, template: str = "") -> str:
+        ending = "" if self.answer[-1:] in TERMINATORS else " ."
+        return f"{self.ask(template)} {self.answer}{ending}"
 
 
 @dataclass
@@ -42,27 +59,43 @@ class FactSpec:
     facts: List[Fact]
 
     def validate(self) -> "FactSpec":
-        if not self.questions:
-            raise FactsError("a facts file needs at least one question template")
         if not self.facts:
             raise FactsError("a facts file needs at least one fact")
+
+        templated = [fact for fact in self.facts if fact.needs_a_template]
+        if templated and not self.questions:
+            raise FactsError(
+                f"{len(templated)} facts give a subject but no question, and the file "
+                f"lists no question templates. Give each fact its own question, or add "
+                f"a questions: list using {PLACEHOLDER}."
+            )
         for question in self.questions:
             if PLACEHOLDER not in question:
                 raise FactsError(
                     f"question template {question!r} has no {PLACEHOLDER} to fill in"
                 )
-        counts = Counter(fact.subject for fact in self.facts)
-        duplicates = sorted(subject for subject, seen in counts.items() if seen > 1)
+
+        counts = Counter(fact.label for fact in self.facts)
+        duplicates = sorted(label for label, seen in counts.items() if seen > 1)
         if duplicates:
             raise FactsError(
-                f"these subjects are listed more than once: {duplicates[:10]}"
+                f"these are listed more than once: {duplicates[:10]}"
                 + (f" and {len(duplicates) - 10} more" if len(duplicates) > 10 else "")
             )
         return self
 
     @property
     def subjects(self) -> List[str]:
-        return [fact.subject for fact in self.facts]
+        return [fact.label for fact in self.facts]
+
+    @property
+    def categories(self) -> Dict[str, int]:
+        return dict(Counter(fact.category for fact in self.facts if fact.category))
+
+    @property
+    def longest_line(self) -> int:
+        return max((len(fact.line(self.questions[0] if self.questions else ""))
+                    for fact in self.facts), default=0)
 
 
 def load_facts(path: str | Path = DEFAULT_FACTS) -> FactSpec:
@@ -78,11 +111,18 @@ def load_facts(path: str | Path = DEFAULT_FACTS) -> FactSpec:
 
     facts: List[Fact] = []
     for entry in entries:
-        subject = str((entry or {}).get("subject") or "").strip()
-        answer = str((entry or {}).get("answer") or "").strip()
-        if not subject or not answer:
-            raise FactsError(f"every fact needs a subject and an answer, got {entry!r}")
-        facts.append(Fact(subject=subject, answer=answer))
+        entry = entry or {}
+        answer = str(entry.get("answer") or "").strip()
+        subject = str(entry.get("subject") or "").strip()
+        question = str(entry.get("question") or "").strip()
+        category = str(entry.get("category") or "").strip()
+        if not answer or not (subject or question):
+            raise FactsError(
+                f"every fact needs an answer and either a question or a subject, "
+                f"got {entry!r}"
+            )
+        facts.append(Fact(answer=answer, subject=subject, question=question,
+                          category=category))
 
     questions = [str(q).strip() for q in (raw.get("questions") or []) if str(q).strip()]
     return FactSpec(questions=questions, facts=facts).validate()
@@ -92,7 +132,8 @@ def fact_lines(spec: FactSpec, repeats: int, rng: random.Random) -> List[str]:
     lines: List[str] = []
     for fact in spec.facts:
         for _ in range(repeats):
-            lines.append(fact.line(rng.choice(spec.questions)))
+            template = rng.choice(spec.questions) if spec.questions else ""
+            lines.append(fact.line(template))
     rng.shuffle(lines)
     return lines
 
@@ -124,7 +165,15 @@ def generate_fact_corpus(
         json.dumps(
             {
                 "questions": spec.questions,
-                "facts": [{"subject": f.subject, "answer": f.answer} for f in spec.facts],
+                "facts": [
+                    {
+                        "subject": f.subject,
+                        "question": f.question,
+                        "category": f.category,
+                        "answer": f.answer,
+                    }
+                    for f in spec.facts
+                ],
                 "repeats": counts,
             },
             indent=2,
@@ -140,7 +189,8 @@ def load_fact_subjects(directory: str | Path) -> List[str]:
     if not path.exists():
         return []
     raw = json.loads(path.read_text(encoding="utf-8"))
-    return [str(fact["subject"]) for fact in raw.get("facts", [])]
+    return [str(fact.get("subject") or fact.get("question") or "")
+            for fact in raw.get("facts", [])]
 
 
 def main(argv: Sequence[str] | None = None) -> int:
@@ -170,8 +220,13 @@ def main(argv: Sequence[str] | None = None) -> int:
     logger.info("")
     logger.info(section("FACTS ADDED"))
     logger.info(f"facts file : {args.facts}")
-    logger.info(f"questions  : {len(spec.questions)} templates")
-    logger.info(f"subjects   : {len(spec.facts)}")
+    logger.info(f"templates  : {len(spec.questions)}")
+    logger.info(f"facts      : {len(spec.facts)}")
+    if spec.categories:
+        listed = sorted(spec.categories.items())
+        logger.info("categories : " + ", ".join(f"{name} {n}" for name, n in listed))
+    logger.info(f"longest    : {spec.longest_line} characters "
+                f"(raise data.block_size above this or it is cut short)")
     for subject in spec.subjects[:SUBJECTS_LISTED]:
         logger.info(f"  {subject}")
     if len(spec.facts) > SUBJECTS_LISTED:
