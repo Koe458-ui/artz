@@ -1,83 +1,225 @@
-How to re-enter ai traning mode
+Ored AI — Re-enter AI Training Mode
 
-You will starts from C:\Users\username (change username to your name )
+You will starts from "C:\Users\username" (change username to your name )
 
-while you are here - cd C:\Users\username
-_________RUN________
+while you are here - "cd C:\Users\username"
+
+_RUN
+
 git clone https://github.com/Koe458-ui/artz.git
 cd artz
 git checkout Ored.ai
 git log --oneline -1
---------------------
-_________OUTPUT________
-The version it will show should match with GitHub ored.ai last merged version 
 
-____Virtual environment____
+---
+
+_OUTPUT
+The version it will show should match with GitHub ored.ai last merged version
+
+Virtual environment
+
 python -m venv C:\Users\usermame\artz\.venv
 C:\Users\username\artz\.venv\Scripts\activate.bat
 pip install torch
 pip install -r C:\Users\username\artz\ored\model\requirements-dev.txt
---------------------
+
+---
 
 NOW
-______Verify CUDA works_____
-python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
---------------------
-_________OUTPUT________
-CUDA: true.   Your GPU specs (like RTX 5090 )
---------------------
 
-If this CUDA is flase then 
-_________RUN________
+_Verify CUDA works
+
+_RUN
+
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+
+---
+
+_OUTPUT
+CUDA: true.   Your GPU specs (like RTX 5090 )
+
+---
+
+If this CUDA is flase then
+
+_RUN
+
 pip uninstall -y torch
 pip install torch --index-url https://download.pytorch.org/whl/cu128
---------------------
+
+---
 
 After successfully Run this chevk the same veeify cuda code and then it should display as CUDA : True , rtx xxxx
 
-___Check the code is sound____
+Check the code is sound_
 
-_________RUN________
+_RUN
+
 cd C:\Users\harsh\artz\ored\model
 python -m pytest
---------------------
 
-_________OUTPUT________
+---
+
+_OUTPUT
 Expect xxx passed`(should be up to date , check otherwise)
---------------------
 
-____Recover your old checkpoints from Database_____
+---
+
+Recover your old checkpoints from Database_
+
+Set your Supabase credentials:
+
 set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
-set ORED_SB_SERVICE_KEY= secret key ask me (koe/anish) for secret 
---------------------
-python scripts\checkpoints.py list
-python scripts\checkpoints.py pull checkpoints\char_transformer_v2\best.pt --kind best --run-name char_transformer_v2
----------------------
+set ORED_SB_SERVICE_KEY= secret key ask me (koe/anish) for secret
 
-_________TRAIN________
+---
+
+Check available checkpoints:
+
+_RUN
+
+python scripts\checkpoints.py list
+
+Then pull the checkpoint you want:
+
+python scripts\checkpoints.py pull checkpoints\char_transformer_v2\best.pt --kind best --run-name char_transformer_v2
+
+---
+
+Checkpoint types
+
+- "best.pt" = the checkpoint with the best validation result. Lower validation loss is better.
+- "live.pt" = latest checkpoint used to continue/resume training.
+- "base.pt" = starting checkpoint of the training run.
+- "history/" = old checkpoint versions kept as backups when "best.pt" or "live.pt" is replaced.
+
+During training:
+
+base.pt  → saved at the start
+live.pt  → updated during training
+best.pt  → updated only when validation improves
+history/ → keeps replaced/older checkpoints
+
+Do not manually replace "best.pt" with a worse checkpoint.
+
+_TRAIN
+
 python scripts\generate_facts.py --repeats 20
 python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --set training.epochs=40 --set training.device=cuda
-python scripts\recall.py --checkpoint checkpoints\ored_v2\best.pt
---------------------
 
-IMPORTANT 
-_________(.venv) should be there in front of the cmd________
+---
 
-It's now `C:\Users\harsh\artz\.venv`, not `artz\ored\.venv`. From `ored\model`, activate with:
-_________RUN________
-..\..\.venv\Scripts\activate.bat
---------------------
+If you want to start from another checkpoint
 
+python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
 
-After done training ask questions 
-_________RUN________
+"--init-from" means start a new run using the other checkpoint's weights.
+
+If training was stopped and you want to continue it
+
+python scripts\train.py --config configs\char_transformer.yaml --resume-live --set training.epochs=40
+
+"--resume-live" means continue from the saved "live.pt" training state.
+
+---
+
+Save checkpoints manually if needed
+
+Put a checkpoint into history:
+
+python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
+
+Put a checkpoint into best:
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
+
+Put a checkpoint into live:
+
+python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+
+- "best" only replaces "best.pt" if it scores better on validation.
+- "best --force" can replace it manually if absolutely needed.
+- "live" must contain everything required to continue training.
+- Replaced "best.pt" or "live.pt" is kept in "history/".
+
+---
+
+Merge online-learning result into best
+
+After an online-learning session creates a live checkpoint:
+
+_RUN
+
+python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
+
+---
+
+This compares the online-learning "live.pt" with the current "best.pt" on the same validation data.
+
+If live is better:
+
+live.pt → best.pt
+old best.pt → history/
+
+If live is not better:
+
+best.pt stays unchanged
+
+Example:
+
+live = 3.07018
+best = 3.37613
+
+Since lower validation loss is better, the live checkpoint becomes "best.pt".
+
+---
+
+After done training ask questions
+
+_RUN
+
 python scripts\recall.py --checkpoint checkpoints\ored_v2\best.pt
 python scripts\infer.py --checkpoint checkpoints\ored_v2\best.pt --text " Ask questions here delete this text and ask questions related to what he train"
---------------------
+
+---
 
 After asking questions add checkpoint (IMPORTANT)
-_________RUN________
+
+_RUN
+
 set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
 set ORED_SB_SERVICE_KEY= (use the key provided by me / koe/ zeo)
 python scripts\checkpoints.py push checkpoints\ored_v2\best.pt --kind best --run-name ored_v2
---------------------
+
+---
+
+IMPORTANT
+
+_(".venv") should be there in front of the cmd
+
+It's now "C:\Users\harsh\artz\.venv", not "artz\ored\.venv".
+
+From "ored\model", activate with:
+
+_RUN
+
+..\..\.venv\Scripts\activate.bat
+
+---
+
+Checkpoint reminder
+
+Your normal structure should now be:
+
+checkpoints/
+├── ored_v2/
+│   ├── base.pt
+│   ├── best.pt
+│   └── live.pt
+└── history/
+
+"best.pt" = model you normally use for testing/deployment.
+
+"live.pt" = model/training state you use to continue training.
+
+"history/" = previous checkpoint versions kept safely.
