@@ -112,6 +112,7 @@ class OnlineLearner:
         live_dir: str | Path = DEFAULT_LIVE_DIR,
         version: str = "live",
         remote: Optional[RemoteCheckpoints] = None,
+        start_step: int = 0,
     ) -> None:
         self.policy = policy or OnlinePolicy()
         self.policy.validate()
@@ -124,6 +125,7 @@ class OnlineLearner:
         self.version = version
         self.remote = remote
         self.stats = OnlineStats()
+        self.start_step = int(start_step)
         self.optimizer = torch.optim.AdamW(
             self.model.parameters(), lr=self.policy.learning_rate
         )
@@ -147,6 +149,7 @@ class OnlineLearner:
             policy=policy,
             live_dir=live_dir,
             remote=remote,
+            start_step=int(info.get("global_step") or 0),
         )
 
     def _encode(self, text: str) -> Tuple[List[int], float]:
@@ -236,14 +239,17 @@ class OnlineLearner:
             path=self.live_dir / "live.pt",
             model=self.model,
             config=self.cfg.to_dict(),
-            epoch=self.stats.steps,
+            epoch=0,
             metrics={"last_loss": self.stats.last_loss or 0.0},
             optimizer=self.optimizer,
-            extra={"tokenizer": self.tokenizer.to_dict(), "online": self.stats.as_dict()},
+            extra={"online": self.stats.as_dict()},
+            kind="live",
+            global_step=self.start_step + self.stats.steps,
+            tokenizer=self.tokenizer.to_dict(),
         )
         if self.remote is not None:
             try:
                 self.remote.push(path, self.stats.as_dict())
-            except StoreError as exc:
+            except (StoreError, ValueError) as exc:
                 logger.error("live checkpoint not pushed: %s", exc)
         return path

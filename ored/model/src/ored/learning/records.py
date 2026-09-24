@@ -45,6 +45,7 @@ class CheckpointKind(str, Enum):
     BASE = "base"
     BEST = "best"
     LIVE = "live"
+    HISTORY = "history"
     EXPORT = "export"
 
 
@@ -169,6 +170,15 @@ class Checkpoint:
     metrics: Dict[str, float] = field(default_factory=dict)
     uploaded_by: Optional[str] = None
     created_at: str = field(default_factory=now)
+    global_step: int = 0
+    is_current: bool = False
+    parent_checkpoint_id: Optional[str] = None
+    promotion_metric: Optional[str] = None
+    promotion_mode: Optional[str] = None
+    verified_at: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        self.kind = CheckpointKind(self.kind)
 
 
 RECORD_TABLES = {

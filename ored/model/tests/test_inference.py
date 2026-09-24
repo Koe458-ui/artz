@@ -12,6 +12,7 @@ from ored.inference.predictor import (
 )
 from ored.inference.predictor import main as predictor_main
 from ored.training.trainer import Trainer
+from ored.utils.checkpoint import CheckpointError
 
 
 @pytest.fixture()
@@ -47,7 +48,7 @@ def test_loaded_weights_match_the_checkpoint(trained_checkpoint):
     predictor = Predictor.from_checkpoint(trained_checkpoint, device="cpu")
     payload = load_checkpoint(trained_checkpoint)
     for key, tensor in predictor.model.state_dict().items():
-        assert torch.allclose(payload["model_state"][key], tensor)
+        assert torch.allclose(payload["model_state_dict"][key], tensor)
 
 
 def test_out_of_range_input_is_rejected(trained_checkpoint, tiny_dataset):
@@ -126,9 +127,9 @@ def test_language_model_weights_match_the_checkpoint(trained_lm_checkpoint):
     payload = load_checkpoint(trained_lm_checkpoint)
     state = predictor.model.state_dict()
 
-    assert set(state) == set(payload["model_state"])
+    assert set(state) == set(payload["model_state_dict"])
     for key, tensor in state.items():
-        assert torch.allclose(payload["model_state"][key], tensor)
+        assert torch.allclose(payload["model_state_dict"][key], tensor)
 
 
 def test_predictor_class_dispatches_on_the_checkpoint_task(trained_lm_checkpoint):
@@ -140,7 +141,7 @@ def test_language_model_checkpoint_without_a_tokenizer_is_rejected(
     trained_lm_checkpoint, tmp_path
 ):
     payload = torch.load(trained_lm_checkpoint, map_location="cpu", weights_only=True)
-    payload["extra"].pop("tokenizer")
+    payload["tokenizer"] = None
     stripped = tmp_path / "no_tokenizer.pt"
     torch.save(payload, stripped)
 
@@ -217,13 +218,13 @@ def test_stale_task_label_still_loads_the_char_transformer(trained_lm_checkpoint
     assert isinstance(predictor, LanguageModelPredictor)
     assert predictor.model.describe()["vocab_size"] == predictor.tokenizer.vocab_size
     state = predictor.model.state_dict()
-    assert set(state) == set(payload["model_state"])
+    assert set(state) == set(payload["model_state_dict"])
 
 
-def test_tokenizer_saved_at_the_top_level_is_accepted(trained_lm_checkpoint, tmp_path):
+def test_tokenizer_saved_under_extra_is_accepted(trained_lm_checkpoint, tmp_path):
     payload = _payload(trained_lm_checkpoint)
-    payload["tokenizer"] = payload["extra"].pop("tokenizer")
-    top_level = tmp_path / "top_level_tokenizer.pt"
+    payload["extra"] = {"tokenizer": payload.pop("tokenizer")}
+    top_level = tmp_path / "extra_tokenizer.pt"
     torch.save(payload, top_level)
 
     predictor = load_predictor(top_level, device="cpu")
@@ -232,11 +233,11 @@ def test_tokenizer_saved_at_the_top_level_is_accepted(trained_lm_checkpoint, tmp
 
 def test_state_dict_loading_stays_strict(trained_lm_checkpoint, tmp_path):
     payload = _payload(trained_lm_checkpoint)
-    payload["model_state"].pop(next(iter(payload["model_state"])))
+    payload["model_state_dict"].pop(next(iter(payload["model_state_dict"])))
     incomplete = tmp_path / "incomplete.pt"
     torch.save(payload, incomplete)
 
-    with pytest.raises(RuntimeError, match="Missing key"):
+    with pytest.raises(CheckpointError, match="missing from the checkpoint"):
         load_predictor(incomplete, device="cpu")
 
 

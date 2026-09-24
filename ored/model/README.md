@@ -452,8 +452,10 @@ Ored.ai/
 │
 ├── checkpoints/                # trained weights land here (git-ignored)
 │   └── bit_adder_mlp/
+│       ├── base.pt             # the weights before the first step
 │       ├── best.pt             # lowest validation loss
-│       ├── last.pt             # final epoch, for resuming
+│       ├── live.pt             # latest state, for resuming
+│       ├── history/            # snapshots, when checkpoint.keep_history is on
 │       └── history.json        # per-epoch metrics
 │
 ├── .github/workflows/ci.yml    # runs the test suite on every push
@@ -533,14 +535,19 @@ Ored.ai/
 
 | File | What it is |
 |---|---|
+| `base.pt` | The weights before the first step. |
 | `best.pt` | The weights from the epoch with the **lowest validation loss**. Use this one. |
-| `last.pt` | The weights from the final epoch, plus optimizer state, for resuming. |
+| `live.pt` | The latest state — weights, optimizer, step, RNG — for `--set training.resume=live`. |
+| `history/` | Snapshots every N epochs or steps, when `checkpoint.keep_history` is on. |
 | `history.json` | Per-epoch losses and accuracies, plus the full config. |
 
-Each `.pt` contains the model weights, the optimizer state, **the complete
-config**, the epoch number and its metrics. Storing the config is what lets
+Each `.pt` is a versioned dict with named keys: the model weights, **the
+complete config**, the tokenizer, the epoch, step and metrics, and — for live,
+best and history — everything needed to resume. Storing the config is what lets
 `infer.py` rebuild the identical architecture before loading weights — weights
-only make sense in the network they were trained in.
+only make sense in the network they were trained in. The roles, the payload
+format, Supabase storage, promotion, resume and cleanup are described in
+[`CHECKPOINTS.md`](CHECKPOINTS.md).
 
 Checkpoints are **git-ignored**. They are regenerable in 5 seconds, and model
 weights do not belong in a repository.
@@ -1102,6 +1109,7 @@ solved in one forward pass.
 | `Task` abstraction — one trainer serves both steps | ✅ |
 | Cosine LR schedule with warmup | ✅ |
 | Resume from checkpoint (weights + optimizer state) | ✅ |
+| Exact resume from `live.pt` (step, schedule, RNG, mid-epoch) | ✅ |
 | Sampling: temperature, top-k, top-p, greedy | ✅ |
 | Grammar, spelling and arithmetic metrics | ✅ |
 | CI workflow | ✅ |
@@ -1176,13 +1184,21 @@ the bytes go to the private `ored-checkpoints` bucket, which has no storage
 policy for `anon` or `authenticated`: only the service key can read or write it.
 
 ```bash
-python scripts/checkpoints.py push checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
-python scripts/checkpoints.py pull checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
+python scripts/checkpoints.py show-best --run ored_v2
+python scripts/checkpoints.py show-live --run ored_v2
+python scripts/checkpoints.py history --run ored_v2
+python scripts/checkpoints.py verify best --run ored_v2
 python scripts/checkpoints.py list
+python scripts/checkpoints.py push checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
 ```
 
-Every push records the size and a sha256, and `pull` refuses a file whose digest
-does not match what was recorded. `serve.py --remote-checkpoints` pulls the live
+Every checkpoint is uploaded, its size and sha256 confirmed in Storage, and only
+then recorded, in one transaction that also makes it the run's current live or
+best. `pull` refuses a file whose digest does not match what was recorded. Set
+`checkpoint.upload: true` to have the trainer publish as it goes. The whole
+design — roles, paths, table, rules, commands — is in
+[`CHECKPOINTS.md`](CHECKPOINTS.md); the migration is
+`ored/supabase/migrations/20260924150000_ored_checkpoint_roles.sql`. `serve.py --remote-checkpoints` pulls the live
 checkpoint on boot when there is no local one and pushes it on every save, so a
 restart on a fresh machine does not lose what the model learned online.
 
@@ -1226,7 +1242,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **86 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **89 files, 0 comments, 0 docstrings.**
 
 ---
 

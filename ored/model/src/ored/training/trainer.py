@@ -11,10 +11,11 @@ import torch.nn as nn
 from torch.utils.data import DataLoader
 
 from ored.config import Config, load_config
+from ored.training.checkpoints import CheckpointManager, capture_rng, restore_rng
 from ored.training.metrics import MetricAccumulator
 from ored.training.schedules import build_schedule
 from ored.training.tasks import build_task
-from ored.utils.checkpoint import load_checkpoint, save_checkpoint
+from ored.utils.checkpoint import check_compatible, load_checkpoint, load_model_state
 from ored.utils.logging_utils import get_logger, section
 from ored.utils.seed import resolve_device, set_seed
 from ored.utils.weight_stats import (
@@ -92,9 +93,9 @@ class Trainer:
 
         self.task = build_task(cfg)
 
-        generator = torch.Generator()
-        generator.manual_seed(cfg.seed)
-        self.loaders, self.datasets = self.task.build_data(generator=generator)
+        self.generator = torch.Generator()
+        self.generator.manual_seed(cfg.seed)
+        self.loaders, self.datasets = self.task.build_data(generator=self.generator)
 
         self.model = self.task.build_model().to(self.device)
 
@@ -114,29 +115,159 @@ class Trainer:
 
         self.history: List[Dict[str, float]] = []
         self.best_val_loss = float("inf")
-        self.best_epoch = 0
         self.epochs_without_improvement = 0
         self.checkpoint_dir = cfg.checkpoint_dir
-        self.checkpoint_dir.mkdir(parents=True, exist_ok=True)
+        self.checkpoints = CheckpointManager.for_training(cfg)
+
+        self.epoch = 0
+        self.start_epoch = 1
+        self.batch_in_epoch = 0
+        self.epoch_complete = True
+        self.epoch_generator_state = self.generator.get_state()
+        self.train_metrics = MetricAccumulator()
+        self._resume_rng: Optional[Dict[str, Any]] = None
 
         self.resumed_from = ""
-        if cfg.training.resume:
-            self._resume(cfg.training.resume)
+        self.resumed_live = False
+        if cfg.training.resume == "live":
+            self._resume_live()
+        elif cfg.training.resume:
+            self._warm_start(cfg.training.resume)
 
         self.initial_parameters = snapshot_parameters(self.model)
 
-    def _resume(self, path: str) -> None:
+    @property
+    def best_epoch(self) -> int:
+        return self.checkpoints.best_epoch
+
+    def _tokenizer(self) -> Optional[Dict[str, Any]]:
+        return self.task.checkpoint_extra().get("tokenizer")
+
+    def _warm_start(self, path: str) -> None:
         payload = load_checkpoint(path, map_location=self.device)
-        self.model.load_state_dict(payload["model_state"], strict=True)
-        if payload.get("optimizer_state") is not None:
-            self.optimizer.load_state_dict(payload["optimizer_state"])
-        self.resumed_from = f"{path} (epoch {payload.get('epoch')})"
+        check_compatible(payload, self.model, path=path, tokenizer=self._tokenizer())
+        load_model_state(self.model, payload["model_state_dict"], path)
+        if payload.get("optimizer_state_dict") is not None:
+            self.optimizer.load_state_dict(payload["optimizer_state_dict"])
+        self.resumed_from = f"{path} (warm start from epoch {payload.get('epoch')})"
+
+    def _resume_live(self) -> None:
+        payload = self.checkpoints.load_live_checkpoint(map_location=self.device)
+        path = payload["_path"]
+        check_compatible(payload, self.model, path=path, expected_kind="live",
+                         tokenizer=self._tokenizer())
+        load_model_state(self.model, payload["model_state_dict"], path)
+        self.optimizer.load_state_dict(payload["optimizer_state_dict"])
+        self._log_config_drift(payload.get("config") or {})
+
+        state = payload["trainer_state"]
+        self.global_step = int(payload["global_step"])
+        self.epoch = int(payload["epoch"])
+        self.history = [dict(r) for r in state.get("history", [])]
+        self.best_val_loss = float(state.get("best_val_loss", float("inf")))
+        self.epochs_without_improvement = int(state.get("epochs_without_improvement", 0))
+        self.current_lr = float(state.get("current_lr", self.current_lr))
+
+        promotion = payload.get("promotion") or {}
+        if promotion.get("metric") == self.checkpoints.rule.metric and promotion.get("mode") == self.checkpoints.rule.mode:
+            self.checkpoints.best_value = promotion.get("value")
+            self.checkpoints.best_epoch = int(promotion.get("epoch") or 0)
+        else:
+            logger.info(
+                f"the checkpoint's best was chosen by {promotion.get('metric')}/{promotion.get('mode')}, "
+                f"this run uses {self.checkpoints.rule.describe()}: best restarts from here"
+            )
+
+        if state.get("epoch_complete", True):
+            self.start_epoch = self.epoch + 1
+            self.batch_in_epoch = 0
+            restore_rng(payload.get("rng_state"), self.generator)
+        else:
+            self.start_epoch = self.epoch
+            self.batch_in_epoch = int(state.get("batch_in_epoch", 0))
+            self.generator.set_state(state["epoch_generator_state"])
+            self._resume_rng = payload.get("rng_state")
+            sums = state.get("train_sums") or {}
+            self.train_metrics = MetricAccumulator(
+                int(sums.get("total_examples", 0)), dict(sums.get("sums", {}))
+            )
+        self.checkpoints.last_live_step = self.global_step
+        self.resumed_live = True
+        where = (f"end of epoch {self.epoch}" if state.get("epoch_complete", True)
+                 else f"epoch {self.epoch}, batch {self.batch_in_epoch}")
+        self.resumed_from = f"{path} ({where}, step {self.global_step:,})"
+
+    def _log_config_drift(self, saved: Dict[str, Any]) -> None:
+        def flat(d: Dict[str, Any], prefix: str = "") -> Dict[str, Any]:
+            out: Dict[str, Any] = {}
+            for k, v in d.items():
+                key = f"{prefix}{k}"
+                out.update(flat(v, key + ".") if isinstance(v, dict) else {key: v})
+            return out
+
+        before, after = flat(saved), flat(self.cfg.to_dict())
+        changed = sorted(k for k in after if k in before and before[k] != after[k]
+                         and k != "training.resume")
+        if changed:
+            logger.info(f"resuming with changed settings: {', '.join(changed)}")
+
+    def _trainer_state(self) -> Dict[str, Any]:
+        return {
+            "history": self.history,
+            "best_val_loss": self.best_val_loss,
+            "epochs_without_improvement": self.epochs_without_improvement,
+            "epoch_complete": self.epoch_complete,
+            "batch_in_epoch": self.batch_in_epoch,
+            "epoch_generator_state": self.epoch_generator_state,
+            "train_sums": {
+                "total_examples": self.train_metrics.total_examples,
+                "sums": dict(self.train_metrics.sums),
+            },
+            "current_lr": self.current_lr,
+        }
+
+    def snapshot(self, metrics: Dict[str, float]) -> Dict[str, Any]:
+        cfg = self.cfg.training
+        return {
+            "model": self.model,
+            "config": self.cfg.to_dict(),
+            "epoch": self.epoch,
+            "global_step": self.global_step,
+            "metrics": {k: v for k, v in metrics.items() if k != "epoch"},
+            "optimizer": self.optimizer,
+            "scheduler_state": {
+                "name": cfg.scheduler,
+                "current_lr": self.current_lr,
+                "total_steps": self.total_steps,
+                "warmup_steps": cfg.warmup_steps,
+                "min_lr_ratio": cfg.min_lr_ratio,
+            },
+            "rng_state": capture_rng(self.generator),
+            "trainer_state": self._trainer_state(),
+            "tokenizer": self._tokenizer(),
+            "promotion": self.checkpoints.promotion(),
+        }
+
+    def _step_metrics(self) -> Dict[str, float]:
+        partial = {f"train_{k}": v for k, v in self.train_metrics.compute().items()}
+        partial["lr"] = self.current_lr
+        return partial
 
     def _train_one_epoch(self) -> Dict[str, float]:
         self.model.train()
-        metrics = MetricAccumulator()
+        skip = self.batch_in_epoch
+        if skip == 0:
+            self.train_metrics = MetricAccumulator()
+            self.epoch_generator_state = self.generator.get_state()
+        self.epoch_complete = False
 
-        for batch in self.loaders["train"]:
+        for index, batch in enumerate(self.loaders["train"]):
+            if index < skip:
+                continue
+            if self._resume_rng is not None:
+                restore_rng(self._resume_rng)
+                self._resume_rng = None
+
             self._apply_learning_rate()
 
             self.optimizer.zero_grad(set_to_none=True)
@@ -150,10 +281,21 @@ class Trainer:
 
             self.optimizer.step()
             self.global_step += 1
+            self.batch_in_epoch = index + 1
 
-            metrics.update(batch_size=batch_size, loss=loss.item(), **extra)
+            self.train_metrics.update(batch_size=batch_size, loss=loss.item(), **extra)
 
-        return metrics.compute()
+            if self.checkpoints.history_due(step=self.global_step):
+                self.checkpoints.save_history_checkpoint(self.snapshot(self._step_metrics()))
+            if self.checkpoints.live_due(step=self.global_step):
+                self.checkpoints.save_live_checkpoint(self.snapshot(self._step_metrics()))
+
+        if self._resume_rng is not None:
+            restore_rng(self._resume_rng)
+            self._resume_rng = None
+        self.batch_in_epoch = 0
+        self.epoch_complete = True
+        return self.train_metrics.compute()
 
     def _apply_learning_rate(self) -> None:
         multiplier = self.schedule(
@@ -182,10 +324,18 @@ class Trainer:
         cfg = self.cfg
         self._log_run_header()
 
+        if not self.resumed_live:
+            self.checkpoints.save_base_checkpoint(self.snapshot({}))
+
         started = time.time()
         stopped_early = False
+        patience = cfg.training.early_stopping_patience
 
-        for epoch in range(1, cfg.training.epochs + 1):
+        for epoch in range(self.start_epoch, cfg.training.epochs + 1):
+            if patience and self.epochs_without_improvement >= patience:
+                stopped_early = True
+                break
+            self.epoch = epoch
             train_metrics = self._train_one_epoch()
             val_metrics = self.evaluate("val")
 
@@ -196,21 +346,25 @@ class Trainer:
                 record[f"val_{key}"] = value
             self.history.append(record)
 
-            improved = val_metrics["loss"] < self.best_val_loss - 1e-6
+            improved = self.checkpoints.evaluate_and_promote_best(
+                record, epoch, lambda: self.snapshot(record)
+            )
             if improved:
                 self.best_val_loss = val_metrics["loss"]
-                self.best_epoch = epoch
                 self.epochs_without_improvement = 0
-                self._save("best.pt", epoch, val_metrics)
             else:
                 self.epochs_without_improvement += 1
 
+            if self.checkpoints.history_due(epoch=epoch):
+                self.checkpoints.save_history_checkpoint(self.snapshot(record))
+            if self.checkpoints.live_due(epoch=epoch):
+                self.checkpoints.save_live_checkpoint(self.snapshot(record))
+
             self._log_epoch(epoch, record, improved)
 
-            patience = cfg.training.early_stopping_patience
             if patience and self.epochs_without_improvement >= patience:
                 logger.info(
-                    f"\nEarly stopping: validation loss has not improved for "
+                    f"\nEarly stopping: {self.checkpoints.rule.describe()} has not improved for "
                     f"{patience} epochs (best was epoch {self.best_epoch})."
                 )
                 stopped_early = True
@@ -218,8 +372,10 @@ class Trainer:
 
         elapsed = time.time() - started
 
-        last_metrics = self.evaluate("val")
-        self._save("last.pt", len(self.history), last_metrics)
+        if self.history and self.checkpoints.last_live_step != self.global_step:
+            self.checkpoints.save_live_checkpoint(self.snapshot(self.history[-1]))
+        if cfg.checkpoint.export_on_finish and self.checkpoints.path("best").exists():
+            self.checkpoints.export_model("best")
         self._save_history()
 
         self._log_summary(elapsed, stopped_early)
@@ -228,20 +384,12 @@ class Trainer:
             "history": self.history,
             "best_val_loss": self.best_val_loss,
             "best_epoch": self.best_epoch,
+            "best_metric": self.checkpoints.rule.metric,
+            "best_value": self.checkpoints.best_value,
             "elapsed_seconds": elapsed,
             "checkpoint_dir": str(self.checkpoint_dir),
+            "upload_errors": list(self.checkpoints.upload_errors),
         }
-
-    def _save(self, filename: str, epoch: int, metrics: Dict[str, float]) -> Path:
-        return save_checkpoint(
-            path=self.checkpoint_dir / filename,
-            model=self.model,
-            config=self.cfg.to_dict(),
-            epoch=epoch,
-            metrics=metrics,
-            optimizer=self.optimizer,
-            extra={"model_description": self.model.describe(), **self.task.checkpoint_extra()},
-        )
 
     def _save_history(self) -> Path:
         path = self.checkpoint_dir / "history.json"
@@ -306,6 +454,10 @@ class Trainer:
         logger.info(line + marker)
 
     def _log_summary(self, elapsed: float, stopped_early: bool) -> None:
+        if not self.history:
+            logger.info(section("NOTHING TO TRAIN"))
+            logger.info(f"the run is already at epoch {self.epoch} of {self.cfg.training.epochs}")
+            return
         first = self.history[0]
         last = self.history[-1]
 
@@ -313,7 +465,9 @@ class Trainer:
         logger.info(f"epochs run        : {len(self.history)}"
                     f"{' (stopped early)' if stopped_early else ''}")
         logger.info(f"wall clock        : {elapsed:.1f}s")
-        logger.info(f"best val loss     : {self.best_val_loss:.6f} (epoch {self.best_epoch})")
+        if self.checkpoints.best_value is not None:
+            logger.info(f"best {self.checkpoints.rule.metric:<13}: "
+                        f"{self.checkpoints.best_value:.6f} (epoch {self.best_epoch})")
         logger.info("")
         logger.info("DID IT LEARN?  (first epoch  ->  last epoch)")
         logger.info(f"  train loss      : {first['train_loss']:.4f}  ->  {last['train_loss']:.4f}")
@@ -331,7 +485,13 @@ class Trainer:
         logger.info("starting point; 'rel' is that distance relative to where it started.")
         logger.info("A layer that learned nothing would sit near 0%.")
         logger.info("")
-        logger.info(f"checkpoints       : {self.checkpoint_dir}/best.pt, {self.checkpoint_dir}/last.pt")
+        logger.info(f"checkpoints       : {self.checkpoint_dir}/best.pt (best), "
+                    f"{self.checkpoint_dir}/live.pt (resume with --set training.resume=live)")
+        if self.checkpoints.settings.keep_history:
+            logger.info(f"history           : {len(self.checkpoints.history_files())} snapshots in "
+                        f"{self.checkpoints.history_dir}")
+        for error in self.checkpoints.upload_errors:
+            logger.info(f"NOT UPLOADED      : {error}")
         logger.info(f"per-epoch history : {self.checkpoint_dir}/history.json")
         logger.info("")
         logger.info("Next:")

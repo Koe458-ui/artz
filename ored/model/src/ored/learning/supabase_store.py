@@ -23,7 +23,7 @@ from ored.learning.records import (
     VersionStatus,
     to_row,
 )
-from ored.learning.store import StoreError
+from ored.learning.store import StaleCheckpointError, StoreError, check_checkpoint
 
 T = TypeVar("T")
 
@@ -167,17 +167,64 @@ class SupabaseStore:
             query = f"status=eq.{status.value}&" + query
         return self._select(ModelVersion, query)
 
-    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
-        if not checkpoint.object_path:
-            raise StoreError("a checkpoint must name the object it was uploaded to")
-        return self._insert(Checkpoint, [checkpoint])[0]
+    def _rpc(self, name: str, args: Dict[str, Any]) -> Checkpoint:
+        try:
+            returned = self._call("POST", f"/rpc/{name}", args)
+        except StoreError as exc:
+            if "it changed" in str(exc):
+                raise StaleCheckpointError(str(exc)) from exc
+            raise
+        if isinstance(returned, list):
+            returned = returned[0] if returned else None
+        if not returned:
+            raise StoreError(f"{name} returned nothing")
+        return self._build(Checkpoint, returned)
 
-    def checkpoints(self, kind: Optional[CheckpointKind] = None) -> List[Checkpoint]:
-        query = "order=created_at.asc"
+    def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
+        return self.register_checkpoint(checkpoint)
+
+    def register_checkpoint(
+        self, checkpoint: Checkpoint, make_current: bool = False, replaces: Optional[str] = None
+    ) -> Checkpoint:
+        check_checkpoint(checkpoint)
+        return self._rpc("ored_checkpoint_register", {
+            "p_row": to_row(checkpoint),
+            "p_make_current": bool(make_current),
+            "p_replaces": replaces,
+        })
+
+    def make_current(self, checkpoint_id: str, replaces: Optional[str] = None) -> Checkpoint:
+        return self._rpc("ored_checkpoint_make_current", {"p_id": checkpoint_id, "p_replaces": replaces})
+
+    def delete_checkpoint(self, checkpoint_id: str, allow_current: bool = False) -> Checkpoint:
+        return self._rpc("ored_checkpoint_delete", {"p_id": checkpoint_id, "p_allow_current": allow_current})
+
+    def mark_verified(self, checkpoint_id: str, sha256: str) -> Checkpoint:
+        return self._rpc("ored_checkpoint_mark_verified", {"p_id": checkpoint_id, "p_sha256": sha256})
+
+    def checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]:
+        found = self._select(Checkpoint, f"id=eq.{urllib.parse.quote(checkpoint_id)}")
+        return found[0] if found else None
+
+    def current_checkpoint(self, run_name: str, kind: CheckpointKind) -> Optional[Checkpoint]:
+        found = self.checkpoints(kind, run_name=run_name, current=True)
+        return found[0] if found else None
+
+    def checkpoints(
+        self,
+        kind: Optional[CheckpointKind] = None,
+        run_name: Optional[str] = None,
+        current: Optional[bool] = None,
+    ) -> List[Checkpoint]:
+        filters = []
         if kind is not None:
-            query = f"kind=eq.{kind.value}&" + query
-        return self._select(Checkpoint, query)
+            filters.append(f"kind=eq.{CheckpointKind(kind).value}")
+        if run_name is not None:
+            filters.append(f"run_name=eq.{urllib.parse.quote(run_name)}")
+        if current is not None:
+            filters.append(f"is_current=is.{'true' if current else 'false'}")
+        filters.append("order=created_at.asc")
+        return self._select(Checkpoint, "&".join(filters))
 
     def drop_checkpoint(self, checkpoint_id: str) -> None:
-        path = f"/{self._table(Checkpoint)}?id=eq.{urllib.parse.quote(checkpoint_id)}"
-        self._call("DELETE", path)
+        self.delete_checkpoint(checkpoint_id, allow_current=True)

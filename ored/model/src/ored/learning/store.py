@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import re
 from typing import Any, Dict, Iterable, List, Optional, Protocol
 
 from ored.learning.records import (
@@ -15,12 +16,33 @@ from ored.learning.records import (
     TrainingExample,
     TrainingSession,
     VersionStatus,
+    now,
     to_row,
 )
 
 
 class StoreError(RuntimeError):
     pass
+
+
+class StaleCheckpointError(StoreError):
+    pass
+
+
+SHA256 = re.compile(r"^[0-9a-f]{64}$")
+
+
+def check_checkpoint(checkpoint: Checkpoint) -> None:
+    if not checkpoint.object_path:
+        raise StoreError("a checkpoint must name the object it was uploaded to")
+    if not SHA256.match(checkpoint.sha256 or ""):
+        raise StoreError(f"checkpoint {checkpoint.object_path} has no valid sha256")
+    if checkpoint.epoch < 0 or checkpoint.global_step < 0:
+        raise StoreError("epoch and global_step must be >= 0")
+    if checkpoint.kind is CheckpointKind.BEST and not (
+        checkpoint.promotion_metric and checkpoint.promotion_mode in ("min", "max")
+    ):
+        raise StoreError("a best checkpoint must record the metric that promoted it")
 
 
 class LearningStore(Protocol):
@@ -57,7 +79,26 @@ class LearningStore(Protocol):
 
     def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint: ...
 
-    def checkpoints(self, kind: Optional[CheckpointKind] = None) -> List[Checkpoint]: ...
+    def register_checkpoint(
+        self, checkpoint: Checkpoint, make_current: bool = False, replaces: Optional[str] = None
+    ) -> Checkpoint: ...
+
+    def make_current(self, checkpoint_id: str, replaces: Optional[str] = None) -> Checkpoint: ...
+
+    def delete_checkpoint(self, checkpoint_id: str, allow_current: bool = False) -> Checkpoint: ...
+
+    def mark_verified(self, checkpoint_id: str, sha256: str) -> Checkpoint: ...
+
+    def checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]: ...
+
+    def current_checkpoint(self, run_name: str, kind: CheckpointKind) -> Optional[Checkpoint]: ...
+
+    def checkpoints(
+        self,
+        kind: Optional[CheckpointKind] = None,
+        run_name: Optional[str] = None,
+        current: Optional[bool] = None,
+    ) -> List[Checkpoint]: ...
 
     def drop_checkpoint(self, checkpoint_id: str) -> None: ...
 
@@ -164,21 +205,106 @@ class InMemoryStore:
         return sorted(found, key=lambda v: v.created_at)
 
     def add_checkpoint(self, checkpoint: Checkpoint) -> Checkpoint:
-        if not checkpoint.object_path:
-            raise StoreError("a checkpoint must name the object it was uploaded to")
+        return self.register_checkpoint(checkpoint)
+
+    def register_checkpoint(
+        self, checkpoint: Checkpoint, make_current: bool = False, replaces: Optional[str] = None
+    ) -> Checkpoint:
+        check_checkpoint(checkpoint)
+        if checkpoint.id in self._checkpoints:
+            raise StoreError(f"checkpoint {checkpoint.id} already exists")
+        if any(c.object_path == checkpoint.object_path for c in self._checkpoints.values()):
+            raise StoreError(f"object {checkpoint.object_path} is already recorded")
+
+        checkpoint.is_current = False
+        previous = None
+        if make_current:
+            if checkpoint.kind is CheckpointKind.HISTORY:
+                raise StoreError("history checkpoints are never current")
+            previous = self.current_checkpoint(checkpoint.run_name, checkpoint.kind)
+            if previous is not None and checkpoint.kind is CheckpointKind.BASE:
+                raise StoreError(
+                    f"run {checkpoint.run_name} already has a base checkpoint; base is immutable"
+                )
+            self._expect_current(checkpoint.run_name, checkpoint.kind, previous, replaces)
+
+        if previous is not None:
+            previous.is_current = False
+        checkpoint.is_current = make_current
         self._checkpoints[checkpoint.id] = checkpoint
         return checkpoint
 
-    def checkpoints(self, kind: Optional[CheckpointKind] = None) -> List[Checkpoint]:
+    @staticmethod
+    def _expect_current(run_name: str, kind: CheckpointKind,
+                        previous: Optional[Checkpoint], replaces: Optional[str]) -> None:
+        actual = previous.id if previous else None
+        if actual != replaces:
+            raise StaleCheckpointError(
+                f"current {kind.value} of run {run_name} is {actual or 'none'}, "
+                f"not {replaces or 'none'}: it changed, compare again"
+            )
+
+    def make_current(self, checkpoint_id: str, replaces: Optional[str] = None) -> Checkpoint:
+        target = self._checkpoints.get(checkpoint_id)
+        if target is None:
+            raise StoreError(f"no checkpoint {checkpoint_id}")
+        if target.kind in (CheckpointKind.HISTORY, CheckpointKind.BASE):
+            raise StoreError(f"a {target.kind.value} checkpoint cannot be promoted in place")
+        if target.is_current:
+            return target
+        previous = self.current_checkpoint(target.run_name, target.kind)
+        self._expect_current(target.run_name, target.kind, previous, replaces)
+        if previous is not None:
+            previous.is_current = False
+        target.is_current = True
+        return target
+
+    def delete_checkpoint(self, checkpoint_id: str, allow_current: bool = False) -> Checkpoint:
+        target = self._checkpoints.get(checkpoint_id)
+        if target is None:
+            raise StoreError(f"no checkpoint {checkpoint_id}")
+        if target.is_current and not allow_current:
+            raise StoreError(
+                f"checkpoint {checkpoint_id} is the current {target.kind.value} of run "
+                f"{target.run_name}; pass allow_current to remove it"
+            )
+        del self._checkpoints[checkpoint_id]
+        for other in self._checkpoints.values():
+            if other.parent_checkpoint_id == checkpoint_id:
+                other.parent_checkpoint_id = None
+        return target
+
+    def mark_verified(self, checkpoint_id: str, sha256: str) -> Checkpoint:
+        target = self._checkpoints.get(checkpoint_id)
+        if target is None or target.sha256 != sha256:
+            raise StoreError(f"checkpoint {checkpoint_id} does not have sha256 {sha256}")
+        target.verified_at = now()
+        return target
+
+    def checkpoint(self, checkpoint_id: str) -> Optional[Checkpoint]:
+        return self._checkpoints.get(checkpoint_id)
+
+    def current_checkpoint(self, run_name: str, kind: CheckpointKind) -> Optional[Checkpoint]:
+        found = self.checkpoints(kind, run_name=run_name, current=True)
+        return found[0] if found else None
+
+    def checkpoints(
+        self,
+        kind: Optional[CheckpointKind] = None,
+        run_name: Optional[str] = None,
+        current: Optional[bool] = None,
+    ) -> List[Checkpoint]:
         found = list(self._checkpoints.values())
         if kind is not None:
             found = [c for c in found if c.kind == kind]
+        if run_name is not None:
+            found = [c for c in found if c.run_name == run_name]
+        if current is not None:
+            found = [c for c in found if c.is_current == current]
         return sorted(found, key=lambda c: c.created_at)
 
     def drop_checkpoint(self, checkpoint_id: str) -> None:
-        if checkpoint_id not in self._checkpoints:
-            raise StoreError(f"no checkpoint {checkpoint_id}")
-        del self._checkpoints[checkpoint_id]
+        self.delete_checkpoint(checkpoint_id, allow_current=True)
 
     def snapshot(self) -> Dict[str, List[Dict[str, Any]]]:
         return {

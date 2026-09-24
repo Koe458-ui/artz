@@ -12,7 +12,7 @@ from ored.data.preprocessing import bits_to_string, decode_prediction, encode_pa
 from ored.data.tokenizer import Tokenizer
 from ored.inference.generator import complete, generate_text
 from ored.models.registry import build_model
-from ored.utils.checkpoint import load_checkpoint
+from ored.utils.checkpoint import check_compatible, load_checkpoint, load_model_state
 from ored.utils.logging_utils import get_logger, section
 from ored.utils.seed import resolve_device
 
@@ -42,7 +42,7 @@ TEXT_MODELS = frozenset({"transformer", "bigram"})
 
 def find_tokenizer_data(payload: Dict[str, Any]) -> Optional[Dict[str, Any]]:
     extra = payload.get("extra") or {}
-    return extra.get("tokenizer") or payload.get("tokenizer")
+    return payload.get("tokenizer") or extra.get("tokenizer")
 
 
 def read_tokenizer(payload: Dict[str, Any], path: str | Path) -> Tokenizer:
@@ -167,7 +167,9 @@ class BasePredictor:
             "task": key,
             "epoch": payload.get("epoch"),
             "metrics": payload.get("metrics", {}),
-            "saved_at": payload.get("saved_at"),
+            "saved_at": payload.get("created_at"),
+            "kind": payload.get("checkpoint_kind"),
+            "global_step": payload.get("global_step"),
             "torch_version": payload.get("torch_version"),
             "device": resolved_device,
         }
@@ -205,8 +207,8 @@ class Predictor(BasePredictor):
     @classmethod
     def _build(cls, payload, cfg, device, info):
         model = build_model(cfg).to(device)
-
-        model.load_state_dict(payload["model_state"], strict=True)
+        check_compatible(payload, model, path=info["path"])
+        load_model_state(model, payload["model_state_dict"], info["path"])
         return cls(model, cfg, device, info)
 
     @torch.no_grad()
@@ -250,8 +252,8 @@ class LanguageModelPredictor(BasePredictor):
     def _build(cls, payload, cfg, device, info):
         tokenizer = read_tokenizer(payload, info["path"])
         model = build_model(cfg, vocab_size=tokenizer.vocab_size).to(device)
-
-        model.load_state_dict(payload["model_state"], strict=True)
+        check_compatible(payload, model, path=info["path"])
+        load_model_state(model, payload["model_state_dict"], info["path"])
         return cls(model, cfg, device, info, tokenizer)
 
     @property

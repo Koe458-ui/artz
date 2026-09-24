@@ -62,8 +62,7 @@ def test_checkpoint_carries_the_tokenizer(tiny_corpus):
     trainer.fit()
 
     payload = load_checkpoint(tiny_corpus.checkpoint_dir / "best.pt")
-    assert "tokenizer" in payload["extra"]
-    assert payload["extra"]["tokenizer"]["itos"] == trainer.task.tokenizer.itos
+    assert payload["tokenizer"]["itos"] == trainer.task.tokenizer.itos
 
 
 def test_trained_language_model_reloads_and_generates(tiny_corpus):
@@ -85,7 +84,7 @@ def test_reloaded_weights_match(tiny_corpus):
 
     trainer = Trainer(tiny_corpus)
     trainer.fit()
-    model, _, _, _ = load_language_model(tiny_corpus.checkpoint_dir / "last.pt", device="cpu")
+    model, _, _, _ = load_language_model(tiny_corpus.checkpoint_dir / "live.pt", device="cpu")
 
     for key, tensor in trainer.model.state_dict().items():
         assert torch.allclose(model.state_dict()[key], tensor)
@@ -94,7 +93,7 @@ def test_reloaded_weights_match(tiny_corpus):
 def test_resume_restores_weights_and_optimizer(tiny_corpus):
     first = Trainer(tiny_corpus)
     first.fit()
-    checkpoint = str(tiny_corpus.checkpoint_dir / "last.pt")
+    checkpoint = str(tiny_corpus.checkpoint_dir / "live.pt")
 
     tiny_corpus.training.resume = checkpoint
     second = Trainer(tiny_corpus)

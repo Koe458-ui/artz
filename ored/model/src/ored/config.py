@@ -192,6 +192,42 @@ class GenerationConfig:
 
 
 @dataclass
+class CheckpointConfig:
+
+    best_metric: str = "val_loss"
+    best_mode: str = "min"
+
+    save_base: bool = True
+
+    save_live_every_epochs: int = 1
+    save_live_every_steps: int = 0
+
+    keep_history: bool = False
+    save_history_every_epochs: int = 1
+    save_history_every_steps: int = 0
+
+    export_on_finish: bool = False
+
+    upload: bool = False
+    keep_superseded_live: bool = False
+
+    def validate(self) -> None:
+        if self.best_mode not in ("min", "max"):
+            raise ValueError("checkpoint.best_mode must be 'min' (lower is better) or 'max'")
+        if not self.best_metric:
+            raise ValueError("checkpoint.best_metric must name a metric, e.g. val_loss")
+        for name in ("save_live_every_epochs", "save_live_every_steps",
+                     "save_history_every_epochs", "save_history_every_steps"):
+            if getattr(self, name) < 0:
+                raise ValueError(f"checkpoint.{name} must be >= 0 (0 = off)")
+        if self.keep_history and not (self.save_history_every_epochs or self.save_history_every_steps):
+            raise ValueError(
+                "checkpoint.keep_history is on but no interval is set: set "
+                "save_history_every_epochs or save_history_every_steps"
+            )
+
+
+@dataclass
 class PathsConfig:
     checkpoint_dir: str = "checkpoints"
 
@@ -209,6 +245,7 @@ class Config:
     model: ModelConfig = field(default_factory=ModelConfig)
     training: TrainingConfig = field(default_factory=TrainingConfig)
     generation: GenerationConfig = field(default_factory=GenerationConfig)
+    checkpoint: CheckpointConfig = field(default_factory=CheckpointConfig)
     paths: PathsConfig = field(default_factory=PathsConfig)
 
     def validate(self) -> "Config":
@@ -216,6 +253,7 @@ class Config:
         self.model.validate()
         self.training.validate()
         self.generation.validate()
+        self.checkpoint.validate()
         return self
 
     def to_dict(self) -> Dict[str, Any]:
