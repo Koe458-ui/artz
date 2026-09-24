@@ -35,6 +35,22 @@ class SessionStatus(str, Enum):
     CANCELLED = "cancelled"
 
 
+class WorkerStatus(str, Enum):
+    JOINING = "joining"
+    READY = "ready"
+    TRAINING = "training"
+    CHECKPOINTING = "checkpointing"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    DISCONNECTED = "disconnected"
+
+
+class CheckpointPart(str, Enum):
+    FILE = "file"
+    MANIFEST = "manifest"
+    SHARD = "shard"
+
+
 class VersionStatus(str, Enum):
     CANDIDATE = "candidate"
     PRODUCTION = "production"
@@ -136,6 +152,32 @@ class TrainingSession:
     started_at: Optional[str] = None
     finished_at: Optional[str] = None
     created_at: str = field(default_factory=now)
+    session_key: Optional[str] = None
+    run_name: str = ""
+
+
+@dataclass
+class TrainingWorker:
+
+    id: str = field(default_factory=new_id)
+    session_id: str = ""
+    worker_id: str = ""
+    rank: Optional[int] = None
+    node_rank: Optional[int] = None
+    local_rank: Optional[int] = None
+    hostname: str = ""
+    device: str = ""
+    gpu_name: str = ""
+    torch_version: str = ""
+    status: WorkerStatus = WorkerStatus.JOINING
+    last_heartbeat: str = field(default_factory=now)
+    started_at: str = field(default_factory=now)
+    finished_at: Optional[str] = None
+    error: str = ""
+    created_at: str = field(default_factory=now)
+
+    def __post_init__(self) -> None:
+        self.status = WorkerStatus(self.status)
 
 
 @dataclass
@@ -176,9 +218,20 @@ class Checkpoint:
     promotion_metric: Optional[str] = None
     promotion_mode: Optional[str] = None
     verified_at: Optional[str] = None
+    part: CheckpointPart = CheckpointPart.FILE
+    checkpoint_group_id: Optional[str] = None
+    rank: Optional[int] = None
+    world_size: int = 1
+    is_complete: bool = True
+    upload_status: str = "verified"
 
     def __post_init__(self) -> None:
         self.kind = CheckpointKind(self.kind)
+        self.part = CheckpointPart(self.part)
+
+    @property
+    def is_logical(self) -> bool:
+        return self.part is not CheckpointPart.SHARD
 
 
 RECORD_TABLES = {
@@ -188,6 +241,7 @@ RECORD_TABLES = {
     LearningCandidate: "ored_learning_candidates",
     TrainingExample: "ored_training_examples",
     TrainingSession: "ored_training_sessions",
+    TrainingWorker: "ored_training_workers",
     ModelVersion: "ored_model_versions",
     Checkpoint: "ored_checkpoints",
 }

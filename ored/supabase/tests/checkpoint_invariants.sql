@@ -231,12 +231,145 @@ begin
   if n <> 2 then raise exception 'overview should list both lives of invariant_test_a, got %', n; end if;
 end $$;
 
+-- 12. distributed checkpoints: shards, groups, finalize ----------------------
+
+create function pg_temp.shard(run text, kind text, grp uuid, r int, w int, name text)
+returns jsonb language sql as $$
+  select pg_temp.row(run, kind, run || '/' || kind || '/' || grp::text || '/' || name,
+    jsonb_build_object('part', 'shard', 'checkpoint_group_id', grp, 'rank', r, 'world_size', w,
+                       'is_complete', false, 'upload_status', 'uploading', 'format_version', 3));
+$$;
+
+do $$
+declare
+  grp uuid := gen_random_uuid();
+  other uuid := gen_random_uuid();
+  s0 public.ored_checkpoints; s1 public.ored_checkpoints; s2 public.ored_checkpoints;
+  m public.ored_checkpoints; n int;
+  manifest jsonb;
+begin
+  s0 := public.ored_checkpoint_register(pg_temp.shard('invariant_dist', 'live', grp, 0, 3, '__0_0.distcp'));
+  s1 := public.ored_checkpoint_register(pg_temp.shard('invariant_dist', 'live', grp, 1, 3, '__1_0.distcp'));
+  s2 := public.ored_checkpoint_register(pg_temp.shard('invariant_dist', 'live', grp, 2, 3, '__2_0.distcp'));
+  manifest := pg_temp.row('invariant_dist', 'live', 'invariant_dist/live/' || grp::text || '/manifest.json',
+                          '{"world_size": 3, "format_version": 3}');
+
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_register(%L::jsonb, true, null)',
+    pg_temp.shard('invariant_dist', 'live', other, 0, 3, 'x.distcp')), 'finalize_group');
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_register(%L::jsonb)',
+    pg_temp.row('invariant_dist', 'live', 'invariant_dist/live/m.json',
+                jsonb_build_object('part', 'manifest', 'checkpoint_group_id', other))), 'finalize_group');
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_register(%L::jsonb)',
+    pg_temp.shard('invariant_dist', 'live', other, 3, 3, 'r3.distcp')), 'ored_checkpoints_rank_check');
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_register(%L::jsonb)',
+    pg_temp.shard('invariant_dist', 'live', other, 0, 3, 'v.distcp') || '{"upload_status": "verified"}'),
+    'registered as uploading');
+
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_finalize_group(%L, %L::jsonb, true, null)', grp, manifest),
+    'shards not verified');
+
+  perform public.ored_checkpoint_shard_status(s0.id, 'verified');
+  perform public.ored_checkpoint_shard_status(s1.id, 'verified');
+  perform public.ored_checkpoint_shard_status(s2.id, 'failed');
+  perform pg_temp.expect_error(format('select public.ored_checkpoint_shard_status(%L, ''verified'')', s2.id),
+    'no uploading shard');
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_finalize_group(%L, %L::jsonb, true, null)', grp, manifest),
+    '2:failed');
+  select count(*) into n from public.ored_checkpoint_current where run_name = 'invariant_dist';
+  if n <> 0 then raise exception 'an incomplete group became current'; end if;
+  if (select is_complete from public.ored_checkpoint_groups where checkpoint_group_id = grp) then
+    raise exception 'group with a failed shard reported complete';
+  end if;
+
+  perform pg_temp.expect_error(format('select public.ored_checkpoint_delete(%L)', s0.id), 'delete_group');
+  n := public.ored_checkpoint_delete_group(grp);
+  if n <> 3 then raise exception 'delete_group removed % rows, expected 3', n; end if;
+
+  grp := gen_random_uuid();
+  s0 := public.ored_checkpoint_register(pg_temp.shard('invariant_dist', 'live', grp, 0, 2, '__0_0.distcp'));
+  s1 := public.ored_checkpoint_register(pg_temp.shard('invariant_dist', 'live', grp, 1, 2, '__1_0.distcp'));
+  perform public.ored_checkpoint_shard_status(s0.id, 'verified');
+  manifest := pg_temp.row('invariant_dist', 'live', 'invariant_dist/live/' || grp::text || '/manifest.json',
+                          '{"world_size": 3, "format_version": 3}');
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_finalize_group(%L, %L::jsonb, true, null)', grp, manifest),
+    'another run, role or world size');
+  manifest := manifest || '{"world_size": 2}';
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_finalize_group(%L, %L::jsonb, true, null)', grp, manifest),
+    '1:uploading');
+  perform public.ored_checkpoint_shard_status(s1.id, 'verified');
+  m := public.ored_checkpoint_finalize_group(grp, manifest, true, null);
+  if not m.is_current or m.part <> 'manifest' or not m.is_complete then
+    raise exception 'finalize did not make a complete current manifest';
+  end if;
+  if exists (select 1 from public.ored_checkpoints where checkpoint_group_id = grp and part = 'shard' and not is_complete) then
+    raise exception 'finalize left shards incomplete';
+  end if;
+  if not (select is_complete and is_current and ranks_verified = 2 from public.ored_checkpoint_groups where checkpoint_group_id = grp) then
+    raise exception 'groups view does not show the finalized group';
+  end if;
+  perform pg_temp.expect_error(format(
+    'select public.ored_checkpoint_finalize_group(%L, %L::jsonb, true, %L)', grp,
+    manifest || jsonb_build_object('id', gen_random_uuid(), 'object_path', 'x/manifest2.json'), m.id),
+    'already finalized');
+  perform pg_temp.expect_error(format('update public.ored_checkpoints set rank = 1 where id = %L', s0.id), 'immutable');
+  perform pg_temp.expect_error(format('update public.ored_checkpoints set is_complete = false where id = %L', s0.id), 'finalize_group');
+  perform pg_temp.expect_error(format('select public.ored_checkpoint_make_current(%L)', s0.id), 'one shard of group');
+  perform pg_temp.expect_error(format('select public.ored_checkpoint_delete_group(%L)', grp), 'is current');
+end $$;
+
+-- 13. sessions and workers -------------------------------------------------
+
+do $$
+declare
+  s public.ored_training_sessions; again public.ored_training_sessions; n int;
+begin
+  s := public.ored_training_session_claim('invariant-session', 'invariant_dist', 'corpus',
+         '{"distributed": {"world_size": 3, "backend": "gloo", "heartbeat_seconds": 30}}');
+  if s.status <> 'running' then raise exception 'claimed session is not running'; end if;
+  again := public.ored_training_session_claim('invariant-session', 'invariant_dist', 'corpus', '{}');
+  if again.id <> s.id then raise exception 'claiming twice made two sessions'; end if;
+
+  insert into public.ored_training_workers (session_id, worker_id, rank, node_rank, local_rank, hostname, gpu_name, status)
+  values (s.id, 'pc1-gpu0', 0, 0, 0, 'pc1', 'RTX 5060', 'training'),
+         (s.id, 'pc2-gpu0', 1, 1, 0, 'pc2', 'RTX 3060', 'checkpointing'),
+         (s.id, 'pc3-gpu0', 2, 2, 0, 'pc3', 'RTX 4050', 'training');
+  update public.ored_training_workers set last_heartbeat = now() - interval '10 minutes'
+   where session_id = s.id and worker_id = 'pc3-gpu0';
+
+  perform pg_temp.expect_error(format(
+    'insert into public.ored_training_workers (session_id, worker_id) values (%L, ''pc1-gpu0'')', s.id), 'duplicate key');
+  perform pg_temp.expect_error(format(
+    'update public.ored_training_workers set status = ''sleeping'' where session_id = %L', s.id), 'status_check');
+
+  select count(*) into n from public.ored_training_worker_status
+   where session_key = 'invariant-session' and health = 'no heartbeat (unknown)';
+  if n <> 1 then raise exception 'expected one silent worker, got %', n; end if;
+  select workers into n from public.ored_training_run_overview where session_key = 'invariant-session';
+  if n <> 3 then raise exception 'run overview counts % workers, expected 3', n; end if;
+  select workers_alive into n from public.ored_training_run_overview where session_key = 'invariant-session';
+  if n <> 2 then raise exception 'run overview counts % alive workers, expected 2', n; end if;
+end $$;
+
 -- 11. the public roles still see nothing -------------------------------------
 
 set local role anon;
 select pg_temp.expect_error('select * from public.ored_checkpoints', 'permission denied');
 select pg_temp.expect_error('select * from public.ored_checkpoint_current', 'permission denied');
 select pg_temp.expect_error('select * from public.ored_checkpoint_duplicates', 'permission denied');
+select pg_temp.expect_error('select * from public.ored_training_workers', 'permission denied');
+select pg_temp.expect_error('select * from public.ored_training_worker_status', 'permission denied');
+select pg_temp.expect_error('select * from public.ored_training_run_overview', 'permission denied');
+select pg_temp.expect_error('select * from public.ored_checkpoint_groups', 'permission denied');
+select pg_temp.expect_error(
+  $q$select public.ored_training_session_claim('x', 'y', 'z', '{}')$q$, 'permission denied');
 select pg_temp.expect_error(
   'select public.ored_checkpoint_delete(gen_random_uuid())', 'permission denied');
 reset role;

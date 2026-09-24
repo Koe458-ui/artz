@@ -89,13 +89,14 @@ class Trainer:
         self.cfg = cfg
 
         set_seed(cfg.seed, cfg.deterministic)
-        self.device = resolve_device(cfg.training.device)
+        self.device = self._select_device()
 
         self.task = build_task(cfg)
 
         self.generator = torch.Generator()
         self.generator.manual_seed(cfg.seed)
         self.loaders, self.datasets = self.task.build_data(generator=self.generator)
+        self._prepare_loaders()
 
         self.model = self.task.build_model().to(self.device)
 
@@ -106,6 +107,7 @@ class Trainer:
             cfg.training.learning_rate,
             cfg.training.weight_decay,
         )
+        self.forward_model = self._wrap_model(self.model)
 
         self.schedule = build_schedule(cfg.training.scheduler)
         self.steps_per_epoch = max(1, len(self.loaders["train"]))
@@ -117,7 +119,7 @@ class Trainer:
         self.best_val_loss = float("inf")
         self.epochs_without_improvement = 0
         self.checkpoint_dir = cfg.checkpoint_dir
-        self.checkpoints = CheckpointManager.for_training(cfg)
+        self.checkpoints = self._build_checkpoints()
 
         self.epoch = 0
         self.start_epoch = 1
@@ -135,6 +137,21 @@ class Trainer:
             self._warm_start(cfg.training.resume)
 
         self.initial_parameters = snapshot_parameters(self.model)
+
+    def _select_device(self) -> torch.device:
+        return resolve_device(self.cfg.training.device)
+
+    def _prepare_loaders(self) -> None:
+        pass
+
+    def _wrap_model(self, model: nn.Module) -> nn.Module:
+        return model
+
+    def _build_checkpoints(self) -> CheckpointManager:
+        return CheckpointManager.for_training(self.cfg)
+
+    def _before_epoch(self) -> None:
+        pass
 
     @property
     def best_epoch(self) -> int:
@@ -160,11 +177,16 @@ class Trainer:
         self.optimizer.load_state_dict(payload["optimizer_state_dict"])
         self._log_config_drift(payload.get("config") or {})
 
+        self._restore_loop_state(payload, payload.get("rng_state"), path)
+
+    def _restore_loop_state(self, payload: Dict[str, Any], rng_state: Optional[Dict[str, Any]],
+                            path: str, train_sums: Optional[Dict[str, Any]] = None) -> None:
         state = payload["trainer_state"]
         self.global_step = int(payload["global_step"])
         self.epoch = int(payload["epoch"])
         self.history = [dict(r) for r in state.get("history", [])]
-        self.best_val_loss = float(state.get("best_val_loss", float("inf")))
+        best_val_loss = state.get("best_val_loss")
+        self.best_val_loss = float("inf") if best_val_loss is None else float(best_val_loss)
         self.epochs_without_improvement = int(state.get("epochs_without_improvement", 0))
         self.current_lr = float(state.get("current_lr", self.current_lr))
 
@@ -178,22 +200,24 @@ class Trainer:
                 f"this run uses {self.checkpoints.rule.describe()}: best restarts from here"
             )
 
-        if state.get("epoch_complete", True):
+        complete = state.get("epoch_complete", True)
+        if complete:
             self.start_epoch = self.epoch + 1
             self.batch_in_epoch = 0
-            restore_rng(payload.get("rng_state"), self.generator)
+            restore_rng(rng_state, self.generator)
         else:
             self.start_epoch = self.epoch
             self.batch_in_epoch = int(state.get("batch_in_epoch", 0))
-            self.generator.set_state(state["epoch_generator_state"])
-            self._resume_rng = payload.get("rng_state")
-            sums = state.get("train_sums") or {}
+            if state.get("epoch_generator_state") is not None:
+                self.generator.set_state(state["epoch_generator_state"])
+            self._resume_rng = rng_state
+            sums = train_sums if train_sums is not None else (state.get("train_sums") or {})
             self.train_metrics = MetricAccumulator(
                 int(sums.get("total_examples", 0)), dict(sums.get("sums", {}))
             )
         self.checkpoints.last_live_step = self.global_step
         self.resumed_live = True
-        where = (f"end of epoch {self.epoch}" if state.get("epoch_complete", True)
+        where = (f"end of epoch {self.epoch}" if complete
                  else f"epoch {self.epoch}, batch {self.batch_in_epoch}")
         self.resumed_from = f"{path} ({where}, step {self.global_step:,})"
 
@@ -254,7 +278,8 @@ class Trainer:
         return partial
 
     def _train_one_epoch(self) -> Dict[str, float]:
-        self.model.train()
+        self.forward_model.train()
+        self._before_epoch()
         skip = self.batch_in_epoch
         if skip == 0:
             self.train_metrics = MetricAccumulator()
@@ -272,7 +297,7 @@ class Trainer:
 
             self.optimizer.zero_grad(set_to_none=True)
 
-            loss, extra, batch_size = self.task.compute_loss(self.model, batch, self.device)
+            loss, extra, batch_size = self.task.compute_loss(self.forward_model, batch, self.device)
 
             loss.backward()
 

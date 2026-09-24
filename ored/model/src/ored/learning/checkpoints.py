@@ -11,7 +11,7 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
-from ored.learning.records import Checkpoint, CheckpointKind, now
+from ored.learning.records import Checkpoint, CheckpointKind, CheckpointPart, now
 from ored.learning.store import StoreError
 from ored.utils.checkpoint import (
     CheckpointError,
@@ -253,6 +253,7 @@ def publish(
     rehash: bool = True,
     prune_superseded: bool = True,
     workdir: Optional[str | Path] = None,
+    object_path: Optional[str] = None,
 ) -> Checkpoint:
     kind = CheckpointKind(kind)
     path = Path(path)
@@ -270,7 +271,7 @@ def publish(
     sha256 = digest(path)
     size = path.stat().st_size
 
-    object_path = object_path_for(kind, run_name, meta["epoch"], meta["global_step"])
+    object_path = object_path or object_path_for(kind, run_name, meta["epoch"], meta["global_step"])
     candidate, n = object_path, 1
     while True:
         existing = _row_for_path(store, candidate)
@@ -330,7 +331,8 @@ def publish(
 
     if kind is CheckpointKind.LIVE and prune_superseded:
         for old in store.checkpoints(CheckpointKind.LIVE, run_name=run_name, current=False):
-            delete_checkpoint(store, files, old.id)
+            if old.part is CheckpointPart.FILE:
+                delete_checkpoint(store, files, old.id)
     return record
 
 
@@ -448,7 +450,7 @@ def fetch_record(files: CheckpointStore, record: Checkpoint, path: str | Path) -
 
 def find(store: Any, kind: CheckpointKind, run_name: str = "") -> Optional[Checkpoint]:
     kind = CheckpointKind(kind)
-    found: List[Checkpoint] = store.checkpoints(kind, run_name=run_name or None)
+    found: List[Checkpoint] = store.checkpoints(kind, run_name=run_name or None, logical=True)
     if not found:
         return None
     current = [c for c in found if c.is_current]
@@ -547,7 +549,7 @@ class DuplicateGroup:
 def find_duplicates(store: Any) -> List[DuplicateGroup]:
     by_sha: Dict[str, List[Checkpoint]] = {}
     for record in store.checkpoints():
-        if record.sha256:
+        if record.sha256 and record.part is CheckpointPart.FILE:
             by_sha.setdefault(record.sha256, []).append(record)
     groups = []
     for sha, records in by_sha.items():
@@ -560,13 +562,24 @@ def find_duplicates(store: Any) -> List[DuplicateGroup]:
 
 def delete_checkpoint(store: Any, files: CheckpointStore, checkpoint_id: str,
                       allow_current: bool = False) -> Checkpoint:
+    target = store.checkpoint(checkpoint_id)
+    if target is not None and target.part is not CheckpointPart.FILE:
+        rows = store.group(target.checkpoint_group_id)
+        store.delete_group(target.checkpoint_group_id, allow_current=allow_current)
+        for row in rows:
+            _remove_quietly(files, row.object_path)
+        return target
     record = store.delete_checkpoint(checkpoint_id, allow_current=allow_current)
     if _row_for_path(store, record.object_path) is None:
-        try:
-            files.remove(record.object_path)
-        except StoreError:
-            pass
+        _remove_quietly(files, record.object_path)
     return record
+
+
+def _remove_quietly(files: CheckpointStore, object_path: str) -> None:
+    try:
+        files.remove(object_path)
+    except StoreError:
+        pass
 
 
 def remove_duplicates(store: Any, files: CheckpointStore, apply: bool = False) -> List[Checkpoint]:
@@ -582,7 +595,7 @@ def prune_history(store: Any, files: CheckpointStore, run_name: str, keep_last: 
     if keep_last < 0:
         raise ValueError("keep_last must be >= 0")
     history = sorted(
-        store.checkpoints(CheckpointKind.HISTORY, run_name=run_name),
+        store.checkpoints(CheckpointKind.HISTORY, run_name=run_name, logical=True),
         key=lambda r: (r.global_step, r.epoch, str(r.created_at)),
     )
     doomed = history[: max(0, len(history) - keep_last)]

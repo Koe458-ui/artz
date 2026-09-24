@@ -246,6 +246,8 @@ python scripts/export_learning_dataset.py --tag <tag>
 
 Checkpoint roles (base, live, best, history, export), their Storage paths and
 the `ored_checkpoints` rules are in `ored/model/CHECKPOINTS.md`.
+Training one model on several PCs at once is in
+`ored/model/docs/distributed-training.md`.
 
 `ored/model/README.md` is the long version: how the model works, what it learned,
 and why each piece is built the way it is.

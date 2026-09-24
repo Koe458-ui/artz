@@ -12,6 +12,10 @@ it is, where its file is, and whether training can continue from it.
 | `history` | Old snapshots for rollback, debugging and comparison | many, append-only | never |
 | `export` | An inference-only copy for deployment, no training state | one current | never (a new export is a new row) |
 
+Training on several PCs keeps these roles; one checkpoint is then a group of
+files, one shard per worker plus a manifest. See
+[`docs/distributed-training.md`](docs/distributed-training.md).
+
 "live" is the name the database already used. It means *latest and resumable*;
 there is no separate "latest" or "last" role.
 

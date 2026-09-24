@@ -9,7 +9,7 @@ from pathlib import Path
 import pytest
 
 SUPABASE = Path(__file__).resolve().parents[2] / "supabase"
-MIGRATION = SUPABASE / "migrations" / "20260924150000_ored_checkpoint_roles.sql"
+MIGRATIONS = sorted((SUPABASE / "migrations").glob("*.sql"))
 
 
 def _pg_bin():
@@ -49,12 +49,16 @@ def psql(database, *args):
     return result.stdout
 
 
-def test_migration_applies_to_the_pre_migration_schema_and_keeps_every_row(database):
+def test_migrations_apply_to_the_pre_migration_schema_and_keep_every_row(database):
     psql(database, "-f", str(SUPABASE / "tests" / "baseline.sql"))
     before = psql(database, "-At", "-c", "select count(*) from public.ored_checkpoints")
-    psql(database, "-1", "-f", str(MIGRATION))
+    for migration in MIGRATIONS:
+        psql(database, "-1", "-f", str(migration))
     after = psql(database, "-At", "-c", "select count(*) from public.ored_checkpoints")
     assert before == after
+    parts = psql(database, "-At", "-c",
+                 "select distinct part || ':' || is_complete || ':' || upload_status from public.ored_checkpoints")
+    assert parts.split() == ["file:true:verified"]
 
 
 def test_checkpoint_invariants_hold(database):

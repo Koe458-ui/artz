@@ -20,6 +20,7 @@ from ored.learning.records import (
     SessionStatus,
     TrainingExample,
     TrainingSession,
+    TrainingWorker,
     VersionStatus,
     to_row,
 )
@@ -215,8 +216,11 @@ class SupabaseStore:
         kind: Optional[CheckpointKind] = None,
         run_name: Optional[str] = None,
         current: Optional[bool] = None,
+        logical: Optional[bool] = None,
     ) -> List[Checkpoint]:
         filters = []
+        if logical is not None:
+            filters.append("part=neq.shard" if logical else "part=eq.shard")
         if kind is not None:
             filters.append(f"kind=eq.{CheckpointKind(kind).value}")
         if run_name is not None:
@@ -228,3 +232,59 @@ class SupabaseStore:
 
     def drop_checkpoint(self, checkpoint_id: str) -> None:
         self.delete_checkpoint(checkpoint_id, allow_current=True)
+
+    def set_shard_status(self, checkpoint_id: str, status: str) -> Checkpoint:
+        return self._rpc("ored_checkpoint_shard_status", {"p_id": checkpoint_id, "p_status": status})
+
+    def finalize_group(
+        self, group_id: str, manifest: Checkpoint, make_current: bool = False,
+        replaces: Optional[str] = None,
+    ) -> Checkpoint:
+        return self._rpc("ored_checkpoint_finalize_group", {
+            "p_group": group_id,
+            "p_manifest": to_row(manifest),
+            "p_make_current": bool(make_current),
+            "p_replaces": replaces,
+        })
+
+    def delete_group(self, group_id: str, allow_current: bool = False) -> int:
+        returned = self._call("POST", "/rpc/ored_checkpoint_delete_group",
+                              {"p_group": group_id, "p_allow_current": allow_current})
+        return int(returned if not isinstance(returned, list) else (returned[0] if returned else 0))
+
+    def group(self, group_id: str) -> List[Checkpoint]:
+        safe = urllib.parse.quote(group_id)
+        return self._select(Checkpoint, f"checkpoint_group_id=eq.{safe}&order=part.asc,rank.asc,object_path.asc")
+
+    def claim_session(self, session_key: str, run_name: str, dataset_tag: str,
+                      config: Dict[str, Any]) -> TrainingSession:
+        returned = self._call("POST", "/rpc/ored_training_session_claim", {
+            "p_session_key": session_key,
+            "p_run_name": run_name,
+            "p_dataset_tag": dataset_tag,
+            "p_config": config,
+        })
+        if isinstance(returned, list):
+            returned = returned[0] if returned else None
+        if not returned:
+            raise StoreError("ored_training_session_claim returned nothing")
+        return self._build(TrainingSession, returned)
+
+    def upsert_worker(self, worker: TrainingWorker) -> TrainingWorker:
+        row = to_row(worker)
+        row.pop("id")
+        row.pop("created_at")
+        returned = self._call(
+            "POST", "/" + self._table(TrainingWorker) + "?on_conflict=session_id,worker_id", [row],
+            "resolution=merge-duplicates,return=representation",
+        )
+        return self._build(TrainingWorker, returned[0])
+
+    def update_worker(self, worker_row_id: str, **fields: Any) -> None:
+        values = {k: (v.value if hasattr(v, "value") else v) for k, v in fields.items()}
+        path = f"/{self._table(TrainingWorker)}?id=eq.{urllib.parse.quote(worker_row_id)}"
+        self._call("PATCH", path, values)
+
+    def workers(self, session_id: str) -> List[TrainingWorker]:
+        safe = urllib.parse.quote(session_id)
+        return self._select(TrainingWorker, f"session_id=eq.{safe}&order=rank.asc")

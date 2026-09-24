@@ -20,7 +20,7 @@ from ored.learning.checkpoints import (
     remove_duplicates,
     verify_checkpoint,
 )
-from ored.learning.records import Checkpoint, CheckpointKind
+from ored.learning.records import Checkpoint, CheckpointKind, CheckpointPart
 from ored.learning.store import StoreError
 from ored.learning.supabase_store import SupabaseStore
 from ored.utils.checkpoint import CheckpointError, PromotionRule, as_kind, load_checkpoint, write_payload
@@ -104,6 +104,8 @@ def card(record: Checkpoint, report: Any = None) -> str:
         f"PyTorch:         {record.torch_version or '-'}",
         f"Storage path:    {record.bucket_id}/{record.object_path}",
         f"Derived from:    {record.parent_checkpoint_id or '-'}",
+        *([f"Distributed:     {record.world_size} workers, group {record.checkpoint_group_id} "
+           f"({'complete' if record.is_complete else 'INCOMPLETE'})"] if record.part is not CheckpointPart.FILE else []),
         f"Created:         {record.created_at}",
         f"Uploaded by:     {record.uploaded_by or '-'}",
         f"Verified:        {_verified(record, report)}",
@@ -178,7 +180,7 @@ def _resolve(store: Any, ref: str, run: str) -> Checkpoint:
 
 
 def _show_role(store: Any, kind: CheckpointKind, run: str) -> int:
-    runs = [run] if run else sorted({r.run_name for r in store.checkpoints(kind)})
+    runs = [run] if run else sorted({r.run_name for r in store.checkpoints(kind, logical=True)})
     shown = 0
     for name in runs:
         record = find(store, kind, name)
@@ -202,6 +204,7 @@ def cmd_list(args: argparse.Namespace) -> int:
         CheckpointKind(args.kind) if args.kind else None,
         run_name=args.run or None,
         current=True if args.current else None,
+        logical=True,
     )
     if not records:
         print("Nothing stored yet.")
@@ -226,7 +229,7 @@ def cmd_show(args: argparse.Namespace) -> int:
 def cmd_history(args: argparse.Namespace) -> int:
     store, _ = _connect()
     records = sorted(
-        store.checkpoints(CheckpointKind.HISTORY, run_name=args.run),
+        store.checkpoints(CheckpointKind.HISTORY, run_name=args.run, logical=True),
         key=lambda r: (r.global_step, r.epoch),
     )
     if not records:
@@ -237,13 +240,36 @@ def cmd_history(args: argparse.Namespace) -> int:
     return 0
 
 
+def _verify_group(args: argparse.Namespace, store: Any = None, files: Any = None) -> int:
+    from ored.config import load_config
+    from ored.distributed.checkpoint import verify_group_dir, verify_group_remote
+    from ored.distributed.cli import report
+
+    cfg = load_config(args.config) if getattr(args, "config", "") else None
+    if Path(args.checkpoint).is_dir():
+        manifest, problems = verify_group_dir(args.checkpoint, cfg)
+    else:
+        manifest, problems = verify_group_remote(store, files, args.checkpoint, cfg)
+    print(report(manifest, problems, args.checkpoint, model_checked=cfg is not None))
+    return 0 if not problems else 1
+
+
 def cmd_verify(args: argparse.Namespace) -> int:
     path = Path(args.checkpoint)
+    if path.is_dir():
+        return _verify_group(args)
     if path.exists():
         print(local_card(path))
         return 0
     store, files = _connect()
-    record = _resolve(store, args.checkpoint, args.run)
+    record = store.checkpoint(args.checkpoint) if args.checkpoint not in KINDS else None
+    if record is None and args.checkpoint not in KINDS and store.group(args.checkpoint):
+        return _verify_group(args, store, files)
+    if record is None or record.part is not CheckpointPart.FILE:
+        record = record or _resolve(store, args.checkpoint, args.run)
+    if record.part is not CheckpointPart.FILE:
+        args.checkpoint = record.checkpoint_group_id
+        return _verify_group(args, store, files)
     report = verify_checkpoint(store, files, record)
     print(card(record, report))
     return 0 if report.ok else 1
@@ -438,8 +464,9 @@ def build_parser() -> argparse.ArgumentParser:
     p.set_defaults(func=cmd_history)
 
     p = sub.add_parser("verify")
-    p.add_argument("checkpoint", help="id, role (live/best/...) or local .pt path")
+    p.add_argument("checkpoint", help="id, checkpoint_group_id, role (live/best/...), .pt file or checkpoint folder")
     p.add_argument("--run", default="")
+    p.add_argument("--config", default="", help="also check the model config is compatible")
     p.set_defaults(func=cmd_verify)
 
     p = sub.add_parser("promote-best")

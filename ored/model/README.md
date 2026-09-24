@@ -468,6 +468,7 @@ Ored.ai/
 │   ├── recall.py               # ask a checkpoint every fact it was taught
 │   ├── vocab.py                # what a checkpoint can read, and what it was taught
 │   ├── train.py                # both steps, selected by --config
+│   ├── distributed.py          # one model trained on many PCs (torchrun)
 │   ├── evaluate.py             # both steps, routed by the checkpoint
 │   ├── infer.py                # Step 1 prediction
 │   ├── generate.py             # Step 2 text generation
@@ -1198,7 +1199,16 @@ best. `pull` refuses a file whose digest does not match what was recorded. Set
 `checkpoint.upload: true` to have the trainer publish as it goes. The whole
 design — roles, paths, table, rules, commands — is in
 [`CHECKPOINTS.md`](CHECKPOINTS.md); the migration is
-`ored/supabase/migrations/20260924150000_ored_checkpoint_roles.sql`. `serve.py --remote-checkpoints` pulls the live
+`ored/supabase/migrations/20260924150000_ored_checkpoint_roles.sql`.
+
+### Training on several PCs
+
+`python -m ored.distributed launch train ...` trains one model on many PCs at
+once with `torchrun` and `DistributedDataParallel`, and saves one distributed
+checkpoint that every PC writes part of. How the PCs find each other, how the
+data is split, how best is chosen on the global validation loss, how
+checkpoints are sharded into Supabase, and what happens when a PC crashes are
+in [`docs/distributed-training.md`](docs/distributed-training.md). `serve.py --remote-checkpoints` pulls the live
 checkpoint on boot when there is no local one and pushes it on every save, so a
 restart on a fresh machine does not lose what the model learned online.
 
@@ -1242,7 +1252,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **89 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **101 files, 0 comments, 0 docstrings.**
 
 ---
 

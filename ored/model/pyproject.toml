@@ -28,6 +28,7 @@ ored-generate = "ored.inference.generate_cli:main"
 ored-export-learning = "ored.learning.export_cli:main"
 ored-checkpoints = "ored.learning.checkpoint_cli:main"
 ored-serve = "ored.serving.server:main"
+ored-distributed = "ored.distributed.cli:main"
 
 [tool.setuptools.packages.find]
 where = ["src"]
