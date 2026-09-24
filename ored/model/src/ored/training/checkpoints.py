@@ -1,8 +1,9 @@
 from __future__ import annotations
 
+import copy
 import random
 from pathlib import Path
-from typing import Any, Callable, Dict, List, Optional
+from typing import Any, Callable, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -13,7 +14,9 @@ from ored.utils.checkpoint import (
     PromotionRule,
     as_kind,
     build_payload,
+    check_compatible,
     load_checkpoint,
+    load_model_state,
     write_payload,
 )
 from ored.utils.logging_utils import get_logger
@@ -251,3 +254,89 @@ class CheckpointManager:
         if record is not None:
             fetch_record(files, record, path)
             logger.info(f"pulled the current {kind} checkpoint from {record.bucket_id}/{record.object_path}")
+
+
+PLACEABLE = ("live", "best", "history")
+
+
+def free_path(path: Path) -> Path:
+    candidate, n = path, 1
+    while candidate.exists():
+        n += 1
+        candidate = path.with_name(f"{path.stem}-{n}{path.suffix}")
+    return candidate
+
+
+def evaluate_file(path: str | Path, cfg: Config, device: str = "auto") -> Dict[str, float]:
+    from ored.training.trainer import Trainer
+
+    cfg = copy.deepcopy(cfg)
+    cfg.training.resume = ""
+    cfg.training.device = device
+    cfg.checkpoint.upload = False
+    trainer = Trainer(cfg)
+    payload = load_checkpoint(path, map_location=trainer.device)
+    check_compatible(payload, trainer.model, path=path, tokenizer=trainer._tokenizer())
+    load_model_state(trainer.model, payload["model_state_dict"], path)
+    return {f"val_{k}": v for k, v in trainer.evaluate("val").items()}
+
+
+def archive_to_history(manager: CheckpointManager, path: Path) -> Path:
+    payload = load_checkpoint(path)
+    target = free_path(manager.history_dir / history_filename(payload["epoch"], payload["global_step"]))
+    return write_payload(target, as_kind(payload, "history"))
+
+
+def place_checkpoint(
+    cfg: Config,
+    source: str | Path,
+    kind: str,
+    force: bool = False,
+    device: str = "auto",
+    manager: Optional[CheckpointManager] = None,
+) -> Tuple[Optional[Path], str]:
+    if kind not in PLACEABLE:
+        raise ValueError(f"a checkpoint can be saved as {', '.join(PLACEABLE)}, not {kind!r}")
+    manager = manager or CheckpointManager(cfg)
+    source = Path(source)
+    payload = load_checkpoint(source)
+
+    if kind == "history":
+        target = free_path(manager.history_dir / history_filename(payload["epoch"], payload["global_step"]))
+        write_payload(target, as_kind(payload, "history"))
+        manager._publish("history", target)
+        return target, f"saved as history: {target}"
+
+    if kind == "live":
+        if not (payload.get("optimizer_state_dict") and payload.get("trainer_state")):
+            raise CheckpointError(
+                f"{source} cannot be the live checkpoint: it has no optimizer or loop state, so "
+                f"training could not resume from it. Start a new run from it with --init-from {source}"
+            )
+        live = manager.path("live")
+        archived = archive_to_history(manager, live) if live.exists() and live.resolve() != source.resolve() else None
+        write_payload(live, as_kind(payload, "live"))
+        manager._publish("live", live)
+        note = f" (previous live kept as {archived})" if archived else ""
+        return live, f"saved as live: {live}{note}"
+
+    rule = manager.rule
+    best = manager.path("best")
+    new_metrics = evaluate_file(source, cfg, device)
+    new_value = rule.value(new_metrics)
+    old_value = rule.value(evaluate_file(best, cfg, device)) if best.exists() else None
+    compared = (f"{rule.metric} {new_value:.5f} vs current best "
+                f"{'none' if old_value is None else f'{old_value:.5f}'}")
+    if not force and not rule.is_better(new_value, old_value):
+        return None, f"not promoted: {compared}; {rule.describe()}. best.pt is unchanged."
+
+    archived = archive_to_history(manager, best) if best.exists() else None
+    promoted = as_kind(payload, "best")
+    promoted["metrics"] = {**(payload.get("metrics") or {}), **new_metrics}
+    promoted["promotion"] = {"metric": rule.metric, "mode": rule.mode,
+                             "value": new_value, "epoch": payload.get("epoch")}
+    write_payload(best, promoted)
+    manager._publish("best", best)
+    note = f"; previous best kept as {archived}" if archived else ""
+    return best, f"promoted to best: {compared}{note}"
+

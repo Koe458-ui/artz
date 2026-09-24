@@ -307,6 +307,56 @@ last batch of an epoch.
 `training.resume: <path>` is the old warm start: weights and optimizer from any
 compatible checkpoint, epochs counted from 1.
 
+## From the command prompt
+
+Run from `ored/model`. Add `--upload` to any of them to publish to Supabase as well.
+
+```bash
+# New run from scratch (base, best and live are saved automatically)
+python scripts/train.py --config configs/char_transformer.yaml
+
+# ...keeping a history snapshot every 10 epochs, and live every 500 steps
+python scripts/train.py --config configs/char_transformer.yaml --history-every 10 --live-every-steps 500
+
+# New run that starts from another checkpoint's weights (epochs count from 1)
+python scripts/train.py --config configs/char_transformer.yaml --set run_name=ored_v3 \
+    --init-from checkpoints/ored_v2/best.pt
+
+# Continue a run exactly where live.pt stopped (raise epochs to train longer)
+python scripts/train.py --config configs/char_transformer.yaml --resume-live --set training.epochs=60
+
+# Put any checkpoint file into a run's role by hand
+python scripts/checkpoints.py save FILE.pt --as history --config configs/char_transformer.yaml
+python scripts/checkpoints.py save FILE.pt --as best    --config configs/char_transformer.yaml
+python scripts/checkpoints.py save FILE.pt --as live    --config configs/char_transformer.yaml
+
+# Make the online (serve.py) session's live.pt the best, if it validates better
+python scripts/checkpoints.py merge-live --config configs/char_transformer.yaml
+python scripts/checkpoints.py merge-live --config configs/char_transformer.yaml --live checkpoints/live/live.pt
+```
+
+`--config` (plus any `--set`) picks the run: files go to
+`<paths.checkpoint_dir>/<run_name>/`.
+
+`save --as best` and `merge-live` evaluate **both** the file and the current
+`best.pt` on the run's validation split, with the same code the trainer uses,
+and replace `best.pt` only if `PromotionRule` says the file is better. The
+online session's own numbers are not trusted: its `last_loss` is from single
+messages, not the validation set. The replaced best is kept as
+`history/epoch_EEEE_step_SSSSSSSS.pt`, never deleted. `--force` replaces even
+when not better. A file that is not better leaves everything untouched:
+
+```
+promoted to best: val_loss 3.07018 vs current best 3.37613; previous best kept as checkpoints/lm/history/epoch_0002_step_00000074.pt
+not promoted: val_loss 3.07018 vs current best 3.07018; val_loss (lower is better). best.pt is unchanged.
+```
+
+`save --as live` refuses a file without optimizer and loop state (a best from
+format 1, a base, an export or the online session's live), because the run
+could not resume from it; use `--init-from` to start a new run from it. The
+previous `live.pt` is kept in `history/`. `save --as history` adds a snapshot
+(`-2`, `-3` if the name is taken).
+
 ## Commands
 
 `python scripts/checkpoints.py <command>` (also `python -m ored.learning.checkpoint_cli`
@@ -322,6 +372,8 @@ and the installed `ored-checkpoints`). Commands that touch Supabase read `ORED_S
 | `verify <id\|role\|file.pt>` | Storage: exists, size, sha256, loads, then records `verified_at`. Local file: loads and validates. |
 | `promote-best <id\|file.pt> [--run R] [--metric M --mode min\|max] [--force]` | evaluate and promote |
 | `resume-live --config C [--set k=v]` | train with `training.resume=live` |
+| `save FILE --as live\|best\|history --config C [--force] [--upload]` | put a file into the run's role; best only if better |
+| `merge-live --config C [--live PATH] [--force] [--upload]` | the online session's live → best, if it validates better |
 | `export --run R [--source best\|live]` / `export --path file.pt [--out o.pt]` | inference-only artifact |
 | `duplicates [--apply]` | report identical files; `--apply` removes the non-canonical rows and objects |
 | `cleanup-history --run R --keep N [--apply]` | keep the newest N snapshots |

@@ -42,6 +42,9 @@ only: the service key must never reach a browser or phone app).
   verify <id|path|live|best>   download, re-hash and load it
   promote-best <id|path>       make it best if it beats the current best
   resume-live --config ...     continue training from live
+  save FILE --as live|best|history --config ...
+                               put a file into this run's role (best only if better)
+  merge-live --config ...      online session's live.pt -> best.pt, if it validates better
   export     --run ored_v2     inference-only copy of the current best
   duplicates [--apply]         byte-identical rows (report; --apply removes extras)
   cleanup-history --run R --keep N [--apply]
@@ -271,6 +274,31 @@ def cmd_resume_live(args: argparse.Namespace) -> int:
     return 0
 
 
+def _place(args: argparse.Namespace, source: str, kind: str) -> int:
+    from ored.config import load_config
+    from ored.training.checkpoints import CheckpointManager, place_checkpoint
+
+    overrides = list(args.overrides) + (["checkpoint.upload=true"] if args.upload else [])
+    cfg = load_config(args.config, overrides)
+    path, message = place_checkpoint(
+        cfg, source, kind, force=getattr(args, "force", False), device=args.device,
+        manager=CheckpointManager.for_training(cfg),
+    )
+    print(message)
+    if path is not None:
+        print()
+        print(local_card(path))
+    return 0 if path is not None else 1
+
+
+def cmd_save(args: argparse.Namespace) -> int:
+    return _place(args, args.path, args.role)
+
+
+def cmd_merge_live(args: argparse.Namespace) -> int:
+    return _place(args, args.live, "best")
+
+
 def cmd_export(args: argparse.Namespace) -> int:
     if args.path:
         source = Path(args.path)
@@ -424,6 +452,25 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--config", required=True)
     p.add_argument("--set", dest="overrides", action="append", default=[], metavar="KEY=VALUE")
     p.set_defaults(func=cmd_resume_live)
+
+    def with_run_config(p: argparse.ArgumentParser) -> None:
+        p.add_argument("--config", required=True, help="the run's config; its run_name picks checkpoints/<run_name>/")
+        p.add_argument("--set", dest="overrides", action="append", default=[], metavar="KEY=VALUE")
+        p.add_argument("--device", default="auto", choices=["auto", "cpu", "cuda"])
+        p.add_argument("--upload", action="store_true", help="also publish to Supabase")
+
+    p = sub.add_parser("save", help="put a checkpoint file into this run's live, best or history")
+    p.add_argument("path")
+    p.add_argument("--as", dest="role", required=True, choices=["live", "best", "history"])
+    p.add_argument("--force", action="store_true", help="for best: replace even if not better")
+    with_run_config(p)
+    p.set_defaults(func=cmd_save)
+
+    p = sub.add_parser("merge-live", help="make the online session's live.pt the best if it validates better")
+    p.add_argument("--live", default="checkpoints/live/live.pt")
+    p.add_argument("--force", action="store_true")
+    with_run_config(p)
+    p.set_defaults(func=cmd_merge_live)
 
     p = sub.add_parser("export")
     p.add_argument("--run", default="")

@@ -414,3 +414,114 @@ def test_language_model_checkpoints_carry_the_tokenizer(tiny_corpus):
         assert payload["tokenizer"]["itos"] == trainer.task.tokenizer.itos
         assert payload["task"] == "language_model"
         assert "val_bpc" in payload["metrics"] or name == "base.pt"
+
+
+def test_train_flags_become_checkpoint_settings():
+    from ored.training.trainer import checkpoint_overrides, main
+    import argparse
+
+    args = argparse.Namespace(resume_live=False, init_from="checkpoints/ored_v2/best.pt",
+                              history_every=10, history_every_steps=None,
+                              live_every_steps=500, upload=True)
+    assert checkpoint_overrides(args) == [
+        "training.resume=checkpoints/ored_v2/best.pt",
+        "checkpoint.keep_history=true", "checkpoint.save_history_every_epochs=10",
+        "checkpoint.save_live_every_steps=500", "checkpoint.upload=true",
+    ]
+    with pytest.raises(SystemExit):
+        main(["--resume-live", "--init-from", "x.pt"])
+
+
+def test_init_from_starts_a_new_run_from_another_checkpoint(tiny_dataset, tmp_path):
+    donor = Trainer(fresh(tiny_dataset, tmp_path / "donor"))
+    donor.fit()
+    cfg = fresh(tiny_dataset, tmp_path / "new")
+    cfg.training.resume = str(donor.checkpoints.path("best"))
+    started = Trainer(cfg)
+    assert_same_weights(params(started.model), load_checkpoint(donor.checkpoints.path("best"))["model_state_dict"])
+    started.fit()
+    base = load_checkpoint(cfg.checkpoint_dir / "base.pt")
+    assert_same_weights(base["model_state_dict"], load_checkpoint(donor.checkpoints.path("best"))["model_state_dict"])
+    assert started.history[0]["epoch"] == 1
+
+
+def test_save_a_better_file_as_best_keeps_the_old_best_in_history(tiny_dataset, tmp_path):
+    from ored.training.checkpoints import evaluate_file, place_checkpoint
+
+    short = fresh(tiny_dataset, tmp_path / "short")
+    short.training.epochs = 1
+    Trainer(short).fit()
+    long = fresh(tiny_dataset, tmp_path / "long")
+    long.training.epochs = 20
+    Trainer(long).fit()
+    old_best = load_checkpoint(short.checkpoint_dir / "best.pt")
+
+    path, message = place_checkpoint(short, long.checkpoint_dir / "best.pt", "best", device="cpu")
+
+    assert path == short.checkpoint_dir / "best.pt" and "promoted" in message
+    best = load_checkpoint(path)
+    assert best["checkpoint_kind"] == "best"
+    assert best["epoch"] == load_checkpoint(long.checkpoint_dir / "best.pt")["epoch"]
+    assert best["metrics"]["val_loss"] == pytest.approx(evaluate_file(path, short, "cpu")["val_loss"])
+    archived = list((short.checkpoint_dir / "history").glob("*.pt"))
+    assert len(archived) == 1
+    assert load_checkpoint(archived[0])["checkpoint_kind"] == "history"
+    assert_same_weights(load_checkpoint(archived[0])["model_state_dict"], old_best["model_state_dict"])
+
+
+def test_save_a_worse_file_as_best_changes_nothing(tiny_dataset, tmp_path):
+    from ored.training.checkpoints import place_checkpoint
+
+    tiny_dataset.training.epochs = 20
+    Trainer(tiny_dataset).fit()
+    before = (tiny_dataset.checkpoint_dir / "best.pt").read_bytes()
+
+    path, message = place_checkpoint(tiny_dataset, tiny_dataset.checkpoint_dir / "base.pt", "best", device="cpu")
+
+    assert path is None and "not promoted" in message
+    assert (tiny_dataset.checkpoint_dir / "best.pt").read_bytes() == before
+    assert not (tiny_dataset.checkpoint_dir / "history").exists()
+
+    path, _ = place_checkpoint(tiny_dataset, tiny_dataset.checkpoint_dir / "base.pt", "best",
+                               force=True, device="cpu")
+    assert load_checkpoint(path)["epoch"] == 0
+
+
+def test_save_as_history_and_live(tiny_dataset):
+    from ored.training.checkpoints import place_checkpoint
+
+    Trainer(tiny_dataset).fit()
+    d = tiny_dataset.checkpoint_dir
+    first, _ = place_checkpoint(tiny_dataset, d / "best.pt", "history")
+    second, _ = place_checkpoint(tiny_dataset, d / "best.pt", "history")
+    assert first != second and second.stem.endswith("-2")
+    assert load_checkpoint(second)["checkpoint_kind"] == "history"
+
+    live, message = place_checkpoint(tiny_dataset, d / "best.pt", "live")
+    assert load_checkpoint(live)["checkpoint_kind"] == "live" and "previous live kept" in message
+
+    with pytest.raises(CheckpointError, match="--init-from"):
+        place_checkpoint(tiny_dataset, d / "base.pt", "live")
+
+
+def test_merge_live_from_an_online_session(tiny_corpus, tmp_path, capsys):
+    from ored.learning.checkpoint_cli import main as cli_main
+    from ored.learning.online import OnlineLearner, OnlinePolicy
+
+    tiny_corpus.training.epochs = 1
+    Trainer(tiny_corpus).fit()
+    best = tiny_corpus.checkpoint_dir / "best.pt"
+    learner = OnlineLearner.from_checkpoint(best, device="cpu", live_dir=tmp_path / "live",
+                                            policy=OnlinePolicy(learning_rate=1e-3, save_every=0))
+    for _ in range(3):
+        learner.learn("the small cat sees the red dog .")
+    live = learner.save()
+
+    import yaml
+    config = tmp_path / "run.yaml"
+    config.write_text(yaml.safe_dump(tiny_corpus.to_dict()))
+
+    code = cli_main(["merge-live", "--config", str(config), "--live", str(live), "--device", "cpu"])
+    out = capsys.readouterr().out
+    assert ("promoted to best" in out) == (code == 0)
+    assert "not promoted" in out or "BEST" in out

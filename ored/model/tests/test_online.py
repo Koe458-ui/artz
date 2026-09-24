@@ -90,3 +90,15 @@ def test_the_policy_rejects_nonsense():
         OnlinePolicy(learning_rate=0).validate()
     with pytest.raises(ValueError):
         OnlinePolicy(steps_per_message=0).validate()
+
+
+@pytest.mark.parametrize("module", ["ored.learning.online", "ored.serving.server", "ored.inference.vocab_cli"])
+def test_the_module_imports_on_its_own(module):
+    import subprocess
+    import sys
+    from pathlib import Path
+
+    src = Path(__file__).resolve().parent.parent / "src"
+    result = subprocess.run([sys.executable, "-c", f"import {module}"], capture_output=True,
+                            text=True, env={"PYTHONPATH": str(src), "PATH": ""})
+    assert result.returncode == 0, result.stderr

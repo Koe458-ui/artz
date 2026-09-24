@@ -512,14 +512,45 @@ def train(cfg: Config, ensure_dataset: bool = True) -> Dict[str, Any]:
     return Trainer(cfg).fit()
 
 
+def checkpoint_overrides(args: argparse.Namespace) -> List[str]:
+    overrides = []
+    if args.resume_live:
+        overrides.append("training.resume=live")
+    if args.init_from:
+        overrides.append(f"training.resume={args.init_from}")
+    if args.history_every is not None:
+        overrides += ["checkpoint.keep_history=true",
+                      f"checkpoint.save_history_every_epochs={args.history_every}"]
+    if args.history_every_steps is not None:
+        overrides += ["checkpoint.keep_history=true",
+                      f"checkpoint.save_history_every_steps={args.history_every_steps}"]
+    if args.live_every_steps is not None:
+        overrides.append(f"checkpoint.save_live_every_steps={args.live_every_steps}")
+    if args.upload:
+        overrides.append("checkpoint.upload=true")
+    return overrides
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Train an Ored.ai model.")
     parser.add_argument("--config", default="configs/bit_adder_mlp.yaml")
     parser.add_argument("--set", dest="overrides", action="append", default=[],
                         metavar="KEY=VALUE", help="override a config value (repeatable)")
+    start = parser.add_mutually_exclusive_group()
+    start.add_argument("--resume-live", action="store_true",
+                       help="continue this run exactly from checkpoints/<run_name>/live.pt")
+    start.add_argument("--init-from", metavar="PATH",
+                       help="start a new run from another checkpoint's weights")
+    parser.add_argument("--history-every", type=int, metavar="EPOCHS",
+                        help="keep a history snapshot every N epochs")
+    parser.add_argument("--history-every-steps", type=int, metavar="STEPS",
+                        help="keep a history snapshot every N steps")
+    parser.add_argument("--live-every-steps", type=int, metavar="STEPS",
+                        help="also save live.pt every N steps, not just every epoch")
+    parser.add_argument("--upload", action="store_true", help="publish checkpoints to Supabase")
     args = parser.parse_args(argv)
 
-    cfg = load_config(args.config, args.overrides)
+    cfg = load_config(args.config, args.overrides + checkpoint_overrides(args))
     train(cfg)
     return 0
 
