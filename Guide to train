@@ -69,3 +69,17 @@ It's now `C:\Users\harsh\artz\.venv`, not `artz\ored\.venv`. From `ored\model`, 
 _________RUN________
 ..\..\.venv\Scripts\activate.bat
 --------------------
+
+
+After done training ask questions 
+_________RUN________
+python scripts\recall.py --checkpoint checkpoints\ored_v2\best.pt
+python scripts\infer.py --checkpoint checkpoints\ored_v2\best.pt --text " Ask questions here delete this text and ask questions related to what he train"
+--------------------
+
+After asking questions add checkpoint (IMPORTANT)
+_________RUN________
+set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
+set ORED_SB_SERVICE_KEY= (use the key provided by me / koe/ zeo)
+python scripts\checkpoints.py push checkpoints\ored_v2\best.pt --kind best --run-name ored_v2
+--------------------
