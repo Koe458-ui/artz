@@ -1,86 +1,94 @@
 Ored AI — Re-enter AI Training Mode
 
-You will starts from "C:\Users\username" (change username to your name )
+You will starts from "C:\Users\username" (change username to your name)
 
-while you are here - "cd C:\Users\username"
+While you are here:
 
-_RUN
+cd C:\Users\username
+
+Clone the code
+
+RUN
 
 git clone https://github.com/Koe458-ui/artz.git
 cd artz
 git checkout Ored.ai
 git log --oneline -1
 
----
+OUTPUT
 
-_OUTPUT
-The version it will show should match with GitHub ored.ai last merged version
+The version it will show should match with GitHub Ored.ai last merged version.
+
+---
 
 Virtual environment
 
-python -m venv C:\Users\usermame\artz\.venv
+python -m venv C:\Users\username\artz\.venv
 C:\Users\username\artz\.venv\Scripts\activate.bat
+
 pip install torch
 pip install -r C:\Users\username\artz\ored\model\requirements-dev.txt
 
 ---
 
-NOW
+Verify CUDA works
 
-_Verify CUDA works
+RUN
 
-_RUN
+python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0) if torch.cuda.is_available() else 'No CUDA GPU')"
 
-python -c "import torch; print(torch.cuda.is_available(), torch.cuda.get_device_name(0))"
+OUTPUT
+
+True RTX XXXX
+
+Example:
+
+True NVIDIA GeForce RTX 5090
 
 ---
 
-_OUTPUT
-CUDA: true.   Your GPU specs (like RTX 5090 )
+If CUDA is false
 
----
-
-If this CUDA is flase then
-
-_RUN
+RUN
 
 pip uninstall -y torch
 pip install torch --index-url https://download.pytorch.org/whl/cu128
 
+After successfully running this, check the same CUDA command again.
+
+It should display:
+
+True RTX XXXX
+
 ---
 
-After successfully Run this chevk the same veeify cuda code and then it should display as CUDA : True , rtx xxxx
+Check the code is sound
 
-Check the code is sound_
-
-_RUN
+RUN
 
 cd C:\Users\harsh\artz\ored\model
 python -m pytest
 
+OUTPUT
+
+xxx passed
+
+The number should be up to date. Check if it changes.
+
 ---
 
-_OUTPUT
-Expect xxx passed`(should be up to date , check otherwise)
-
----
-
-Recover your old checkpoints from Database_
+Recover your old checkpoints from Database
 
 Set your Supabase credentials:
 
 set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
 set ORED_SB_SERVICE_KEY= secret key ask me (koe/anish) for secret
 
----
-
-Check available checkpoints:
-
-_RUN
+Check available checkpoints
 
 python scripts\checkpoints.py list
 
-Then pull the checkpoint you want:
+Pull a checkpoint
 
 python scripts\checkpoints.py pull checkpoints\char_transformer_v2\best.pt --kind best --run-name char_transformer_v2
 
@@ -88,80 +96,144 @@ python scripts\checkpoints.py pull checkpoints\char_transformer_v2\best.pt --kin
 
 Checkpoint types
 
-- "best.pt" = the checkpoint with the best validation result. Lower validation loss is better.
-- "live.pt" = latest checkpoint used to continue/resume training.
-- "base.pt" = starting checkpoint of the training run.
-- "history/" = old checkpoint versions kept as backups when "best.pt" or "live.pt" is replaced.
+Checkpoint| Meaning
+"base.pt"| Starting checkpoint of the training run
+"best.pt"| Best checkpoint based on validation loss
+"live.pt"| Latest checkpoint that can continue training
+"history/"| Old checkpoints kept as backups
 
-During training:
+Lower validation loss = better checkpoint.
 
-base.pt  → saved at the start
-live.pt  → updated during training
-best.pt  → updated only when validation improves
-history/ → keeps replaced/older checkpoints
+---
 
-Do not manually replace "best.pt" with a worse checkpoint.
+Add checkpoint as BEST
 
-_TRAIN
+RUN
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
+
+Example:
+
+python scripts\checkpoints.py save checkpoints\ored_v2\best.pt --as best --config configs\char_transformer.yaml
+
+"best.pt" replaces the current best only when the new checkpoint has a better validation result.
+
+To force replacement:
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml --force
+
+The old "best.pt" is kept in "history/".
+
+---
+
+Add checkpoint as LIVE
+
+RUN
+
+python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+
+Example:
+
+python scripts\checkpoints.py save checkpoints\ored_v2\live.pt --as live --config configs\char_transformer.yaml
+
+"live.pt" must contain everything needed to continue training.
+
+If it does not contain the required training state, use "--init-from" instead.
+
+---
+
+Add checkpoint to HISTORY
+
+RUN
+
+python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
+
+Example:
+
+python scripts\checkpoints.py save checkpoints\ored_v2\best.pt --as history --config configs\char_transformer.yaml
+
+This keeps the checkpoint as a backup in "history/".
+
+---
+
+Add checkpoint as BASE
+
+"base.pt" is created automatically when a new training run starts.
+
+You normally do not add "base.pt" manually.
+
+To start a new training run from an existing checkpoint:
+
+python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
+
+The existing checkpoint is used as the starting weights and the new run creates its own "base.pt".
+
+---
+
+Train
+
+RUN
 
 python scripts\generate_facts.py --repeats 20
 python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --set training.epochs=40 --set training.device=cuda
 
+During training:
+
+base.pt
+   ↓
+live.pt
+   ↓
+validation
+   ↓
+better? ── yes ──→ best.pt
+   │
+   no
+   ↓
+best.pt stays the same
+
+Old replaced checkpoints are kept in:
+
+history/
+
 ---
 
-If you want to start from another checkpoint
+Start training from another checkpoint
 
 python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
 
-"--init-from" means start a new run using the other checkpoint's weights.
+"--init-from" = start a new run using another checkpoint's weights.
 
-If training was stopped and you want to continue it
+---
+
+Continue stopped training
 
 python scripts\train.py --config configs\char_transformer.yaml --resume-live --set training.epochs=40
 
-"--resume-live" means continue from the saved "live.pt" training state.
+"--resume-live" = continue training from "live.pt".
 
 ---
 
-Save checkpoints manually if needed
+Merge LIVE into BEST
 
-Put a checkpoint into history:
+After an online-learning session creates "live.pt":
 
-python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
-
-Put a checkpoint into best:
-
-python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
-
-Put a checkpoint into live:
-
-python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
-
-- "best" only replaces "best.pt" if it scores better on validation.
-- "best --force" can replace it manually if absolutely needed.
-- "live" must contain everything required to continue training.
-- Replaced "best.pt" or "live.pt" is kept in "history/".
-
----
-
-Merge online-learning result into best
-
-After an online-learning session creates a live checkpoint:
-
-_RUN
+RUN
 
 python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
 
----
+It compares "live.pt" and "best.pt" using the same validation data.
 
-This compares the online-learning "live.pt" with the current "best.pt" on the same validation data.
+If LIVE is better
 
-If live is better:
+live.pt
+   ↓
+best.pt
 
-live.pt → best.pt
-old best.pt → history/
+old best.pt
+   ↓
+history/
 
-If live is not better:
+If LIVE is not better
 
 best.pt stays unchanged
 
@@ -170,46 +242,85 @@ Example:
 live = 3.07018
 best = 3.37613
 
-Since lower validation loss is better, the live checkpoint becomes "best.pt".
+Because lower validation loss is better:
+
+3.07018 < 3.37613
+
+So "live.pt" becomes "best.pt".
+
+---
+
+Checkpoints from the command prompt
+
+Save as history
+
+python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
+
+Save as best
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
+
+Save as live
+
+python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+
+List checkpoints
+
+python scripts\checkpoints.py list
+
+Merge live into best
+
+python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
 
 ---
 
 After done training ask questions
 
-_RUN
+RUN
 
 python scripts\recall.py --checkpoint checkpoints\ored_v2\best.pt
-python scripts\infer.py --checkpoint checkpoints\ored_v2\best.pt --text " Ask questions here delete this text and ask questions related to what he train"
+python scripts\infer.py --checkpoint checkpoints\ored_v2\best.pt --text "Ask questions here. Delete this text and ask questions related to what he trained."
 
 ---
 
-After asking questions add checkpoint (IMPORTANT)
+After asking questions add checkpoint
 
-_RUN
+IMPORTANT
+
+RUN
 
 set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
-set ORED_SB_SERVICE_KEY= (use the key provided by me / koe/ zeo)
+set ORED_SB_SERVICE_KEY= (use the key provided by me / koe / zeo)
+
 python scripts\checkpoints.py push checkpoints\ored_v2\best.pt --kind best --run-name ored_v2
 
 ---
 
-IMPORTANT
+Important
 
-_(".venv") should be there in front of the cmd
+"(.venv)" should be there in front of the command.
 
-It's now "C:\Users\harsh\artz\.venv", not "artz\ored\.venv".
+It's now:
+
+C:\Users\harsh\artz\.venv
+
+not:
+
+artz\ored\.venv
 
 From "ored\model", activate with:
 
-_RUN
+RUN
 
 ..\..\.venv\Scripts\activate.bat
 
+You should see:
+
+(.venv) C:\Users\harsh\artz\ored\model>
+
 ---
 
-Checkpoint reminder
-
-Your normal structure should now be:
+Checkpoint structure
 
 checkpoints/
 ├── ored_v2/
@@ -218,8 +329,7 @@ checkpoints/
 │   └── live.pt
 └── history/
 
-"best.pt" = model you normally use for testing/deployment.
-
-"live.pt" = model/training state you use to continue training.
-
-"history/" = previous checkpoint versions kept safely.
+base.pt   = starting checkpoint
+best.pt   = best validation checkpoint
+live.pt   = latest resumable checkpoint
+history/  = old checkpoint backups
