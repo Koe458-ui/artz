@@ -14,40 +14,42 @@ PART 1 — SET UP (every PC)
   5. If CUDA Is False
   6. Check the Code Is Sound
 
-PART 2 — CHECKPOINTS
+PART 2 — CHECKPOINTS: WHAT THEY ARE
   7. Checkpoint Types
   8. Checkpoint Structure
   9. Recover Your Old Checkpoints From Database
-  10. Add Checkpoint as BEST
-  11. Add Checkpoint as LIVE
-  12. Add Checkpoint to HISTORY
-  13. Add Checkpoint as BASE
-  14. Checkpoints From the Command Prompt
 
 PART 3 — TRAIN ON ONE PC
-  15. Train
-  16. Start Training From Another Checkpoint
-  17. Continue Stopped Training
-  18. Merge LIVE Into BEST
+  10. Train
+  11. Start Training From Another Checkpoint
+  12. Continue Stopped Training
 
-PART 4 — AFTER TRAINING
+PART 4 — MANAGE CHECKPOINTS
+  13. Add Checkpoint as BEST
+  14. Add Checkpoint as LIVE
+  15. Add Checkpoint to HISTORY
+  16. Add Checkpoint as BASE
+  17. Merge LIVE Into BEST
+  18. Checkpoints From the Command Prompt
+
+PART 5 — AFTER TRAINING
   19. After Done Training — Ask Questions
   20. After Asking Questions — Add Checkpoint
 
-PART 5 — TRAIN ON MANY PCS
+PART 6 — TRAIN ON MANY PCS
   21. Many PCs — What It Is
-  22. Before You Start — On EVERY PC
-  23. Connect the PCs
-  24. Check the PCs Can Talk
-  25. Train on Many PCs
-  26. Continue Stopped Training — Many PCs
-  27. If One PC Crashes
-  28. Add Another PC
-  29. Check a Checkpoint
-  30. After Done Training — Ask Questions (Many PCs)
-  31. See It on Your Phone (Supabase)
-  32. Checkpoint Structure — Many PCs
-  33. Important — Many PCs
+  22. Important — Many PCs
+  23. Before You Start — On EVERY PC
+  24. Connect the PCs
+  25. Check the PCs Can Talk
+  26. Train on Many PCs
+  27. See It on Your Phone (Supabase)
+  28. Continue Stopped Training — Many PCs
+  29. Add Another PC
+  30. If One PC Crashes
+  31. Check a Checkpoint
+  32. After Done Training — Ask Questions (Many PCs)
+  33. Checkpoint Structure — Many PCs
 
 ---
 
@@ -157,7 +159,7 @@ The number should be up to date. Check otherwise.
 ---
 
 ========================================
-PART 2 — CHECKPOINTS
+PART 2 — CHECKPOINTS: WHAT THEY ARE
 ========================================
 
 7. Checkpoint Types
@@ -211,99 +213,11 @@ python scripts\checkpoints.py pull checkpoints\char_transformer_v2\best.pt --kin
 
 ---
 
-10. Add Checkpoint as BEST
-
-RUN
-
-python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
-
-Example:
-
-python scripts\checkpoints.py save checkpoints\ored_v2\best.pt --as best --config configs\char_transformer.yaml
-
-"best.pt" only replaces the current best if the new checkpoint has a better validation result.
-
-To force replacement:
-
-python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml --force
-
-The old "best.pt" is kept in "history/".
-
----
-
-11. Add Checkpoint as LIVE
-
-RUN
-
-python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
-
-Example:
-
-python scripts\checkpoints.py save checkpoints\ored_v2\live.pt --as live --config configs\char_transformer.yaml
-
-"live.pt" must contain everything needed to continue training.
-
-If it does not contain the required training state, use "--init-from" instead.
-
----
-
-12. Add Checkpoint to HISTORY
-
-RUN
-
-python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
-
-Example:
-
-python scripts\checkpoints.py save checkpoints\ored_v2\best.pt --as history --config configs\char_transformer.yaml
-
-This keeps the checkpoint as a backup in "history/".
-
----
-
-13. Add Checkpoint as BASE
-
-"base.pt" is created automatically when a new training run starts.
-
-You normally do not add "base.pt" manually.
-
-To start a new training run from an existing checkpoint:
-
-python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
-
-The existing checkpoint is used as the starting weights and the new run creates its own "base.pt".
-
----
-
-14. Checkpoints From the Command Prompt
-
-List checkpoints
-
-python scripts\checkpoints.py list
-
-Save as BEST
-
-python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
-
-Save as LIVE
-
-python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
-
-Save as HISTORY
-
-python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
-
-Merge LIVE into BEST
-
-python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
-
----
-
 ========================================
 PART 3 — TRAIN ON ONE PC
 ========================================
 
-15. Train
+10. Train
 
 RUN
 
@@ -331,7 +245,7 @@ history/
 
 ---
 
-16. Start Training From Another Checkpoint
+11. Start Training From Another Checkpoint
 
 python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
 
@@ -339,7 +253,7 @@ python scripts\train.py --config configs\char_transformer.yaml --set run_name=or
 
 ---
 
-17. Continue Stopped Training
+12. Continue Stopped Training
 
 python scripts\train.py --config configs\char_transformer.yaml --resume-live --set training.epochs=40
 
@@ -347,7 +261,75 @@ python scripts\train.py --config configs\char_transformer.yaml --resume-live --s
 
 ---
 
-18. Merge LIVE Into BEST
+========================================
+PART 4 — MANAGE CHECKPOINTS
+========================================
+
+13. Add Checkpoint as BEST
+
+RUN
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
+
+Example:
+
+python scripts\checkpoints.py save checkpoints\ored_v2\best.pt --as best --config configs\char_transformer.yaml
+
+"best.pt" only replaces the current best if the new checkpoint has a better validation result.
+
+To force replacement:
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml --force
+
+The old "best.pt" is kept in "history/".
+
+---
+
+14. Add Checkpoint as LIVE
+
+RUN
+
+python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+
+Example:
+
+python scripts\checkpoints.py save checkpoints\ored_v2\live.pt --as live --config configs\char_transformer.yaml
+
+"live.pt" must contain everything needed to continue training.
+
+If it does not contain the required training state, use "--init-from" instead.
+
+---
+
+15. Add Checkpoint to HISTORY
+
+RUN
+
+python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
+
+Example:
+
+python scripts\checkpoints.py save checkpoints\ored_v2\best.pt --as history --config configs\char_transformer.yaml
+
+This keeps the checkpoint as a backup in "history/".
+
+---
+
+16. Add Checkpoint as BASE
+
+"base.pt" is created automatically when a new training run starts.
+
+You normally do not add "base.pt" manually.
+
+To start a new training run from an existing checkpoint:
+
+python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
+
+The existing checkpoint is used as the starting weights and the new run creates its own "base.pt".
+
+---
+
+17. Merge LIVE Into BEST
 
 After an online-learning session creates "live.pt":
 
@@ -384,8 +366,32 @@ So "live.pt" becomes "best.pt".
 
 ---
 
+18. Checkpoints From the Command Prompt
+
+List checkpoints
+
+python scripts\checkpoints.py list
+
+Save as BEST
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
+
+Save as LIVE
+
+python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+
+Save as HISTORY
+
+python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
+
+Merge LIVE into BEST
+
+python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
+
+---
+
 ========================================
-PART 4 — AFTER TRAINING
+PART 5 — AFTER TRAINING
 ========================================
 
 19. After Done Training — Ask Questions
@@ -412,7 +418,7 @@ python scripts\checkpoints.py push checkpoints\ored_v2\best.pt --kind best --run
 ---
 
 ========================================
-PART 5 — TRAIN ON MANY PCS
+PART 6 — TRAIN ON MANY PCS
 ========================================
 
 21. Many PCs — What It Is
@@ -439,7 +445,23 @@ Full details: ored\model\docs\distributed-training.md
 
 ---
 
-22. Before You Start — On EVERY PC
+22. Important — Many PCs
+
+Always add "--upload". Each PC only keeps its own part. To continue, every PC needs every part, and "--upload" is how they get it.
+
+Use "--rendezvous static" and set NODE_RANK, so PC 1 is always the main PC.
+
+Use a new "--session" name every time you start.
+
+The slowest PC sets the speed. A very slow GPU slows everyone. Leave it out.
+
+Each PC uses batch size 32. With 3 PCs, one step = 32 x 3 = 96 examples.
+
+Windows uses "gloo". Do not set backend to "nccl" on Windows.
+
+---
+
+23. Before You Start — On EVERY PC
 
 Do steps 1 to 6 on every PC.
 
@@ -463,7 +485,7 @@ If one PC has different data or a different config, training stops and says whic
 
 ---
 
-23. Connect the PCs
+24. Connect the PCs
 
 All PCs must reach each other.
 
@@ -489,7 +511,7 @@ Never open these ports on your router.
 
 ---
 
-24. Check the PCs Can Talk
+25. Check the PCs Can Talk
 
 Run on EVERY PC. Only NODE_RANK changes.
 
@@ -523,7 +545,7 @@ set GLOO_SOCKET_IFNAME=Tailscale
 
 ---
 
-25. Train on Many PCs
+26. Train on Many PCs
 
 Set your Supabase keys on EVERY PC (same as step 9):
 
@@ -580,97 +602,7 @@ Epoch   1/40 | train loss ... | val loss ...  <- best so far
 
 ---
 
-26. Continue Stopped Training — Many PCs
-
-Start all PCs again with "--resume-live" and a NEW session name:
-
-python scripts\distributed.py launch train --config configs\char_transformer.yaml --session ored_v3-run2 --rendezvous static --set run_name=ored_v3 --set training.epochs=40 -- --resume-live --upload --report
-
-OUTPUT (on PC 1)
-
-resumed from      : ...live\checkpoint_epoch_0020_... (end of epoch 20, step ...), saved by 3 workers
-
-You can continue with a different number of PCs. Just change NNODES.
-
-3 PCs before → 2 PCs now = OK
-
-OUTPUT
-
-worker count changed (3 -> 2): model and optimizer restored ...
-
-If it says "can only resume with 3 workers" → use 3 PCs again.
-(This happens only if you used "--live-every-steps".)
-
----
-
-27. If One PC Crashes
-
-PC crashes
-   ↓
-other PCs stop with an error
-   ↓
-last "live" is safe
-   ↓
-start all PCs again (step 26)
-
-Nothing is lost except the time since the last "live".
-
-A checkpoint is only used if EVERY PC saved its part. Half-saved checkpoints are never used.
-
----
-
-28. Add Another PC
-
-1. Do step 22 on the new PC.
-2. Stop training (Ctrl + C on all PCs).
-3. Start again (step 26) with NNODES one bigger.
-
-Example: 3 PCs → 4 PCs
-
-set NNODES=4
-
-New PC: set NODE_RANK=3
-
----
-
-29. Check a Checkpoint
-
-Needs the Supabase keys (step 25). It downloads every PC's part and checks it.
-
-RUN
-
-python scripts\checkpoints.py verify live --run ored_v3 --config configs\char_transformer.yaml
-
-python scripts\checkpoints.py verify best --run ored_v3 --config configs\char_transformer.yaml
-
-OUTPUT
-
-VERIFIED
-
-or:
-
-FAILED
-  - rank 1: object ored_v3/live/checkpoint_.../__1_0.distcp is missing
-
-Checking a folder on one PC only works if that PC has every part:
-
-python scripts\distributed.py verify checkpoints\ored_v3\live\checkpoint_epoch_0040_... --config configs\char_transformer.yaml
-
----
-
-30. After Done Training — Ask Questions (Many PCs)
-
-On PC 1, "best.pt" is ready like before:
-
-python scripts\recall.py --checkpoint checkpoints\ored_v3\best.pt
-
-python scripts\infer.py --checkpoint checkpoints\ored_v3\best.pt --text "Ask questions here."
-
-With "--upload", best is already saved in Supabase. No step 20 needed.
-
----
-
-31. See It on Your Phone (Supabase)
+27. See It on Your Phone (Supabase)
 
 Supabase → SQL Editor:
 
@@ -694,7 +626,97 @@ Shows live / best / history and if all PCs saved their part.
 
 ---
 
-32. Checkpoint Structure — Many PCs
+28. Continue Stopped Training — Many PCs
+
+Start all PCs again with "--resume-live" and a NEW session name:
+
+python scripts\distributed.py launch train --config configs\char_transformer.yaml --session ored_v3-run2 --rendezvous static --set run_name=ored_v3 --set training.epochs=40 -- --resume-live --upload --report
+
+OUTPUT (on PC 1)
+
+resumed from      : ...live\checkpoint_epoch_0020_... (end of epoch 20, step ...), saved by 3 workers
+
+You can continue with a different number of PCs. Just change NNODES.
+
+3 PCs before → 2 PCs now = OK
+
+OUTPUT
+
+worker count changed (3 -> 2): model and optimizer restored ...
+
+If it says "can only resume with 3 workers" → use 3 PCs again.
+(This happens only if you used "--live-every-steps".)
+
+---
+
+29. Add Another PC
+
+1. Do step 23 on the new PC.
+2. Stop training (Ctrl + C on all PCs).
+3. Start again (step 28) with NNODES one bigger.
+
+Example: 3 PCs → 4 PCs
+
+set NNODES=4
+
+New PC: set NODE_RANK=3
+
+---
+
+30. If One PC Crashes
+
+PC crashes
+   ↓
+other PCs stop with an error
+   ↓
+last "live" is safe
+   ↓
+start all PCs again (step 28)
+
+Nothing is lost except the time since the last "live".
+
+A checkpoint is only used if EVERY PC saved its part. Half-saved checkpoints are never used.
+
+---
+
+31. Check a Checkpoint
+
+Needs the Supabase keys (step 26). It downloads every PC's part and checks it.
+
+RUN
+
+python scripts\checkpoints.py verify live --run ored_v3 --config configs\char_transformer.yaml
+
+python scripts\checkpoints.py verify best --run ored_v3 --config configs\char_transformer.yaml
+
+OUTPUT
+
+VERIFIED
+
+or:
+
+FAILED
+  - rank 1: object ored_v3/live/checkpoint_.../__1_0.distcp is missing
+
+Checking a folder on one PC only works if that PC has every part:
+
+python scripts\distributed.py verify checkpoints\ored_v3\live\checkpoint_epoch_0040_... --config configs\char_transformer.yaml
+
+---
+
+32. After Done Training — Ask Questions (Many PCs)
+
+On PC 1, "best.pt" is ready like before:
+
+python scripts\recall.py --checkpoint checkpoints\ored_v3\best.pt
+
+python scripts\infer.py --checkpoint checkpoints\ored_v3\best.pt --text "Ask questions here."
+
+With "--upload", best is already saved in Supabase. No step 20 needed.
+
+---
+
+33. Checkpoint Structure — Many PCs
 
 checkpoints/
 │
@@ -718,19 +740,3 @@ checkpoints/
 One folder = one checkpoint, made of all PCs' parts.
 
 "manifest.json" lists every part. No manifest = not finished = never used.
-
----
-
-33. Important — Many PCs
-
-Always add "--upload". Each PC only keeps its own part. To continue, every PC needs every part, and "--upload" is how they get it.
-
-Use "--rendezvous static" and set NODE_RANK, so PC 1 is always the main PC.
-
-Use a new "--session" name every time you start.
-
-The slowest PC sets the speed. A very slow GPU slows everyone. Leave it out.
-
-Each PC uses batch size 32. With 3 PCs, one step = 32 x 3 = 96 examples.
-
-Windows uses "gloo". Do not set backend to "nccl" on Windows.
