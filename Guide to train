@@ -2,6 +2,59 @@ Ored AI — Re-enter AI Training Mode
 
 You will starts from "C:\Users\username" (change username to your name).
 
+---
+
+CONTENTS
+
+PART 1 — SET UP (every PC)
+  1. Start
+  2. Virtual Environment
+  3. Important
+  4. Verify CUDA Works
+  5. If CUDA Is False
+  6. Check the Code Is Sound
+
+PART 2 — CHECKPOINTS
+  7. Checkpoint Types
+  8. Checkpoint Structure
+  9. Recover Your Old Checkpoints From Database
+  10. Add Checkpoint as BEST
+  11. Add Checkpoint as LIVE
+  12. Add Checkpoint to HISTORY
+  13. Add Checkpoint as BASE
+  14. Checkpoints From the Command Prompt
+
+PART 3 — TRAIN ON ONE PC
+  15. Train
+  16. Start Training From Another Checkpoint
+  17. Continue Stopped Training
+  18. Merge LIVE Into BEST
+
+PART 4 — AFTER TRAINING
+  19. After Done Training — Ask Questions
+  20. After Asking Questions — Add Checkpoint
+
+PART 5 — TRAIN ON MANY PCS
+  21. Many PCs — What It Is
+  22. Before You Start — On EVERY PC
+  23. Connect the PCs
+  24. Check the PCs Can Talk
+  25. Train on Many PCs
+  26. Continue Stopped Training — Many PCs
+  27. If One PC Crashes
+  28. Add Another PC
+  29. Check a Checkpoint
+  30. After Done Training — Ask Questions (Many PCs)
+  31. See It on Your Phone (Supabase)
+  32. Checkpoint Structure — Many PCs
+  33. Important — Many PCs
+
+---
+
+========================================
+PART 1 — SET UP (every PC)
+========================================
+
 1. Start
 
 While you are here:
@@ -33,7 +86,31 @@ pip install -r C:\Users\username\artz\ored\model\requirements-dev.txt
 
 ---
 
-3. Verify CUDA Works
+3. Important
+
+"(.venv)" should be there in front of the command.
+
+It's now:
+
+C:\Users\harsh\artz\.venv
+
+not:
+
+artz\ored\.venv
+
+From "ored\model", activate with:
+
+RUN
+
+..\..\.venv\Scripts\activate.bat
+
+You should see:
+
+(.venv) C:\Users\harsh\artz\ored\model>
+
+---
+
+4. Verify CUDA Works
 
 RUN
 
@@ -49,7 +126,7 @@ True NVIDIA GeForce RTX 5090
 
 ---
 
-4. If CUDA Is False
+5. If CUDA Is False
 
 RUN
 
@@ -64,7 +141,7 @@ True RTX XXXX
 
 ---
 
-5. Check the Code Is Sound
+6. Check the Code Is Sound
 
 RUN
 
@@ -79,7 +156,43 @@ The number should be up to date. Check otherwise.
 
 ---
 
-6. Recover Your Old Checkpoints From Database
+========================================
+PART 2 — CHECKPOINTS
+========================================
+
+7. Checkpoint Types
+
+Checkpoint| Meaning
+"base.pt"| Starting checkpoint of the training run
+"best.pt"| Best checkpoint based on validation loss
+"live.pt"| Latest checkpoint that can continue training
+"history/"| Old checkpoints kept as backups
+
+Lower validation loss = better checkpoint.
+
+---
+
+8. Checkpoint Structure
+
+checkpoints/
+│
+├── ored_v2/
+│   ├── base.pt
+│   ├── best.pt
+│   └── live.pt
+│
+└── history/
+
+Meaning
+
+base.pt   = starting checkpoint
+best.pt   = best validation checkpoint
+live.pt   = latest resumable checkpoint
+history/  = old checkpoint backups
+
+---
+
+9. Recover Your Old Checkpoints From Database
 
 Set your Supabase credentials:
 
@@ -98,19 +211,7 @@ python scripts\checkpoints.py pull checkpoints\char_transformer_v2\best.pt --kin
 
 ---
 
-7. Checkpoint Types
-
-Checkpoint| Meaning
-"base.pt"| Starting checkpoint of the training run
-"best.pt"| Best checkpoint based on validation loss
-"live.pt"| Latest checkpoint that can continue training
-"history/"| Old checkpoints kept as backups
-
-Lower validation loss = better checkpoint.
-
----
-
-8. Add Checkpoint as BEST
+10. Add Checkpoint as BEST
 
 RUN
 
@@ -130,7 +231,7 @@ The old "best.pt" is kept in "history/".
 
 ---
 
-9. Add Checkpoint as LIVE
+11. Add Checkpoint as LIVE
 
 RUN
 
@@ -146,7 +247,7 @@ If it does not contain the required training state, use "--init-from" instead.
 
 ---
 
-10. Add Checkpoint to HISTORY
+12. Add Checkpoint to HISTORY
 
 RUN
 
@@ -160,7 +261,7 @@ This keeps the checkpoint as a backup in "history/".
 
 ---
 
-11. Add Checkpoint as BASE
+13. Add Checkpoint as BASE
 
 "base.pt" is created automatically when a new training run starts.
 
@@ -174,7 +275,35 @@ The existing checkpoint is used as the starting weights and the new run creates 
 
 ---
 
-12. Train
+14. Checkpoints From the Command Prompt
+
+List checkpoints
+
+python scripts\checkpoints.py list
+
+Save as BEST
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
+
+Save as LIVE
+
+python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+
+Save as HISTORY
+
+python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
+
+Merge LIVE into BEST
+
+python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
+
+---
+
+========================================
+PART 3 — TRAIN ON ONE PC
+========================================
+
+15. Train
 
 RUN
 
@@ -202,7 +331,7 @@ history/
 
 ---
 
-13. Start Training From Another Checkpoint
+16. Start Training From Another Checkpoint
 
 python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
 
@@ -210,7 +339,7 @@ python scripts\train.py --config configs\char_transformer.yaml --set run_name=or
 
 ---
 
-14. Continue Stopped Training
+17. Continue Stopped Training
 
 python scripts\train.py --config configs\char_transformer.yaml --resume-live --set training.epochs=40
 
@@ -218,7 +347,7 @@ python scripts\train.py --config configs\char_transformer.yaml --resume-live --s
 
 ---
 
-15. Merge LIVE Into BEST
+18. Merge LIVE Into BEST
 
 After an online-learning session creates "live.pt":
 
@@ -255,31 +384,11 @@ So "live.pt" becomes "best.pt".
 
 ---
 
-16. Checkpoints From the Command Prompt
+========================================
+PART 4 — AFTER TRAINING
+========================================
 
-List checkpoints
-
-python scripts\checkpoints.py list
-
-Save as BEST
-
-python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
-
-Save as LIVE
-
-python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
-
-Save as HISTORY
-
-python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
-
-Merge LIVE into BEST
-
-python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
-
----
-
-17. After Done Training — Ask Questions
+19. After Done Training — Ask Questions
 
 RUN
 
@@ -289,7 +398,7 @@ python scripts\infer.py --checkpoint checkpoints\ored_v2\best.pt --text "Ask que
 
 ---
 
-18. After Asking Questions — Add Checkpoint
+20. After Asking Questions — Add Checkpoint
 
 IMPORTANT
 
@@ -302,49 +411,9 @@ python scripts\checkpoints.py push checkpoints\ored_v2\best.pt --kind best --run
 
 ---
 
-19. Important
-
-"(.venv)" should be there in front of the command.
-
-It's now:
-
-C:\Users\harsh\artz\.venv
-
-not:
-
-artz\ored\.venv
-
-From "ored\model", activate with:
-
-RUN
-
-..\..\.venv\Scripts\activate.bat
-
-You should see:
-
-(.venv) C:\Users\harsh\artz\ored\model>
-
----
-
-20. Checkpoint Structure
-
-checkpoints/
-│
-├── ored_v2/
-│   ├── base.pt
-│   ├── best.pt
-│   └── live.pt
-│
-└── history/
-
-Meaning
-
-base.pt   = starting checkpoint
-best.pt   = best validation checkpoint
-live.pt   = latest resumable checkpoint
-history/  = old checkpoint backups
-
----
+========================================
+PART 5 — TRAIN ON MANY PCS
+========================================
 
 21. Many PCs — What It Is
 
@@ -372,7 +441,7 @@ Full details: ored\model\docs\distributed-training.md
 
 22. Before You Start — On EVERY PC
 
-Do steps 1 to 5 on every PC.
+Do steps 1 to 6 on every PC.
 
 Every PC must show the same version:
 
@@ -456,7 +525,7 @@ set GLOO_SOCKET_IFNAME=Tailscale
 
 25. Train on Many PCs
 
-Set your Supabase keys on EVERY PC (same as step 6):
+Set your Supabase keys on EVERY PC (same as step 9):
 
 set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
 set ORED_SB_SERVICE_KEY=YOUR_SECRET_KEY
@@ -597,7 +666,7 @@ python scripts\recall.py --checkpoint checkpoints\ored_v3\best.pt
 
 python scripts\infer.py --checkpoint checkpoints\ored_v3\best.pt --text "Ask questions here."
 
-With "--upload", best is already saved in Supabase. No step 18 needed.
+With "--upload", best is already saved in Supabase. No step 20 needed.
 
 ---
 
