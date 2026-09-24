@@ -1,12 +1,12 @@
 Ored AI — Re-enter AI Training Mode
 
-You will starts from "C:\Users\username" (change username to your name)
+You will starts from "C:\Users\username" (change username to your name).
+
+1. Start
 
 While you are here:
 
 cd C:\Users\username
-
-Clone the code
 
 RUN
 
@@ -21,7 +21,9 @@ The version it will show should match with GitHub Ored.ai last merged version.
 
 ---
 
-Virtual environment
+2. Virtual Environment
+
+RUN
 
 python -m venv C:\Users\username\artz\.venv
 C:\Users\username\artz\.venv\Scripts\activate.bat
@@ -31,7 +33,7 @@ pip install -r C:\Users\username\artz\ored\model\requirements-dev.txt
 
 ---
 
-Verify CUDA works
+3. Verify CUDA Works
 
 RUN
 
@@ -47,14 +49,14 @@ True NVIDIA GeForce RTX 5090
 
 ---
 
-If CUDA is false
+4. If CUDA Is False
 
 RUN
 
 pip uninstall -y torch
 pip install torch --index-url https://download.pytorch.org/whl/cu128
 
-After successfully running this, check the same CUDA command again.
+After successfully running this, check the same CUDA verify code again.
 
 It should display:
 
@@ -62,7 +64,7 @@ True RTX XXXX
 
 ---
 
-Check the code is sound
+5. Check the Code Is Sound
 
 RUN
 
@@ -73,16 +75,18 @@ OUTPUT
 
 xxx passed
 
-The number should be up to date. Check if it changes.
+The number should be up to date. Check otherwise.
 
 ---
 
-Recover your old checkpoints from Database
+6. Recover Your Old Checkpoints From Database
 
 Set your Supabase credentials:
 
 set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
-set ORED_SB_SERVICE_KEY= secret key ask me (koe/anish) for secret
+set ORED_SB_SERVICE_KEY=YOUR_SECRET_KEY
+
+«Do not put the real service key in GitHub.»
 
 Check available checkpoints
 
@@ -94,7 +98,7 @@ python scripts\checkpoints.py pull checkpoints\char_transformer_v2\best.pt --kin
 
 ---
 
-Checkpoint types
+7. Checkpoint Types
 
 Checkpoint| Meaning
 "base.pt"| Starting checkpoint of the training run
@@ -106,7 +110,7 @@ Lower validation loss = better checkpoint.
 
 ---
 
-Add checkpoint as BEST
+8. Add Checkpoint as BEST
 
 RUN
 
@@ -116,7 +120,7 @@ Example:
 
 python scripts\checkpoints.py save checkpoints\ored_v2\best.pt --as best --config configs\char_transformer.yaml
 
-"best.pt" replaces the current best only when the new checkpoint has a better validation result.
+"best.pt" only replaces the current best if the new checkpoint has a better validation result.
 
 To force replacement:
 
@@ -126,7 +130,7 @@ The old "best.pt" is kept in "history/".
 
 ---
 
-Add checkpoint as LIVE
+9. Add Checkpoint as LIVE
 
 RUN
 
@@ -142,7 +146,7 @@ If it does not contain the required training state, use "--init-from" instead.
 
 ---
 
-Add checkpoint to HISTORY
+10. Add Checkpoint to HISTORY
 
 RUN
 
@@ -156,7 +160,7 @@ This keeps the checkpoint as a backup in "history/".
 
 ---
 
-Add checkpoint as BASE
+11. Add Checkpoint as BASE
 
 "base.pt" is created automatically when a new training run starts.
 
@@ -170,11 +174,12 @@ The existing checkpoint is used as the starting weights and the new run creates 
 
 ---
 
-Train
+12. Train
 
 RUN
 
 python scripts\generate_facts.py --repeats 20
+
 python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --set training.epochs=40 --set training.device=cuda
 
 During training:
@@ -185,11 +190,11 @@ live.pt
    ↓
 validation
    ↓
-better? ── yes ──→ best.pt
-   │
-   no
-   ↓
-best.pt stays the same
+better?
+ ┌─┴──────────┐
+YES           NO
+ ↓             ↓
+best.pt    best.pt stays
 
 Old replaced checkpoints are kept in:
 
@@ -197,7 +202,7 @@ history/
 
 ---
 
-Start training from another checkpoint
+13. Start Training From Another Checkpoint
 
 python scripts\train.py --config configs\char_transformer.yaml --set run_name=ored_v2 --init-from checkpoints\char_transformer_v2\best.pt --set training.epochs=40 --set training.device=cuda
 
@@ -205,7 +210,7 @@ python scripts\train.py --config configs\char_transformer.yaml --set run_name=or
 
 ---
 
-Continue stopped training
+14. Continue Stopped Training
 
 python scripts\train.py --config configs\char_transformer.yaml --resume-live --set training.epochs=40
 
@@ -213,7 +218,7 @@ python scripts\train.py --config configs\char_transformer.yaml --resume-live --s
 
 ---
 
-Merge LIVE into BEST
+15. Merge LIVE Into BEST
 
 After an online-learning session creates "live.pt":
 
@@ -223,7 +228,7 @@ python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
 
 It compares "live.pt" and "best.pt" using the same validation data.
 
-If LIVE is better
+If LIVE Is Better
 
 live.pt
    ↓
@@ -233,7 +238,7 @@ old best.pt
    ↓
 history/
 
-If LIVE is not better
+If LIVE Is Not Better
 
 best.pt stays unchanged
 
@@ -250,53 +255,54 @@ So "live.pt" becomes "best.pt".
 
 ---
 
-Checkpoints from the command prompt
-
-Save as history
-
-python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
-
-Save as best
-
-python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
-
-Save as live
-
-python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+16. Checkpoints From the Command Prompt
 
 List checkpoints
 
 python scripts\checkpoints.py list
 
-Merge live into best
+Save as BEST
+
+python scripts\checkpoints.py save FILE.pt --as best --config configs\char_transformer.yaml
+
+Save as LIVE
+
+python scripts\checkpoints.py save FILE.pt --as live --config configs\char_transformer.yaml
+
+Save as HISTORY
+
+python scripts\checkpoints.py save FILE.pt --as history --config configs\char_transformer.yaml
+
+Merge LIVE into BEST
 
 python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
 
 ---
 
-After done training ask questions
+17. After Done Training — Ask Questions
 
 RUN
 
 python scripts\recall.py --checkpoint checkpoints\ored_v2\best.pt
+
 python scripts\infer.py --checkpoint checkpoints\ored_v2\best.pt --text "Ask questions here. Delete this text and ask questions related to what he trained."
 
 ---
 
-After asking questions add checkpoint
+18. After Asking Questions — Add Checkpoint
 
 IMPORTANT
 
 RUN
 
 set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
-set ORED_SB_SERVICE_KEY= (use the key provided by me / koe / zeo)
+set ORED_SB_SERVICE_KEY=YOUR_SECRET_KEY
 
 python scripts\checkpoints.py push checkpoints\ored_v2\best.pt --kind best --run-name ored_v2
 
 ---
 
-Important
+19. Important
 
 "(.venv)" should be there in front of the command.
 
@@ -320,14 +326,18 @@ You should see:
 
 ---
 
-Checkpoint structure
+20. Checkpoint Structure
 
 checkpoints/
+│
 ├── ored_v2/
 │   ├── base.pt
 │   ├── best.pt
 │   └── live.pt
+│
 └── history/
+
+Meaning
 
 base.pt   = starting checkpoint
 best.pt   = best validation checkpoint
