@@ -60,8 +60,6 @@ python scripts\train.py --config configs\char_transformer.yaml --set run_name=or
 python scripts\recall.py --checkpoint checkpoints\ored_v2\best.pt
 --------------------
 
-`generate_facts.py` rebuilds `data\raw\corpus\` from scratch, so nothing is missing there.
-
 IMPORTANT 
 _________(.venv) should be there in front of the cmd________
 
