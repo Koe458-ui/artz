@@ -405,9 +405,13 @@ def test_checkpoints_cli_verifies_a_group_by_id(cfg, tmp_path, monkeypatch, caps
     store = SharedStore(shared / "store.pkl")
     files = DirectoryBucket(shared / "bucket")
     monkeypatch.setattr("ored.learning.checkpoint_cli._connect", lambda: (store, files))
+    import yaml
+    (tmp_path / "run.yaml").write_text(yaml.safe_dump(cfg.to_dict()))
     group = store.current_checkpoint(cfg.run_name, CheckpointKind.LIVE).checkpoint_group_id
 
     assert checkpoints_main(["verify", group]) == 0
+    assert capsys.readouterr().out.rstrip().endswith("VERIFIED")
+    assert checkpoints_main(["verify", "live", "--run", cfg.run_name, "--config", str(tmp_path / "run.yaml")]) == 0
     assert capsys.readouterr().out.rstrip().endswith("VERIFIED")
 
     shard = next(r for r in store.group(group) if r.part is CheckpointPart.SHARD and r.rank == 1)

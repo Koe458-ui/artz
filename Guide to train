@@ -343,3 +343,325 @@ base.pt   = starting checkpoint
 best.pt   = best validation checkpoint
 live.pt   = latest resumable checkpoint
 history/  = old checkpoint backups
+
+---
+
+21. Many PCs — What It Is
+
+Many PCs train ONE model together.
+
+PC 1 ─┐
+PC 2 ─┼─ train together → one model → one checkpoint
+PC 3 ─┘
+
+Each PC trains on a different part of the data.
+After every step all PCs share what they learned, so every PC has the same model.
+
+It is NOT:
+
+PC 1 trains alone
+PC 2 trains alone
+↓
+join the .pt files
+
+PC 1 is the main PC. It saves "best.pt" and the run summary.
+
+Full details: ored\model\docs\distributed-training.md
+
+---
+
+22. Before You Start — On EVERY PC
+
+Do steps 1 to 5 on every PC.
+
+Every PC must show the same version:
+
+RUN
+
+git log --oneline -1
+
+OUTPUT
+
+Same on all PCs.
+
+Make the same training data on every PC (same command, same numbers):
+
+RUN
+
+python scripts\generate_facts.py --repeats 20
+
+If one PC has different data or a different config, training stops and says which PC is different.
+
+---
+
+23. Connect the PCs
+
+All PCs must reach each other.
+
+Same home / same network → use PC 1's normal IP.
+
+Different homes → install Tailscale on every PC and log in with the same account. Use PC 1's Tailscale IP (starts with 100.).
+
+Find PC 1's IP (run on PC 1):
+
+RUN
+
+tailscale ip -4
+
+or:
+
+ipconfig
+
+Allow Python through Windows Firewall on every PC.
+
+Tick "Private" only. Do NOT tick "Public".
+
+Never open these ports on your router.
+
+---
+
+24. Check the PCs Can Talk
+
+Run on EVERY PC. Only NODE_RANK changes.
+
+PC 1 = 0, PC 2 = 1, PC 3 = 2, and so on.
+
+RUN
+
+set MASTER_ADDR=100.64.0.1
+set MASTER_PORT=29500
+set NNODES=3
+set NPROC_PER_NODE=1
+set NODE_RANK=0
+
+python scripts\distributed.py launch test --config configs\char_transformer.yaml --session net-check --rendezvous static
+
+(Change 100.64.0.1 to PC 1's IP. Change NODE_RANK on each PC.)
+
+OUTPUT (on PC 1)
+
+  OK   all ranks discovered 3 of 3
+  OK   all ranks connected (all-gather)
+  OK   all-reduce sum 6, expected 6
+  OK   barrier
+VERIFIED: every worker can train together
+
+If it waits and never finishes → one PC can't reach PC 1. Check the IP and the firewall.
+
+If a PC has Wi-Fi and Ethernet and Tailscale, tell it which one to use:
+
+set GLOO_SOCKET_IFNAME=Tailscale
+
+---
+
+25. Train on Many PCs
+
+Set your Supabase keys on EVERY PC (same as step 6):
+
+set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
+set ORED_SB_SERVICE_KEY=YOUR_SECRET_KEY
+
+Then run on EVERY PC. Only NODE_RANK changes.
+
+3 PCs
+
+RUN
+
+set MASTER_ADDR=100.64.0.1
+set MASTER_PORT=29500
+set NNODES=3
+set NPROC_PER_NODE=1
+set NODE_RANK=0
+
+python scripts\distributed.py launch train --config configs\char_transformer.yaml --session ored_v3-run1 --rendezvous static --set run_name=ored_v3 --set training.epochs=40 -- --upload --report
+
+5 PCs
+
+set NNODES=5
+
+NODE_RANK = 0, 1, 2, 3, 4
+
+10 PCs (or any number)
+
+set NNODES=10
+
+NODE_RANK = 0 to 9
+
+Nothing else changes.
+
+Meaning
+
+MASTER_ADDR    = PC 1's IP
+MASTER_PORT    = port on PC 1 (keep 29500)
+NNODES         = how many PCs
+NODE_RANK      = this PC's number (PC 1 = 0)
+NPROC_PER_NODE = GPUs used on this PC (normally 1)
+--session      = name of this training run. Same on all PCs. New name for each new run.
+--upload       = save checkpoints to Supabase (needed to continue later)
+--report       = show the PCs in Supabase
+
+Start the PCs in any order. They wait for each other.
+
+During training (on PC 1):
+
+Epoch   1/40 | train loss ... | val loss ...  <- best so far
+
+"val loss" is from ALL PCs together, not just PC 1.
+"best" is picked from this number.
+
+---
+
+26. Continue Stopped Training — Many PCs
+
+Start all PCs again with "--resume-live" and a NEW session name:
+
+python scripts\distributed.py launch train --config configs\char_transformer.yaml --session ored_v3-run2 --rendezvous static --set run_name=ored_v3 --set training.epochs=40 -- --resume-live --upload --report
+
+OUTPUT (on PC 1)
+
+resumed from      : ...live\checkpoint_epoch_0020_... (end of epoch 20, step ...), saved by 3 workers
+
+You can continue with a different number of PCs. Just change NNODES.
+
+3 PCs before → 2 PCs now = OK
+
+OUTPUT
+
+worker count changed (3 -> 2): model and optimizer restored ...
+
+If it says "can only resume with 3 workers" → use 3 PCs again.
+(This happens only if you used "--live-every-steps".)
+
+---
+
+27. If One PC Crashes
+
+PC crashes
+   ↓
+other PCs stop with an error
+   ↓
+last "live" is safe
+   ↓
+start all PCs again (step 26)
+
+Nothing is lost except the time since the last "live".
+
+A checkpoint is only used if EVERY PC saved its part. Half-saved checkpoints are never used.
+
+---
+
+28. Add Another PC
+
+1. Do step 22 on the new PC.
+2. Stop training (Ctrl + C on all PCs).
+3. Start again (step 26) with NNODES one bigger.
+
+Example: 3 PCs → 4 PCs
+
+set NNODES=4
+
+New PC: set NODE_RANK=3
+
+---
+
+29. Check a Checkpoint
+
+Needs the Supabase keys (step 25). It downloads every PC's part and checks it.
+
+RUN
+
+python scripts\checkpoints.py verify live --run ored_v3 --config configs\char_transformer.yaml
+
+python scripts\checkpoints.py verify best --run ored_v3 --config configs\char_transformer.yaml
+
+OUTPUT
+
+VERIFIED
+
+or:
+
+FAILED
+  - rank 1: object ored_v3/live/checkpoint_.../__1_0.distcp is missing
+
+Checking a folder on one PC only works if that PC has every part:
+
+python scripts\distributed.py verify checkpoints\ored_v3\live\checkpoint_epoch_0040_... --config configs\char_transformer.yaml
+
+---
+
+30. After Done Training — Ask Questions (Many PCs)
+
+On PC 1, "best.pt" is ready like before:
+
+python scripts\recall.py --checkpoint checkpoints\ored_v3\best.pt
+
+python scripts\infer.py --checkpoint checkpoints\ored_v3\best.pt --text "Ask questions here."
+
+With "--upload", best is already saved in Supabase. No step 18 needed.
+
+---
+
+31. See It on Your Phone (Supabase)
+
+Supabase → SQL Editor:
+
+select * from ored_training_run_overview;
+
+Shows: run, how many PCs, PCs alive, live epoch, best epoch, best loss.
+
+select rank, hostname, gpu_name, status, health from ored_training_worker_status order by rank;
+
+Shows each PC:
+
+rank 0  RTX 5060  training   alive
+rank 1  RTX 3060  training   alive
+rank 2  RTX 4050  checkpointing   alive
+
+"no heartbeat (unknown)" = PC not heard from for a while. It may be busy or off. Check it.
+
+select role, epoch, val_loss, world_size, is_complete, is_current from ored_checkpoint_groups where run_name = 'ored_v3';
+
+Shows live / best / history and if all PCs saved their part.
+
+---
+
+32. Checkpoint Structure — Many PCs
+
+checkpoints/
+│
+└── ored_v3/
+    ├── best.pt          ← for asking questions (PC 1)
+    ├── live.json        ← which live is current
+    ├── best.json        ← which best is current
+    ├── live/
+    │   └── checkpoint_epoch_0040_step_..._1a2b3c4d/
+    │       ├── manifest.json
+    │       ├── __0_0.distcp    ← PC 1's part
+    │       ├── __1_0.distcp    ← PC 2's part
+    │       ├── __2_0.distcp    ← PC 3's part
+    │       ├── rank-00000.pt
+    │       ├── rank-00001.pt
+    │       └── rank-00002.pt
+    ├── best/
+    ├── history/
+    └── base/
+
+One folder = one checkpoint, made of all PCs' parts.
+
+"manifest.json" lists every part. No manifest = not finished = never used.
+
+---
+
+33. Important — Many PCs
+
+Always add "--upload". Each PC only keeps its own part. To continue, every PC needs every part, and "--upload" is how they get it.
+
+Use "--rendezvous static" and set NODE_RANK, so PC 1 is always the main PC.
+
+Use a new "--session" name every time you start.
+
+The slowest PC sets the speed. A very slow GPU slows everyone. Leave it out.
+
+Each PC uses batch size 32. With 3 PCs, one step = 32 x 3 = 96 examples.
+
+Windows uses "gloo". Do not set backend to "nccl" on Windows.
