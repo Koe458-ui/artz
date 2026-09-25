@@ -13,7 +13,7 @@ from ored.data.preprocessing import bits_to_string
 from ored.inference.predictor import resolve_task
 from ored.models.registry import build_model
 from ored.training.metrics import bit_accuracy, exact_match_accuracy
-from ored.utils.checkpoint import load_checkpoint
+from ored.utils.checkpoint import check_compatible, load_checkpoint, load_model_state
 from ored.utils.logging_utils import get_logger, section
 from ored.utils.seed import resolve_device
 
@@ -43,7 +43,8 @@ def evaluate_checkpoint(
         )
 
     model = build_model(cfg).to(resolved_device)
-    model.load_state_dict(payload["model_state"], strict=True)
+    check_compatible(payload, model, path=checkpoint_path)
+    load_model_state(model, payload["model_state_dict"], checkpoint_path)
     model.eval()
 
     datasets = build_datasets(cfg)

@@ -1,6 +1,15 @@
 from ored.learning.candidates import CandidatePolicy, build_candidates, redact
 from ored.learning.dataset import DatasetError, DatasetReport, DatasetSpec, export
-from ored.learning.checkpoints import CheckpointStore, DEFAULT_BUCKET, fetch, publish
+from ored.learning.checkpoints import (
+    CheckpointStore,
+    DEFAULT_BUCKET,
+    NotBetterError,
+    fetch,
+    find_duplicates,
+    promote_best,
+    publish,
+    verify_checkpoint,
+)
 from ored.learning.records import (
     CandidateStatus,
     Checkpoint,
@@ -25,7 +34,7 @@ from ored.learning.registry import (
     record_version,
 )
 from ored.learning.review import ReviewError, approve, approve_many, pending, reject, withdraw
-from ored.learning.store import InMemoryStore, LearningStore, StoreError
+from ored.learning.store import InMemoryStore, LearningStore, StaleCheckpointError, StoreError
 from ored.learning.supabase_store import SupabaseStore
 
 __all__ = [
@@ -34,8 +43,12 @@ __all__ = [
     "CheckpointKind",
     "CheckpointStore",
     "DEFAULT_BUCKET",
+    "NotBetterError",
     "fetch",
+    "find_duplicates",
+    "promote_best",
     "publish",
+    "verify_checkpoint",
     "build_candidates",
     "redact",
     "DatasetError",
@@ -67,6 +80,7 @@ __all__ = [
     "withdraw",
     "InMemoryStore",
     "LearningStore",
+    "StaleCheckpointError",
     "StoreError",
     "SupabaseStore",
 ]

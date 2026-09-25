@@ -3,9 +3,9 @@ name: ored
 on:
   push:
     branches: ['**']
-    paths: ['ored/model/**', '.github/workflows/ored.yml']
+    paths: ['ored/model/**', 'ored/supabase/**', '.github/workflows/ored.yml']
   pull_request:
-    paths: ['ored/model/**', '.github/workflows/ored.yml']
+    paths: ['ored/model/**', 'ored/supabase/**', '.github/workflows/ored.yml']
 
 permissions:
   contents: read

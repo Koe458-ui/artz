@@ -52,17 +52,18 @@ def test_checkpoints_are_written_and_reloadable(tiny_dataset):
     trainer = Trainer(tiny_dataset)
     trainer.fit()
 
-    for name in ("best.pt", "last.pt"):
+    for name in ("base.pt", "best.pt", "live.pt"):
         path = tiny_dataset.checkpoint_dir / name
         assert path.exists(), f"{name} was not written"
 
         payload = load_checkpoint(path)
-        assert "model_state" in payload
+        assert payload["checkpoint_kind"] == name[:-3]
+        assert "model_state_dict" in payload
         assert payload["config"]["data"]["n_bits"] == tiny_dataset.data.n_bits
 
-        if name == "last.pt":
+        if name == "live.pt":
             for key, tensor in trainer.model.state_dict().items():
-                assert torch.allclose(payload["model_state"][key], tensor)
+                assert torch.allclose(payload["model_state_dict"][key], tensor)
 
 
 def test_history_json_is_written(tiny_dataset):

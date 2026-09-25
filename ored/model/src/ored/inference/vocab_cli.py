@@ -8,7 +8,6 @@ from typing import List, Optional, Sequence
 
 from ored.data.tokenizer import Tokenizer
 from ored.inference.predictor import read_tokenizer, resolve_checkpoint
-from ored.learning.online import OnlinePolicy
 from ored.utils.checkpoint import load_checkpoint
 from ored.utils.logging_utils import get_logger, section
 
@@ -60,9 +59,13 @@ def corpus_words(directory: str | Path, split: str = "train") -> set:
 def inspect(
     tokenizer: Tokenizer,
     text: str,
-    min_known_ratio: float = OnlinePolicy().min_known_ratio,
+    min_known_ratio: Optional[float] = None,
     known_words: Optional[set] = None,
 ) -> VocabReport:
+    if min_known_ratio is None:
+        from ored.learning.online import OnlinePolicy
+
+        min_known_ratio = OnlinePolicy().min_known_ratio
     ids = tokenizer.encode(text)
     unknown = sorted({c for c, i in zip(text, ids) if i == UNK_ID})
     ratio = sum(1 for i in ids if i != UNK_ID) / len(ids) if ids else 0.0

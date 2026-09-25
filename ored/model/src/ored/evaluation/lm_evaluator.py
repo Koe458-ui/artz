@@ -13,7 +13,7 @@ from ored.data.tokenizer import Tokenizer
 from ored.evaluation.text_metrics import score_arithmetic, score_text
 from ored.inference.generator import complete, generate_text
 from ored.models.registry import build_model
-from ored.utils.checkpoint import load_checkpoint
+from ored.utils.checkpoint import check_compatible, load_checkpoint, load_model_state
 from ored.utils.logging_utils import get_logger, section
 from ored.utils.seed import resolve_device, set_seed
 
@@ -28,23 +28,25 @@ def load_language_model(
     payload = load_checkpoint(checkpoint_path, map_location=resolved)
     cfg = config_from_dict(payload["config"])
 
-    extra = payload.get("extra") or {}
-    if "tokenizer" not in extra:
+    if not payload.get("tokenizer"):
         raise ValueError(
             f"{checkpoint_path} contains no tokenizer, so its token ids cannot be "
             f"interpreted. Was it trained with task: language_model?"
         )
-    tokenizer = Tokenizer.from_dict(extra["tokenizer"])
+    tokenizer = Tokenizer.from_dict(payload["tokenizer"])
 
     model = build_model(cfg, vocab_size=tokenizer.vocab_size).to(resolved)
-    model.load_state_dict(payload["model_state"], strict=True)
+    check_compatible(payload, model, path=checkpoint_path)
+    load_model_state(model, payload["model_state_dict"], checkpoint_path)
     model.eval()
 
     info = {
         "path": str(checkpoint_path),
         "epoch": payload.get("epoch"),
         "metrics": payload.get("metrics", {}),
-        "saved_at": payload.get("saved_at"),
+        "saved_at": payload.get("created_at"),
+        "kind": payload.get("checkpoint_kind"),
+        "global_step": payload.get("global_step"),
         "device": resolved,
     }
     return model, tokenizer, cfg, info

@@ -192,6 +192,79 @@ class GenerationConfig:
 
 
 @dataclass
+class CheckpointConfig:
+
+    best_metric: str = "val_loss"
+    best_mode: str = "min"
+
+    save_base: bool = True
+
+    save_live_every_epochs: int = 1
+    save_live_every_steps: int = 0
+
+    keep_history: bool = False
+    save_history_every_epochs: int = 1
+    save_history_every_steps: int = 0
+
+    export_on_finish: bool = False
+
+    upload: bool = False
+    keep_superseded_live: bool = False
+
+    def validate(self) -> None:
+        if self.best_mode not in ("min", "max"):
+            raise ValueError("checkpoint.best_mode must be 'min' (lower is better) or 'max'")
+        if not self.best_metric:
+            raise ValueError("checkpoint.best_metric must name a metric, e.g. val_loss")
+        for name in ("save_live_every_epochs", "save_live_every_steps",
+                     "save_history_every_epochs", "save_history_every_steps"):
+            if getattr(self, name) < 0:
+                raise ValueError(f"checkpoint.{name} must be >= 0 (0 = off)")
+        if self.keep_history and not (self.save_history_every_epochs or self.save_history_every_steps):
+            raise ValueError(
+                "checkpoint.keep_history is on but no interval is set: set "
+                "save_history_every_epochs or save_history_every_steps"
+            )
+
+
+@dataclass
+class DistributedConfig:
+
+    enabled: bool = False
+    backend: str = "gloo"
+    nnodes: str = "1"
+    nproc_per_node: int = 1
+    rendezvous_backend: str = "c10d"
+    master_port: int = 29500
+    timeout_seconds: int = 900
+    max_restarts: int = 0
+    batch_size_mode: str = "per_worker"
+    heartbeat_seconds: int = 30
+    report_to_supabase: bool = False
+
+    def validate(self) -> None:
+        if self.backend not in ("gloo", "nccl"):
+            raise ValueError("distributed.backend must be gloo (any OS, CPU or GPU) or nccl (Linux + NVIDIA GPUs)")
+        if self.rendezvous_backend not in ("c10d", "static"):
+            raise ValueError("distributed.rendezvous_backend must be c10d or static")
+        parts = str(self.nnodes).split(":")
+        if len(parts) > 2 or not all(p.isdigit() and int(p) >= 1 for p in parts):
+            raise ValueError("distributed.nnodes must be a count like 3, or MIN:MAX like 2:5")
+        if len(parts) == 2 and int(parts[0]) > int(parts[1]):
+            raise ValueError("distributed.nnodes MIN:MAX needs MIN <= MAX")
+        if self.nproc_per_node < 1:
+            raise ValueError("distributed.nproc_per_node must be >= 1")
+        if not 1 <= self.master_port <= 65535:
+            raise ValueError("distributed.master_port must be a TCP port")
+        if self.timeout_seconds < 30:
+            raise ValueError("distributed.timeout_seconds must be >= 30")
+        if self.batch_size_mode not in ("per_worker", "global"):
+            raise ValueError("distributed.batch_size_mode must be per_worker or global")
+        if self.heartbeat_seconds < 5:
+            raise ValueError("distributed.heartbeat_seconds must be >= 5")
+
+
+@dataclass
 class PathsConfig:
     checkpoint_dir: str = "checkpoints"
 
@@ -209,6 +282,8 @@ class Config:
     model: ModelConfig = field(default_factory=ModelConfig)
     training: TrainingConfig = field(default_factory=TrainingConfig)
     generation: GenerationConfig = field(default_factory=GenerationConfig)
+    checkpoint: CheckpointConfig = field(default_factory=CheckpointConfig)
+    distributed: DistributedConfig = field(default_factory=DistributedConfig)
     paths: PathsConfig = field(default_factory=PathsConfig)
 
     def validate(self) -> "Config":
@@ -216,6 +291,8 @@ class Config:
         self.model.validate()
         self.training.validate()
         self.generation.validate()
+        self.checkpoint.validate()
+        self.distributed.validate()
         return self
 
     def to_dict(self) -> Dict[str, Any]:
