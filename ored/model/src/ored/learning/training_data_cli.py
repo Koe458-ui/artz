@@ -41,6 +41,7 @@ server-side secrets: never put them in a browser, a public asset or Git.
   validate                     check every row (or a selection) and list problems
   add --type qna ...           add one row (unverified unless --verified)
   import rows.jsonl            add many rows; refuses exact duplicates
+  import-facts                 add every question in configs/facts.yaml (tag "facts")
   export --dataset-tag T       write the selected rows to a .jsonl file
   snapshot --dataset-tag T     take (or reuse) the immutable training snapshot
   pull --dataset-tag T --snapshot HASH   download a snapshot taken elsewhere
@@ -192,6 +193,23 @@ def cmd_import(args: argparse.Namespace, store: Any) -> int:
                 return 1
     logger.info(f"read {len(records)} row(s) from {args.file}")
     return _insert(store, records, args.skip_duplicates)
+
+
+def cmd_import_facts(args: argparse.Namespace, store: Any) -> int:
+    from collections import Counter
+
+    from ored.data.facts_import import facts_to_rows
+
+    rows = facts_to_rows(args.file, args.tag, verified=not args.unverified)
+    logger.info(f"read {len(rows)} question(s) from {args.file} -> dataset_tag {args.tag!r}, "
+                f"verified={str(not args.unverified).lower()}")
+    for (category, subject), count in sorted(Counter((r.category, r.subject) for r in rows).items()):
+        logger.info(f"  {category:<20}{subject:<24}{count:>5}")
+    if args.dry_run:
+        bad = [c for c in (check_record(r) for r in rows) if not c.ok]
+        logger.info(f"dry run: {len(rows) - len(bad)} valid, {len(bad)} invalid, nothing written")
+        return 1 if bad else 0
+    return _insert(store, rows, args.skip_duplicates)
 
 
 def cmd_export(args: argparse.Namespace, store: Any) -> int:
@@ -374,6 +392,14 @@ def build_parser() -> argparse.ArgumentParser:
     p.add_argument("--skip-duplicates", action="store_true",
                    help="insert the new rows and list the ones that already exist")
 
+    p = sub.add_parser("import-facts", help="add every question in configs/facts.yaml")
+    p.add_argument("file", nargs="?", default="configs/facts.yaml")
+    p.add_argument("--tag", default="facts", help="dataset_tag for the rows (default facts)")
+    p.add_argument("--unverified", action="store_true", help="import them with verified = false")
+    p.add_argument("--skip-duplicates", action="store_true",
+                   help="insert the new questions and list the ones already in Supabase")
+    p.add_argument("--dry-run", action="store_true", help="validate and show the mapping, write nothing")
+
     p = sub.add_parser("export")
     _filters(p, tag_required=True)
     p.add_argument("--include-unverified", action="store_true")
@@ -403,16 +429,21 @@ def build_parser() -> argparse.ArgumentParser:
 
 COMMANDS = {
     "stats": cmd_stats, "validate": cmd_validate, "add": cmd_add, "import": cmd_import,
+    "import-facts": cmd_import_facts,
     "export": cmd_export, "snapshot": cmd_snapshot, "pull": cmd_pull, "lineage": cmd_lineage,
     "taxonomy": cmd_taxonomy,
 }
 OFFLINE = ("taxonomy", "pull", "lineage")
 
 
+def _offline(args: argparse.Namespace) -> bool:
+    return args.command in OFFLINE or (args.command == "import-facts" and args.dry_run)
+
+
 def main(argv: Optional[List[str]] = None, store: Any = None) -> int:
     args = build_parser().parse_args(argv)
     try:
-        if store is None and args.command not in OFFLINE:
+        if store is None and not _offline(args):
             store = _connect()
         if args.command == "lineage" and store is None:
             try:

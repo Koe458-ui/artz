@@ -272,6 +272,37 @@ requires `--set data.supabase.snapshot=<sha256>`, so every PC trains on
 identical files: take it once with `training_data.py snapshot --dataset-tag T
 --upload` and every PC downloads it by hash.
 
+## The facts from `configs/facts.yaml`
+
+The 1,003 questions in `configs/facts.yaml` were imported on 2026-09-26 as
+`ored_training_data` rows with `dataset_tag = 'facts'`, `source = 'facts_yaml'`,
+`type = 'qna'`, `enabled` and `verified` (they were already curated and trained
+on). `src/ored/data/facts_import.py` holds the mapping:
+
+| facts.yaml category | category / subject | rows |
+|---|---|---|
+| physics, chemistry, biology, astronomy | `science` / same name | 40, 50, 30, 10 |
+| mathematics | `mathematics` / `addition`, `subtraction`, `multiplication`, `division` from the operator | 50 |
+| computing | `computer_science` / `computer_fundamentals` | 20 |
+| geography | `general_knowledge` / `geography`, topic `capitals` | 19 |
+| civics, philosophy, commerce | `general_knowledge` / same name | 100 each |
+| online_game, outdoor_sports, art_and_artists | `general_knowledge` / `online_games`, `outdoor_sports`, `art_and_artists` | 100, 100, 84 |
+| english | `grammar` / `english_grammar` | 100 |
+| language_studies | `language_skills` / `linguistics` | 100 |
+
+`metadata` keeps `facts_id` and `facts_category`, so every row can be traced back
+to its line in the file. Ids `00217`–`00219` are used twice in the file (once for
+geography, once for civics); each row keeps its own. Sums get
+`metadata.group` (`addition:3,4`), so `3 + 4` and `4 + 3` always share a split.
+
+Train on them alone with `--supabase-dataset facts`, or with everything else
+using `--supabase-dataset`. `configs/facts.yaml` stays in the repository because
+`scripts/generate_facts.py` and `scripts/recall.py` still read it for the
+generated corpus; new questions belong in Supabase. To bring later edits of the
+file across, run `python scripts/training_data.py import-facts --skip-duplicates`:
+changed questions are added as new rows, and identical ones are listed and left
+alone. Replaced wording stays in Supabase until it is disabled there.
+
 ## Commands
 
 ```bash
@@ -280,6 +311,7 @@ python scripts/training_data.py validate
 python scripts/training_data.py add --type qna --category science --subject physics \
     --input "What is force?" --output "A push or a pull." --verified
 python scripts/training_data.py import rows.jsonl [--skip-duplicates]
+python scripts/training_data.py import-facts [configs/facts.yaml] [--dry-run] [--skip-duplicates]
 python scripts/training_data.py export --dataset-tag physics_v1
 python scripts/training_data.py snapshot --dataset-tag physics_v1 [--upload]
 python scripts/training_data.py pull --dataset-tag physics_v1 --snapshot <sha256>

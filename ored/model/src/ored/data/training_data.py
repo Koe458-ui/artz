@@ -39,13 +39,14 @@ TAXONOMY: Dict[str, Dict[str, List[str]]] = {
     "grammar": {s: [] for s in (
         "nouns", "pronouns", "verbs", "adjectives", "adverbs", "prepositions", "conjunctions",
         "articles", "singular_plural", "tenses", "active_passive_voice", "direct_indirect_speech",
-        "sentence_structure", "clauses", "conditionals", "grammar_correction")},
+        "sentence_structure", "clauses", "conditionals", "grammar_correction", "english_grammar")},
     "sentences": {s: [] for s in (
         "simple", "compound", "complex", "questions", "answers", "commands", "requests",
         "statements", "descriptions", "explanations", "sentence_completion")},
     "general_knowledge": {s: [] for s in (
         "everyday_facts", "people", "places", "countries", "cities", "continents", "oceans",
-        "landmarks", "history", "geography", "culture", "society", "civics", "economics")},
+        "landmarks", "history", "geography", "culture", "society", "civics", "economics",
+        "commerce", "philosophy", "art_and_artists", "outdoor_sports", "online_games")},
     "qna": {s: [] for s in (
         "factual", "definition", "explanation", "comparison", "how_to", "why", "what", "who",
         "where", "when", "how")},
@@ -58,7 +59,7 @@ TAXONOMY: Dict[str, Dict[str, List[str]]] = {
         "decimals", "percentages", "ratios", "proportions", "averages", "powers", "roots",
         "algebra", "equations", "inequalities", "sequences", "sets", "geometry", "trigonometry",
         "coordinate_geometry", "probability", "statistics", "calculus", "unit_conversion",
-        "mathematical_reasoning")},
+        "mathematical_reasoning", "arithmetic")},
     "science": {
         "physics": [
             "units", "measurements", "vectors", "kinematics", "mechanics", "work", "energy", "power",
@@ -75,6 +76,7 @@ TAXONOMY: Dict[str, Dict[str, List[str]]] = {
             "cells", "genetics", "dna_rna", "evolution", "anatomy", "physiology", "microbiology",
             "botany", "zoology", "ecology", "ecosystems", "reproduction", "metabolism",
             "biotechnology"],
+        "astronomy": [],
     },
     "computer_science": {s: [] for s in (
         "computer_fundamentals", "hardware", "software", "operating_systems", "programming",
@@ -101,7 +103,7 @@ TAXONOMY: Dict[str, Dict[str, List[str]]] = {
         "messages", "reports", "notes", "structured_writing")},
     "language_skills": {s: [] for s in (
         "translation", "paraphrasing", "summarization", "text_correction", "spelling_correction",
-        "grammar_correction", "classification", "keyword_extraction", "terminology")},
+        "grammar_correction", "classification", "keyword_extraction", "terminology", "linguistics")},
     "data": {s: [] for s in (
         "tables", "lists", "structured_data", "data_interpretation", "charts", "percentages",
         "measurements", "units", "conversions")},

@@ -968,6 +968,10 @@ that does not is given a full stop.
 Either way the lines are mixed into the ordinary corpus rather than replacing
 it, so the grammar sentences and the arithmetic stay where they were.
 
+The same questions are also in Supabase now, as the `facts` dataset of
+`ored_training_data` (see [`docs/training-data.md`](docs/training-data.md)):
+`python scripts/train.py --config configs/char_transformer.yaml --supabase-dataset facts`.
+
 ```bash
 python scripts/generate_facts.py
 python scripts/generate_facts.py --repeats 80
@@ -1273,7 +1277,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **108 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **110 files, 0 comments, 0 docstrings.**
 
 ---
 
