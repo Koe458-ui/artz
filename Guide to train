@@ -51,6 +51,18 @@ PART 6 — TRAIN ON MANY PCS
   32. After Done Training — Ask Questions (Many PCs)
   33. Checkpoint Structure — Many PCs
 
+PART 7 — TRAIN ON YOUR OWN DATA IN SUPABASE
+  34. Supabase Data — What It Is
+  35. Set Your Supabase Keys
+  36. See What Data Is There
+  37. Add Training Data
+  38. Train on Supabase Data
+  39. Continue Stopped Training — Supabase Data
+  40. Train Again After Adding New Data
+  41. Ask Questions — Supabase Data
+  42. Which Data Made This Checkpoint?
+  43. Supabase Data on Many PCs
+
 ---
 
 ========================================
@@ -73,6 +85,15 @@ git log --oneline -1
 OUTPUT
 
 The version it will show should match with GitHub Ored.ai last merged version.
+
+PART 7 (Supabase data) needs the training-data update. Until it is merged into
+Ored.ai, use its branch instead:
+
+RUN
+
+git fetch origin
+git checkout albaze777/supabase-training-pipeline-efqpgi
+git pull
 
 ---
 
@@ -243,6 +264,9 @@ Old replaced checkpoints are kept in:
 
 history/
 
+This trains on the generated corpus (facts.yaml). To train on the questions
+you keep in Supabase instead, go to PART 7.
+
 ---
 
 11. Start Training From Another Checkpoint
@@ -333,6 +357,10 @@ The existing checkpoint is used as the starting weights and the new run creates 
 
 After an online-learning session creates "live.pt":
 
+CAREFUL: an online "live.pt" learned from whatever people typed into the chat.
+Ask it questions (step 19) before you merge it. Never merge it just because
+its loss is lower.
+
 RUN
 
 python scripts\checkpoints.py merge-live --config configs\char_transformer.yaml
@@ -401,6 +429,8 @@ RUN
 python scripts\recall.py --checkpoint checkpoints\ored_v2\best.pt
 
 python scripts\infer.py --checkpoint checkpoints\ored_v2\best.pt --text "Ask questions here. Delete this text and ask questions related to what he trained."
+
+For a model trained on Supabase data (PART 7) use "--ask" instead (step 41).
 
 ---
 
@@ -740,3 +770,303 @@ checkpoints/
 One folder = one checkpoint, made of all PCs' parts.
 
 "manifest.json" lists every part. No manifest = not finished = never used.
+
+---
+
+========================================
+PART 7 — TRAIN ON YOUR OWN DATA IN SUPABASE
+========================================
+
+34. Supabase Data — What It Is
+
+Your questions, facts and words live in Supabase, table "ored_training_data".
+The 1003 questions from facts.yaml are already there (dataset tag "facts").
+
+You add rows in Supabase
+   ↓
+you mark them verified = true
+   ↓
+you run ONE command
+   ↓
+Ored takes a fixed copy of the rows (a "snapshot")
+   ↓
+splits it: train / val / test (the same question never lands in two)
+   ↓
+trains
+   ↓
+best.pt / live.pt / history/ like before
+   ↓
+Supabase records which data made which checkpoint
+
+Only rows with enabled = true AND verified = true are used.
+Rows added while training runs are not used by that run.
+
+Full details: ored\model\docs\training-data.md
+
+---
+
+35. Set Your Supabase Keys
+
+Do this in EVERY new Command Prompt window, after step 3:
+
+RUN
+
+set ORED_SB_URL=https://xoauguhlxjozpvukjtro.supabase.co
+set ORED_SB_SERVICE_KEY=YOUR_SECRET_KEY
+
+Get YOUR_SECRET_KEY from:
+
+Supabase → Ored.ai project → Project Settings → API Keys → Secret key
+(it starts with sb_secret_)
+
+No quotes around the values.
+"set" only lasts for this window. That is on purpose.
+
+«Never put the secret key in GitHub, in a file in artz, or in the website.»
+
+---
+
+36. See What Data Is There
+
+RUN
+
+python scripts\training_data.py stats
+
+OUTPUT (end)
+
+tag facts         : 1003 rows, 1003 trainable (enabled and verified), 0 awaiting review, 0 disabled
+
+Check every row is correct:
+
+RUN
+
+python scripts\training_data.py validate
+
+OUTPUT
+
+invalid   : 0
+
+---
+
+37. Add Training Data
+
+Easiest: Supabase → Table Editor → ored_training_data → Insert → Insert row
+
+Fill in:
+
+type        qna
+category    science
+subject     physics
+topic       mechanics
+input       What is force?
+output      Force is a push or pull that can change the motion of an object.
+difficulty  beginner
+language    en
+dataset_tag facts           (or your own tag, or leave empty)
+verified    true            (only verified rows are trained on)
+enabled     true
+
+Leave id, fingerprint, created_at and updated_at EMPTY. Supabase fills them.
+
+Allowed "type": qna, fact, definition, vocabulary, sentence, conversation,
+instruction, comprehension, correction, translation, math, reasoning,
+writing, classification
+
+Allowed "category": language_foundation, grammar, sentences, general_knowledge,
+qna, conversation, mathematics, science, computer_science, engineering,
+reasoning, instructions, reading, writing, language_skills, data, everyday,
+safety, ored
+
+See every type, category and usual subject:
+
+RUN
+
+python scripts\training_data.py taxonomy
+
+Or add one row from the Command Prompt:
+
+RUN
+
+python scripts\training_data.py add --type qna --category science --subject physics --input "What is force?" --output "A push or a pull." --tag facts --verified
+
+The same question with the same answer twice is refused:
+
+DUPLICATE: 1 record(s) already exist with the same content ...
+
+Edit the old row instead of adding a copy.
+To stop using a row: set enabled = false. Do not delete it.
+
+If you change facts.yaml, bring the changes to Supabase:
+
+RUN
+
+python scripts\training_data.py import-facts --skip-duplicates
+
+---
+
+38. Train on Supabase Data
+
+Do steps 3 and 35 first.
+
+Only the facts:
+
+RUN
+
+python scripts\train.py --config configs\char_transformer.yaml --supabase-dataset facts --upload --set training.device=cuda --epochs 40
+
+Everything in Supabase (all tags):
+
+python scripts\train.py --config configs\char_transformer.yaml --supabase-dataset --upload --set training.device=cuda --epochs 40
+
+Only one subject:
+
+python scripts\train.py --config configs\char_transformer.yaml --supabase-dataset facts --subject physics --upload --epochs 40
+
+Also rows that are not verified yet (only when you mean it):
+
+python scripts\train.py --config configs\char_transformer.yaml --supabase-dataset facts --include-unverified --upload --epochs 40
+
+OUTPUT (start)
+
+TRAINING DATA SNAPSHOT
+dataset       : facts v1 (ored_datasets ...)
+snapshot      : 8466d709a23e1131...
+selection     : enabled = true AND verified = true AND dataset_tag = 'facts' ...
+records       : 1,003  train 720 / val 147 / test 136  (seed 1337)
+session       : ... (ored_training_sessions, running)
+
+Checkpoints go to:
+
+checkpoints\char_transformer-facts\
+    base.pt
+    best.pt
+    live.pt
+    history\
+
+(--supabase-dataset without a tag → checkpoints\char_transformer-all\)
+
+Meaning
+
+--supabase-dataset facts = train on the rows with dataset_tag facts
+--upload                 = save checkpoints to Supabase
+--epochs 40              = how many times it goes through the data
+--batch-size 64          = more per step, if your GPU has room
+--run-name NAME          = choose the checkpoint folder name yourself
+
+A long command can go on several lines with ^ at the end of each line:
+
+python scripts\train.py --config configs\char_transformer.yaml ^
+  --supabase-dataset facts --upload --epochs 40
+
+At the end:
+
+session       : ... evaluated
+model version : char_transformer-facts-xxxxxxxx (candidate ...)
+
+"candidate" = saved, NOT made the live website model. You decide that yourself.
+
+---
+
+39. Continue Stopped Training — Supabase Data
+
+Same command plus "--resume-live":
+
+RUN
+
+python scripts\train.py --config configs\char_transformer.yaml --supabase-dataset facts --upload --resume-live --epochs 40
+
+OUTPUT
+
+resuming live: training continues on the snapshot it started with, 8466d709a23e1131
+
+It keeps training on the SAME data it started with, even if you added rows since.
+
+---
+
+40. Train Again After Adding New Data
+
+New or changed rows = a new snapshot (facts v2, v3, ...).
+
+Start a NEW run with its own name, so it does not mix with the old one:
+
+RUN
+
+python scripts\train.py --config configs\char_transformer.yaml --supabase-dataset facts --run-name ored_facts_v2 --upload --epochs 40
+
+Why a new name: new rows can bring new letters or symbols. A model trained
+without them cannot continue with them.
+
+---
+
+41. Ask Questions — Supabase Data
+
+RUN
+
+python scripts\infer.py --checkpoint checkpoints\char_transformer-facts\best.pt --ask "What is velocity?"
+
+Several at once:
+
+python scripts\infer.py --checkpoint checkpoints\char_transformer-facts\best.pt --ask "What is velocity?" --ask "What is the capital of France?"
+
+OUTPUT
+
+Question: What is velocity?
+Answer: Velocity is speed together with a specified direction.
+
+(The answer is only as good as the training. Few epochs = messy answers.)
+
+For a vocabulary row use its form:
+
+python scripts\infer.py --checkpoint checkpoints\char_transformer-facts\best.pt --ask "apple" --ask-type vocabulary
+
+---
+
+42. Which Data Made This Checkpoint?
+
+RUN
+
+python scripts\training_data.py lineage checkpoints\char_transformer-facts\best.pt
+
+OUTPUT
+
+dataset       : facts v1 (ored_datasets ...)
+snapshot      : 8466d709a23e1131...
+selection     : enabled = true AND verified = true AND dataset_tag = 'facts' ...
+records       : 1003 (train 720 / val 147 / test 136)
+git commit    : ...
+
+Also works with a checkpoint id from "python scripts\checkpoints.py list".
+
+On your phone (Supabase → SQL Editor):
+
+select run_name, role, epoch, val_loss, dataset_name, dataset_version, record_count from ored_checkpoint_lineage order by created_at desc;
+
+Old checkpoints (before PART 7) show empty dataset columns. That is normal.
+
+---
+
+43. Supabase Data on Many PCs
+
+Every PC must train on exactly the same data. So first take ONE snapshot
+and save it to Supabase (on PC 1, after step 35):
+
+RUN
+
+python scripts\training_data.py snapshot --dataset-tag facts --upload
+
+OUTPUT (end)
+
+Train on exactly this snapshot:
+  python scripts\train.py ... --snapshot 8466d709a23e1131...(64 letters)
+
+Copy the 64-letter hash. Then do step 26 on EVERY PC, adding these three --set:
+
+--set data.source=supabase --set data.supabase.dataset_tag=facts --set data.supabase.snapshot=PASTE_THE_64_LETTER_HASH
+
+Example:
+
+python scripts\distributed.py launch train --config configs\char_transformer.yaml --session ored_facts-run1 --rendezvous static --set run_name=ored_facts --set training.epochs=40 --set data.source=supabase --set data.supabase.dataset_tag=facts --set data.supabase.snapshot=PASTE_THE_64_LETTER_HASH -- --upload --report
+
+Every PC downloads the same snapshot and checks it.
+Without the hash it stops and tells you to take a snapshot first.
+

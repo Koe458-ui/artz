@@ -292,9 +292,13 @@ def clean_block(text: str) -> str:
     return BLANK_LINES.sub("\n\n", "\n".join(lines)).strip("\n ")
 
 
+def prompt_for(input: str, type: str = "qna") -> str:
+    first, second = TYPES[type]
+    return f"{first}: {clean_block(input)}\n{second}: "
+
+
 def format_record(record: Any) -> str:
-    first, second = TYPES[record.type]
-    return f"{first}: {clean_block(record.input)}\n{second}: {clean_block(record.output)}"
+    return prompt_for(record.input, record.type) + clean_block(record.output)
 
 
 def group_key(record: Any) -> str:

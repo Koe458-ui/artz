@@ -37,6 +37,7 @@ from ored.training import dataset_run
 from ored.training.trainer import main as train_main, train
 from ored.utils.checkpoint import load_checkpoint
 from test_checkpoint_store import FakeBucket
+from test_inference import trained_lm_checkpoint
 
 MIGRATION = (Path(__file__).resolve().parents[2] / "supabase" / "migrations"
              / "20260926120000_ored_training_data.sql")
@@ -460,3 +461,16 @@ def test_payload_dataset_survives_a_torch_round_trip(tmp_path):
     path = save_checkpoint(tmp_path / "x.pt", torch.nn.Linear(2, 2), {"run_name": "r"}, epoch=1,
                            extra={"dataset": {"snapshot_sha256": "ab" * 32, "records": 3}})
     assert load_checkpoint(path)["extra"]["dataset"]["records"] == 3
+
+
+def test_ask_uses_the_same_text_form_as_training(trained_lm_checkpoint, caplog):
+    from ored.data.training_data import prompt_for
+    from ored.inference.predictor import main as infer_main
+
+    record = row("qna", "science", "What is force?", "A push or a pull.")
+    assert format_record(record) == prompt_for("What is force?") + "A push or a pull."
+    assert prompt_for("apple", "vocabulary") == "Word: apple\nMeaning: "
+    caplog.set_level("INFO")
+    assert infer_main(["--checkpoint", str(trained_lm_checkpoint), "--ask", "What is force?",
+                       "--ask", "What is mass?", "--quiet"]) == 0
+    assert "Question: What is force?\nAnswer: " in caplog.text and "Question: What is mass?" in caplog.text

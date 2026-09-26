@@ -416,7 +416,8 @@ def _apply_override(cfg: Config, assignment: str) -> None:
     leaf = parts[-1]
     if not hasattr(target, leaf):
         raise ValueError(f"unknown config key '{dotted}' in override {assignment!r}")
-    setattr(target, leaf, _coerce(raw_value))
+    declared = get_type_hints(type(target)).get(leaf) if is_dataclass(target) else None
+    setattr(target, leaf, raw_value.strip() if declared is str else _coerce(raw_value))
 
 
 def load_config(
