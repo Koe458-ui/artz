@@ -384,7 +384,7 @@ def _run_language_model(predictor: LanguageModelPredictor, args: argparse.Namesp
         from ored.data.training_data import prompt_for
 
         prompt = prompt_for(question, args.ask_type)
-        answer = predictor.predict(prompt, max_new_tokens=args.tokens or 200).completion
+        answer = predictor.predict(prompt, max_new_tokens=args.tokens or 500).completion
         logger.info(f"{prompt}{answer}")
         logger.info("")
         did_something = True
