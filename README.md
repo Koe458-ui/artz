@@ -155,7 +155,7 @@ that is: the page is crawlable, it says what it is, and it says whose it is.
 
 ## Database
 
-Ten tables, all prefixed `ored_`. Row level security is enabled **and forced**
+Twelve tables, all prefixed `ored_`. Row level security is enabled **and forced**
 on every one, none of them carries a policy, and `anon` and `authenticated` hold
 no grant on any table or on the schema. The service key is the only thing that
 reaches this data, and forcing RLS holds the table owner to the same rule.
@@ -242,12 +242,18 @@ python scripts/checkpoints.py show-best --run char_transformer
 python scripts/checkpoints.py show-live --run char_transformer
 python scripts/checkpoints.py push checkpoints/char_transformer/best.pt --kind best --run-name char_transformer
 python scripts/export_learning_dataset.py --tag <tag>
+
+python scripts/training_data.py stats
+python scripts/train.py --config configs/char_transformer.yaml --supabase-dataset <tag> --upload
+python scripts/training_data.py lineage <checkpoint id or file>
 ```
 
 Checkpoint roles (base, live, best, history, export), their Storage paths and
 the `ored_checkpoints` rules are in `ored/model/CHECKPOINTS.md`.
 Training one model on several PCs at once is in
-`ored/model/docs/distributed-training.md`.
+`ored/model/docs/distributed-training.md`. Training on questions, facts and
+other rows kept in `ored_training_data` — snapshots, versions, and which data
+produced which checkpoint — is in `ored/model/docs/training-data.md`.
 
 `ored/model/README.md` is the long version: how the model works, what it learned,
 and why each piece is built the way it is.

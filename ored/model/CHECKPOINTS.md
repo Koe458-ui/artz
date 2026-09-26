@@ -476,3 +476,15 @@ epoch 31, step 73,711. `export --run ored_v2` makes
 | `tests/test_checkpoint_store.py` | object paths, publish records size/hash/verification, idempotent publish, damaged (corrupt or truncated) upload never recorded and never replaces best, role mismatch refused, fetch round trip, corrupted object refused, missing object reported, verify, live replacement and keeping, one live per run, name collisions, best promote / reject worse / force / max mode, promote-best from file and from history, rollback needs force, stale compare-and-swap refused, best without metric refused, history append-only, base immutable, export from best, duplicates reported then removed only with apply, canonical choice, current delete needs allow, history pruning, orphans, CLI output |
 | `tests/test_checkpoint_schema.py` | applies the migration to a throwaway Postgres loaded with the pre-migration schema and rows, then runs `checkpoint_invariants.sql` (skipped when PostgreSQL is not installed) |
 | `../supabase/tests/checkpoint_invariants.sql` | run against the real project too; everything inside is rolled back |
+
+## Which data produced a checkpoint
+
+A run on `data.source: supabase` records its training data without changing
+any rule above. Every row it uploads carries the run's `session_id`; the
+session carries `dataset_id`, the `ored_datasets` snapshot (tag, version,
+sha256, counts, selection); and every payload carries the same facts in
+`extra.dataset`, with `config.data.supabase.snapshot`. The payload format is
+still 2, and checkpoints from before have no dataset and load unchanged.
+`python scripts/training_data.py lineage <id or file>` and the view
+`ored_checkpoint_lineage` answer the question. Details:
+[`docs/training-data.md`](docs/training-data.md).

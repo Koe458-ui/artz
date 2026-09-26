@@ -316,7 +316,8 @@ class DistributedCheckpointManager(CheckpointManager):
         path = self._save_group("best", snapshot)
         if self.env.is_coordinator and path is not None:
             payload = build_payload(kind="best", **snapshot)
-            payload["extra"] = {"checkpoint_group_id": self.last_group["group_id"]}
+            payload["extra"] = {**(payload.get("extra") or {}),
+                                "checkpoint_group_id": self.last_group["group_id"]}
             write_payload(self.path("best"), payload)
         self.env.barrier()
         return True
@@ -484,6 +485,7 @@ class DistributedCheckpointManager(CheckpointManager):
             "architecture": architecture_of(model),
             "parameters": describe().get("parameters") if callable(describe) else None,
             "tokenizer": snapshot.get("tokenizer"),
+            "dataset": json_ready((snapshot.get("extra") or {}).get("dataset")),
             "config": json_ready(snapshot["config"]),
             "scheduler_state": json_ready(snapshot.get("scheduler_state")),
             "trainer_state": json_ready({k: v for k, v in (snapshot.get("trainer_state") or {}).items()

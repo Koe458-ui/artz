@@ -11,6 +11,7 @@ python scripts/generate_corpus.py
 |---|---|
 | `raw/` | The datasets as generated. |
 | `processed/` | Cached and tokenised data. |
+| `snapshots/` | Immutable snapshots of `ored_training_data`, one folder per tag and content hash. See `docs/training-data.md`. |
 
 Layout, columns, split policy and samples live in Supabase, table
 `ored_datasets`, read through `ored.learning.SupabaseStore.datasets()`.

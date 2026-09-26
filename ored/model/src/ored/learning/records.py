@@ -135,6 +135,34 @@ class Dataset:
     version: int = 1
     created_at: str = field(default_factory=now)
     updated_at: str = field(default_factory=now)
+    source: str = "generated"
+    sha256: Optional[str] = None
+    record_count: int = 0
+    selection: Dict[str, Any] = field(default_factory=dict)
+    split_counts: Dict[str, int] = field(default_factory=dict)
+    storage_path: Optional[str] = None
+
+
+@dataclass
+class TrainingData:
+
+    id: str = field(default_factory=new_id)
+    type: str = ""
+    category: str = ""
+    subject: Optional[str] = None
+    topic: Optional[str] = None
+    input: str = ""
+    output: str = ""
+    difficulty: Optional[str] = None
+    language: str = "en"
+    source: str = "manual"
+    dataset_tag: Optional[str] = None
+    enabled: bool = True
+    verified: bool = False
+    fingerprint: str = ""
+    metadata: Dict[str, Any] = field(default_factory=dict)
+    created_at: str = field(default_factory=now)
+    updated_at: str = field(default_factory=now)
 
 
 @dataclass
@@ -154,6 +182,10 @@ class TrainingSession:
     created_at: str = field(default_factory=now)
     session_key: Optional[str] = None
     run_name: str = ""
+    dataset_id: Optional[str] = None
+
+    def __post_init__(self) -> None:
+        self.status = SessionStatus(self.status)
 
 
 @dataclass
@@ -192,6 +224,9 @@ class ModelVersion:
     notes: str = ""
     promoted_at: Optional[str] = None
     created_at: str = field(default_factory=now)
+
+    def __post_init__(self) -> None:
+        self.status = VersionStatus(self.status)
 
 
 @dataclass
@@ -240,6 +275,7 @@ RECORD_TABLES = {
     Message: "ored_messages",
     LearningCandidate: "ored_learning_candidates",
     TrainingExample: "ored_training_examples",
+    TrainingData: "ored_training_data",
     TrainingSession: "ored_training_sessions",
     TrainingWorker: "ored_training_workers",
     ModelVersion: "ored_model_versions",

@@ -4,6 +4,7 @@ seed: 1337
 deterministic: true
 
 data:
+  source: generated
   tokenizer: char
   block_size: 256
   stride: 128
@@ -19,6 +20,18 @@ data:
       val: 0.15
       test: 0.15
     val_test_fraction: 0.15
+  supabase:
+    dataset_tag: ""
+    types: []
+    categories: []
+    subjects: []
+    languages: []
+    include_unverified: false
+    split_seed: 1337
+    snapshot: ""
+    snapshot_dir: data/snapshots
+    on_invalid: fail
+    notes: ""
 
 model:
   name: transformer

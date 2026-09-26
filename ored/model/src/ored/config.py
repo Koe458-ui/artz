@@ -55,6 +55,42 @@ class CorpusConfig:
 
 
 @dataclass
+class SupabaseDataConfig:
+
+    dataset_tag: str = ""
+
+    types: List[str] = field(default_factory=list)
+    categories: List[str] = field(default_factory=list)
+    subjects: List[str] = field(default_factory=list)
+    languages: List[str] = field(default_factory=list)
+
+    include_unverified: bool = False
+
+    split_seed: int = 1337
+
+    snapshot: str = ""
+
+    snapshot_dir: str = "data/snapshots"
+
+    on_invalid: str = "fail"
+
+    notes: str = ""
+
+    def validate(self) -> None:
+        if self.on_invalid not in ("fail", "skip"):
+            raise ValueError("data.supabase.on_invalid must be fail (stop on a bad row) or skip")
+        if self.snapshot and not (12 <= len(self.snapshot) <= 64
+                                  and all(c in "0123456789abcdef" for c in self.snapshot)):
+            raise ValueError("data.supabase.snapshot must be a snapshot hash (at least 12 hex characters)")
+        for name in ("types", "categories", "subjects", "languages"):
+            if not isinstance(getattr(self, name), list):
+                raise ValueError(f"data.supabase.{name} must be a list")
+
+
+DATA_SOURCES = ("generated", "supabase")
+
+
+@dataclass
 class DataConfig:
     split: SplitConfig = field(default_factory=SplitConfig)
     batch_size: int = 16
@@ -71,7 +107,17 @@ class DataConfig:
 
     stride: int = 64
 
+    source: str = "generated"
+
+    supabase: SupabaseDataConfig = field(default_factory=SupabaseDataConfig)
+
     def validate(self) -> None:
+        if self.source not in DATA_SOURCES:
+            raise ValueError(f"data.source must be one of {', '.join(DATA_SOURCES)}")
+        if self.source == "supabase" and not self.supabase.dataset_tag:
+            raise ValueError("data.source is supabase, so data.supabase.dataset_tag must name the "
+                             "dataset (a tag, or 'all' for every row)")
+        self.supabase.validate()
         if self.n_bits < 1:
             raise ValueError("data.n_bits must be >= 1")
         if self.batch_size < 1:
@@ -287,6 +333,8 @@ class Config:
     paths: PathsConfig = field(default_factory=PathsConfig)
 
     def validate(self) -> "Config":
+        if self.data.source == "supabase" and self.task != "language_model":
+            raise ValueError("data.source: supabase feeds the language_model task only")
         self.data.validate()
         self.model.validate()
         self.training.validate()

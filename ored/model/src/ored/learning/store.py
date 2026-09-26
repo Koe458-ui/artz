@@ -2,9 +2,11 @@ from __future__ import annotations
 
 import re
 import threading
+import time
 from dataclasses import replace
-from typing import Any, Dict, Iterable, List, Optional, Protocol
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Protocol, Sequence
 
+from ored.data.training_data import Selection, normalise_fields
 from ored.learning.records import (
     CandidateStatus,
     Checkpoint,
@@ -16,10 +18,12 @@ from ored.learning.records import (
     Message,
     ModelVersion,
     SessionStatus,
+    TrainingData,
     TrainingExample,
     TrainingSession,
     TrainingWorker,
     VersionStatus,
+    new_id,
     now,
     to_row,
 )
@@ -31,6 +35,35 @@ class StoreError(RuntimeError):
 
 class StaleCheckpointError(StoreError):
     pass
+
+
+class DuplicateTrainingDataError(StoreError):
+
+    def __init__(self, fingerprints: Sequence[str], existing: Sequence[Any], message: str = "") -> None:
+        self.fingerprints = list(fingerprints)
+        self.existing = list(existing)
+        if not message:
+            shown = [f"{e.id} ({e.type}/{e.category}: {e.input[:60]!r})" for e in self.existing[:10]]
+            message = (f"{len(self.fingerprints)} record(s) already exist with the same content "
+                       f"(fingerprint {', '.join(f[:12] for f in self.fingerprints[:10])})")
+            if shown:
+                message += ": " + "; ".join(shown)
+            message += ". Nothing was inserted; edit the existing record instead of adding a copy."
+        super().__init__(message)
+
+
+def training_data_row(record: TrainingData) -> Dict[str, Any]:
+    normalise_fields(record)
+    row = to_row(record)
+    row.pop("created_at")
+    row.pop("updated_at")
+    return row
+
+
+def _stamp() -> str:
+    moment = time.time_ns()
+    whole, fraction = divmod(moment, 1_000_000_000)
+    return time.strftime("%Y-%m-%dT%H:%M:%S", time.gmtime(whole)) + f".{fraction:09d}Z"
 
 
 SHA256 = re.compile(r"^[0-9a-f]{64}$")
@@ -61,6 +94,32 @@ def check_checkpoint(checkpoint: Checkpoint) -> None:
 class LearningStore(Protocol):
 
     def datasets(self, name: Optional[str] = None) -> List[Dataset]: ...
+
+    def dataset(self, dataset_id: str) -> Optional[Dataset]: ...
+
+    def dataset_by_hash(self, name: str, sha256: str) -> Optional[Dataset]: ...
+
+    def register_dataset(self, dataset: Dataset) -> Dataset: ...
+
+    def set_dataset_storage(self, dataset_id: str, storage_path: str) -> Dataset: ...
+
+    def iter_training_data(self, selection: Selection, page_size: int = 1000) -> Iterator[TrainingData]: ...
+
+    def training_data(self, selection: Optional[Selection] = None) -> List[TrainingData]: ...
+
+    def count_training_data(self, selection: Optional[Selection] = None) -> int: ...
+
+    def latest_training_data_update(self, selection: Selection) -> Optional[str]: ...
+
+    def add_training_data(self, records: Iterable[TrainingData]) -> List[TrainingData]: ...
+
+    def update_training_data(self, record_id: str, **fields: Any) -> TrainingData: ...
+
+    def training_data_summary(self) -> List[Dict[str, Any]]: ...
+
+    def session(self, session_id: str) -> Optional[TrainingSession]: ...
+
+    def patch_session(self, session_id: str, **fields: Any) -> None: ...
 
     def add_conversation(self, conversation: Conversation) -> Conversation: ...
 
@@ -149,10 +208,14 @@ class InMemoryStore:
         self._versions: Dict[str, ModelVersion] = {}
         self._checkpoints: Dict[str, Checkpoint] = {}
         self._workers: Dict[str, TrainingWorker] = {}
+        self._training_data: Dict[str, TrainingData] = {}
         self._lock = threading.RLock()
 
     def add_dataset(self, dataset: Dataset) -> Dataset:
-        self._datasets[dataset.name] = dataset
+        if any(d.name == dataset.name and d.version == dataset.version and d.id != dataset.id
+               for d in self._datasets.values()):
+            raise StoreError(f"dataset {dataset.name} v{dataset.version} already exists")
+        self._datasets[dataset.id] = dataset
         return dataset
 
     def datasets(self, name: Optional[str] = None) -> List[Dataset]:
@@ -160,6 +223,107 @@ class InMemoryStore:
         if name is not None:
             found = [d for d in found if d.name == name]
         return sorted(found, key=lambda d: (d.name, d.version))
+
+    def dataset(self, dataset_id: str) -> Optional[Dataset]:
+        return self._datasets.get(dataset_id)
+
+    def dataset_by_hash(self, name: str, sha256: str) -> Optional[Dataset]:
+        for dataset in self._datasets.values():
+            if dataset.name == name and dataset.sha256 == sha256:
+                return dataset
+        return None
+
+    def register_dataset(self, dataset: Dataset) -> Dataset:
+        with self._lock:
+            if not dataset.name or not dataset.sha256:
+                raise StoreError("a snapshot needs a name and a sha256")
+            existing = self.dataset_by_hash(dataset.name, dataset.sha256)
+            if existing is not None:
+                return existing
+            same_name = self.datasets(dataset.name)
+            if any(d.source != "supabase" for d in same_name):
+                raise StoreError(f"dataset name {dataset.name} belongs to a generated dataset; choose another tag")
+            stored = replace(dataset, source="supabase",
+                             version=max((d.version for d in same_name), default=0) + 1,
+                             created_at=now(), updated_at=now())
+            self._datasets[stored.id] = stored
+            return stored
+
+    def set_dataset_storage(self, dataset_id: str, storage_path: str) -> Dataset:
+        dataset = self._datasets.get(dataset_id)
+        if dataset is None:
+            raise StoreError(f"dataset {dataset_id} was not updated")
+        if dataset.storage_path and dataset.storage_path != storage_path:
+            raise StoreError(f"dataset {dataset.name} v{dataset.version} already records where its files are")
+        dataset.storage_path = storage_path
+        return dataset
+
+    def iter_training_data(self, selection: Selection, page_size: int = 1000) -> Iterator[TrainingData]:
+        found = [r for r in self._training_data.values() if selection.matches(r)]
+        yield from sorted(found, key=lambda r: r.fingerprint)
+
+    def training_data(self, selection: Optional[Selection] = None) -> List[TrainingData]:
+        return list(self.iter_training_data(selection or Selection(mode="everything")))
+
+    def count_training_data(self, selection: Optional[Selection] = None) -> int:
+        return len(self.training_data(selection))
+
+    def latest_training_data_update(self, selection: Selection) -> Optional[str]:
+        stamps = [str(r.updated_at) for r in self.training_data(selection)]
+        return max(stamps) if stamps else None
+
+    def add_training_data(self, records: Iterable[TrainingData]) -> List[TrainingData]:
+        with self._lock:
+            incoming = [replace(r) for r in records]
+            for record in incoming:
+                training_data_row(record)
+            fingerprints = [r.fingerprint for r in incoming]
+            repeated = sorted({f for f in fingerprints if fingerprints.count(f) > 1})
+            if repeated:
+                raise DuplicateTrainingDataError(repeated, [])
+            existing = [r for r in self._training_data.values() if r.fingerprint in set(fingerprints)]
+            if existing:
+                raise DuplicateTrainingDataError([e.fingerprint for e in existing], existing)
+            for record in incoming:
+                record.id = record.id or new_id()
+                record.created_at = record.updated_at = _stamp()
+                self._training_data[record.id] = record
+            return [replace(r) for r in incoming]
+
+    def update_training_data(self, record_id: str, **fields: Any) -> TrainingData:
+        with self._lock:
+            current = self._training_data.get(record_id)
+            if current is None:
+                raise StoreError(f"training record {record_id} was not found")
+            allowed = set(TrainingData.__dataclass_fields__) - {"id", "fingerprint", "created_at", "updated_at"}
+            unknown = sorted(set(fields) - allowed)
+            if unknown:
+                raise StoreError(f"cannot update {unknown} on a training record")
+            changed = replace(current, **fields)
+            training_data_row(changed)
+            if any(r.fingerprint == changed.fingerprint and r.id != record_id
+                   for r in self._training_data.values()):
+                raise DuplicateTrainingDataError([], [], f"the edit makes record {record_id} an exact "
+                                                         f"duplicate of another record")
+            changed.updated_at = _stamp()
+            self._training_data[record_id] = changed
+            return replace(changed)
+
+    def training_data_summary(self) -> List[Dict[str, Any]]:
+        groups: Dict[tuple, Dict[str, Any]] = {}
+        for r in self._training_data.values():
+            key = (r.dataset_tag or "", r.category, r.subject or "", r.type, r.language)
+            row = groups.setdefault(key, {
+                "dataset_tag": key[0], "category": key[1], "subject": key[2], "type": key[3],
+                "language": key[4], "records": 0, "trainable": 0, "awaiting_review": 0,
+                "disabled": 0, "last_updated": "",
+            })
+            row["records"] += 1
+            row["trainable"] += int(r.enabled and r.verified)
+            row["awaiting_review"] += int(r.enabled and not r.verified)
+            row["disabled"] += int(not r.enabled)
+            row["last_updated"] = max(row["last_updated"], str(r.updated_at))
+        return [groups[k] for k in sorted(groups)]
 
     def add_conversation(self, conversation: Conversation) -> Conversation:
         self._conversations[conversation.id] = conversation
@@ -217,6 +381,16 @@ class InMemoryStore:
             raise StoreError(f"no session {session.id}")
         self._sessions[session.id] = session
         return session
+
+    def session(self, session_id: str) -> Optional[TrainingSession]:
+        return self._sessions.get(session_id)
+
+    def patch_session(self, session_id: str, **fields: Any) -> None:
+        session = self._sessions.get(session_id)
+        if session is None:
+            raise StoreError(f"no session {session_id}")
+        for key, value in fields.items():
+            setattr(session, key, value)
 
     def sessions(self, status: Optional[SessionStatus] = None) -> List[TrainingSession]:
         found = list(self._sessions.values())
@@ -476,4 +650,5 @@ class InMemoryStore:
             "versions": [to_row(r) for r in self._versions.values()],
             "checkpoints": [to_row(r) for r in self._checkpoints.values()],
             "workers": [to_row(r) for r in self._workers.values()],
+            "training_data": [to_row(r) for r in self._training_data.values()],
         }

@@ -26,6 +26,8 @@ def queue(
     example_count: int,
     conversation_count: int,
     base_version: Optional[str] = None,
+    run_name: str = "",
+    dataset_id: Optional[str] = None,
 ) -> TrainingSession:
     if not dataset_tag:
         raise SessionError("a training session must name the dataset it runs on")
@@ -37,6 +39,8 @@ def queue(
         config=config,
         example_count=example_count,
         conversation_count=conversation_count,
+        run_name=run_name,
+        dataset_id=dataset_id,
     )
     return store.add_session(session)
 

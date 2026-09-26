@@ -22,6 +22,9 @@ class ControlPlane:
     def set_status(self, status: str) -> None:
         pass
 
+    def link_dataset(self, dataset_id: str, example_count: int) -> None:
+        pass
+
     def finish(self, status: str, metrics: Optional[Dict[str, Any]] = None, error: str = "") -> None:
         pass
 
@@ -80,6 +83,11 @@ class SupabaseControlPlane(ControlPlane):
         self._thread = threading.Thread(target=self._beat, name="ored-heartbeat", daemon=True)
         self._thread.start()
         return session_id
+
+    def link_dataset(self, dataset_id: str, example_count: int) -> None:
+        if self.env.is_coordinator and self.session_id:
+            self._safely("dataset link", self.store.patch_session, self.session_id,
+                         dataset_id=dataset_id, example_count=example_count)
 
     def _beat(self) -> None:
         while not self._stop.wait(self.heartbeat_seconds):
