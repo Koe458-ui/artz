@@ -6,9 +6,9 @@ deterministic: true
 data:
   source: generated
   tokenizer: char
-  block_size: 256
-  stride: 128
-  batch_size: 32
+  block_size: 512
+  stride: 256
+  batch_size: 64
   shuffle_train: true
   corpus:
     dir: data/raw/corpus
@@ -35,24 +35,24 @@ data:
 
 model:
   name: transformer
-  d_model: 128
-  n_layer: 4
-  n_head: 4
-  d_ff: 512
+  d_model: 256
+  n_layer: 6
+  n_head: 8
+  d_ff: 1024
   dropout: 0.1
   tie_weights: true
 
 training:
-  epochs: 8
-  learning_rate: 0.001
+  epochs: 60
+  learning_rate: 0.0005
   optimizer: adamw
   weight_decay: 0.01
   loss: cross_entropy
   scheduler: cosine
-  warmup_steps: 200
+  warmup_steps: 500
   min_lr_ratio: 0.1
   grad_clip: 1.0
-  early_stopping_patience: 4
+  early_stopping_patience: 8
   log_every: 1
   device: auto
   resume: ""
