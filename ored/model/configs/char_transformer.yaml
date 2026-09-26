@@ -8,7 +8,7 @@ data:
   tokenizer: char
   block_size: 512
   stride: 256
-  batch_size: 64
+  batch_size: 32
   shuffle_train: true
   corpus:
     dir: data/raw/corpus
