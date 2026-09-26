@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-from pathlib import Path
 from typing import Dict, List, Tuple
 
 import torch
@@ -8,6 +7,7 @@ from torch.utils.data import DataLoader, Dataset
 
 from ored.config import Config
 from ored.data.corpus import SPLITS, read_corpus
+from ored.data.snapshot import corpus_directory
 from ored.data.tokenizer import Tokenizer, build_tokenizer
 
 
@@ -52,7 +52,7 @@ class TextDataset(Dataset):
 
 
 def build_text_datasets(cfg: Config) -> Tuple[Dict[str, TextDataset], Tokenizer]:
-    directory = Path(cfg.data.corpus.dir)
+    directory = corpus_directory(cfg)
     texts = {split: read_corpus(directory, split) for split in SPLITS}
 
     tokenizer = build_tokenizer(cfg.data.tokenizer, texts["train"])

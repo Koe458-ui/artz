@@ -968,6 +968,10 @@ that does not is given a full stop.
 Either way the lines are mixed into the ordinary corpus rather than replacing
 it, so the grammar sentences and the arithmetic stay where they were.
 
+The same questions are also in Supabase now, as the `facts` dataset of
+`ored_training_data` (see [`docs/training-data.md`](docs/training-data.md)):
+`python scripts/train.py --config configs/char_transformer.yaml --supabase-dataset facts`.
+
 ```bash
 python scripts/generate_facts.py
 python scripts/generate_facts.py --repeats 80
@@ -1147,6 +1151,7 @@ here reads a table belonging to another product, and the only schema outside
 | `ORED_SB_URL` | trainer, exporter, checkpoint CLI, serving, web backend | no |
 | `ORED_SB_SERVICE_KEY` | trainer, exporter, checkpoint CLI, serving, web backend | **yes — server only** |
 | `ORED_SB_CHECKPOINT_BUCKET` | checkpoint storage, default `ored-checkpoints` | no |
+| `ORED_SB_DATASET_BUCKET` | training-data snapshots, default `ored-datasets` | no |
 | `ORED_AUTH_URL` | web backend, to verify a DigiArtz token | no |
 | `ORED_AUTH_KEY` | web backend, publishable key of the DigiArtz project | no |
 | `ORED_ALLOWED_ORIGINS` | web backend, extra origins allowed to post | no |
@@ -1163,8 +1168,9 @@ carries the DigiArtz project URL and its publishable key, and nothing else.
 ### Tables
 
 `ored_staff`, `ored_conversations`, `ored_messages`, `ored_learning_candidates`,
-`ored_training_examples`, `ored_training_sessions`, `ored_model_versions`,
-`ored_datasets`, `ored_checkpoints`, `ored_rate_hits`.
+`ored_training_examples`, `ored_training_data`, `ored_training_sessions`,
+`ored_training_workers`, `ored_model_versions`, `ored_datasets`,
+`ored_checkpoints`, `ored_rate_hits`.
 
 Row level security is enabled **and forced** on every one of them, and not one
 carries a policy. `anon` and `authenticated` hold no grant on any table and no
@@ -1200,6 +1206,25 @@ best. `pull` refuses a file whose digest does not match what was recorded. Set
 design — roles, paths, table, rules, commands — is in
 [`CHECKPOINTS.md`](CHECKPOINTS.md); the migration is
 `ored/supabase/migrations/20260924150000_ored_checkpoint_roles.sql`.
+
+### Training data kept in Supabase
+
+`ored_training_data` holds the questions, facts, vocabulary, conversations and
+other teaching material that are added and verified by hand. A run trains on an
+immutable snapshot of the enabled, verified rows, not on the live table:
+
+```bash
+python scripts/training_data.py stats
+python scripts/train.py --config configs/char_transformer.yaml --supabase-dataset --upload
+python scripts/training_data.py lineage checkpoints/char_transformer-all/best.pt
+```
+
+The snapshot is split by question before tokenising, hashed, versioned in
+`ored_datasets`, linked to its `ored_training_sessions` row and written into
+every checkpoint it produces. The generated corpus stays the default
+(`data.source: generated`). Everything else — the table, the text forms,
+selection, the split, versions and lineage — is in
+[`docs/training-data.md`](docs/training-data.md).
 
 ### Training on several PCs
 
@@ -1252,7 +1277,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **101 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **110 files, 0 comments, 0 docstrings.**
 
 ---
 

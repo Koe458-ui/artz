@@ -44,3 +44,17 @@ def test_round_trip_through_dict():
     cfg = load_config(CONFIG_PATH)
     rebuilt = config_from_dict(cfg.to_dict())
     assert rebuilt.to_dict() == cfg.to_dict()
+
+
+def test_text_settings_stay_text_when_they_look_like_numbers():
+    from pathlib import Path
+
+    from ored.config import load_config
+
+    path = Path(__file__).resolve().parent.parent / "configs" / "char_transformer.yaml"
+    cfg = load_config(path, ["data.source=supabase", "data.supabase.dataset_tag=2024",
+                             "data.supabase.snapshot=" + "1e5" + "0" * 61, "run_name=007",
+                             "training.epochs=3", "training.learning_rate=1e-4", "data.shuffle_train=false"])
+    assert cfg.data.supabase.dataset_tag == "2024" and cfg.run_name == "007"
+    assert cfg.data.supabase.snapshot == "1e5" + "0" * 61
+    assert cfg.training.epochs == 3 and cfg.training.learning_rate == 1e-4 and cfg.data.shuffle_train is False

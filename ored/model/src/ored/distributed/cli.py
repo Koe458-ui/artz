@@ -101,7 +101,28 @@ def session_config(cfg: Config, env: DistEnv, batch_size: int) -> Dict[str, Any]
     return config
 
 
-def ensure_data(cfg: Config, env: DistEnv) -> None:
+def ensure_snapshot(cfg: Config, env: DistEnv) -> Any:
+    from ored.data.snapshot import find_local, prepare_dataset
+    from ored.training.dataset_run import supabase_from_env
+
+    settings = cfg.data.supabase
+    if not settings.snapshot:
+        raise DistributedError(
+            "a distributed run trains every PC on the same data, so it needs a pinned snapshot: take one with\n"
+            f"  python scripts/training_data.py snapshot --dataset-tag {settings.dataset_tag} --upload\n"
+            "and pass --set data.supabase.snapshot=<the hash it prints> on every PC")
+    prepared = None
+    if env.local_rank == 0:
+        needs_download = find_local(settings.snapshot_dir, settings.dataset_tag, settings.snapshot) is None
+        store, files = supabase_from_env(required=needs_download)
+        prepared = prepare_dataset(cfg, store if env.is_coordinator else None, files)
+    env.barrier()
+    return prepared
+
+
+def ensure_data(cfg: Config, env: DistEnv) -> Any:
+    if cfg.data.source == "supabase":
+        return ensure_snapshot(cfg, env)
     if env.local_rank == 0:
         if cfg.task == "bit_addition" and not Path(cfg.data.raw_path).exists():
             from ored.data.generate import generate_dataset
@@ -139,9 +160,13 @@ def run_training(cfg: Config, env: DistEnv, remote: Any = None, control: Any = N
     if automatic:
         cfg.training.resume = "live" if env.restart_count > 0 else ""
     try:
-        ensure_data(cfg, env)
+        prepared = ensure_data(cfg, env)
         dataset_tag = f"{cfg.task}:{cfg.data.corpus.dir if cfg.task == 'language_model' else cfg.data.raw_path}"
+        if cfg.data.source == "supabase":
+            dataset_tag = cfg.data.supabase.dataset_tag
         control.start(cfg.run_name, dataset_tag, session_config(cfg, env, per_worker_batch_size(cfg, env.world_size)))
+        if prepared is not None and prepared.dataset is not None:
+            control.link_dataset(prepared.dataset.id, prepared.snapshot.record_count)
         try:
             trainer = DistributedTrainer(cfg, env, control, remote)
         except NoResumableCheckpoint:

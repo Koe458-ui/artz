@@ -5,8 +5,9 @@ import os
 import urllib.error
 import urllib.parse
 import urllib.request
-from typing import Any, Dict, Iterable, List, Optional, Type, TypeVar
+from typing import Any, Dict, Iterable, Iterator, List, Optional, Tuple, Type, TypeVar
 
+from ored.data.training_data import ALL_TAGS, Selection
 from ored.learning.records import (
     CandidateStatus,
     Checkpoint,
@@ -18,17 +19,25 @@ from ored.learning.records import (
     ModelVersion,
     RECORD_TABLES,
     SessionStatus,
+    TrainingData,
     TrainingExample,
     TrainingSession,
     TrainingWorker,
     VersionStatus,
     to_row,
 )
-from ored.learning.store import StaleCheckpointError, StoreError, check_checkpoint
+from ored.learning.store import (
+    DuplicateTrainingDataError,
+    StaleCheckpointError,
+    StoreError,
+    check_checkpoint,
+    training_data_row,
+)
 
 T = TypeVar("T")
 
 TIMEOUT_SECONDS = 20
+PAGE_SIZE = 1000
 
 
 class SupabaseStore:
@@ -60,7 +69,8 @@ class SupabaseStore:
             headers["prefer"] = prefer
         return headers
 
-    def _call(self, method: str, path: str, payload: Any = None, prefer: str = "") -> Any:
+    def _request(self, method: str, path: str, payload: Any = None,
+                 prefer: str = "") -> Tuple[Any, Dict[str, str]]:
         body = None if payload is None else json.dumps(payload).encode("utf-8")
         request = urllib.request.Request(
             self.base + path, data=body, method=method, headers=self._headers(prefer)
@@ -68,12 +78,16 @@ class SupabaseStore:
         try:
             with urllib.request.urlopen(request, timeout=self.timeout) as response:
                 raw = response.read().decode("utf-8")
+                headers = {k.lower(): v for k, v in response.headers.items()}
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode("utf-8", "replace")[:300]
             raise StoreError(f"{method} {path} -> {exc.code} {detail}") from exc
         except urllib.error.URLError as exc:
             raise StoreError(f"{method} {path} could not be reached: {exc.reason}") from exc
-        return json.loads(raw) if raw else []
+        return (json.loads(raw) if raw else []), headers
+
+    def _call(self, method: str, path: str, payload: Any = None, prefer: str = "") -> Any:
+        return self._request(method, path, payload, prefer)[0]
 
     def _table(self, record_type: Type[Any]) -> str:
         table = RECORD_TABLES.get(record_type)
@@ -115,6 +129,140 @@ class SupabaseStore:
             query = f"name=eq.{urllib.parse.quote(name)}&" + query
         return self._select(Dataset, query)
 
+    def dataset(self, dataset_id: str) -> Optional[Dataset]:
+        found = self._select(Dataset, f"id=eq.{urllib.parse.quote(dataset_id)}")
+        return found[0] if found else None
+
+    def dataset_by_hash(self, name: str, sha256: str) -> Optional[Dataset]:
+        found = self._select(
+            Dataset, f"name=eq.{urllib.parse.quote(name)}&sha256=eq.{urllib.parse.quote(sha256)}"
+        )
+        return found[0] if found else None
+
+    def register_dataset(self, dataset: Dataset) -> Dataset:
+        returned = self._call("POST", "/rpc/ored_dataset_register", {"p_row": to_row(dataset)})
+        if isinstance(returned, list):
+            returned = returned[0] if returned else None
+        if not returned:
+            raise StoreError("ored_dataset_register returned nothing")
+        return self._build(Dataset, returned)
+
+    def set_dataset_storage(self, dataset_id: str, storage_path: str) -> Dataset:
+        path = f"/{self._table(Dataset)}?id=eq.{urllib.parse.quote(dataset_id)}"
+        returned = self._call("PATCH", path, {"storage_path": storage_path}, "return=representation")
+        if not returned:
+            raise StoreError(f"dataset {dataset_id} was not updated")
+        return self._build(Dataset, returned[0])
+
+    @staticmethod
+    def _selection_filters(selection: Selection) -> List[str]:
+        def listed(values: List[str]) -> str:
+            return "(" + ",".join(urllib.parse.quote(v, safe="") for v in values) + ")"
+
+        filters = []
+        if selection.enabled_only:
+            filters.append("enabled=is.true")
+        if selection.verified_only:
+            filters.append("verified=is.true")
+        if selection.dataset_tag != ALL_TAGS:
+            filters.append(f"dataset_tag=eq.{urllib.parse.quote(selection.dataset_tag, safe='')}")
+        for column, values in (("type", selection.types), ("category", selection.categories),
+                               ("subject", selection.subjects), ("language", selection.languages)):
+            if values:
+                filters.append(f"{column}=in.{listed(values)}")
+        if selection.as_of:
+            filters.append(f"updated_at=lte.{urllib.parse.quote(selection.as_of, safe='')}")
+        return filters
+
+    def training_data_page(self, selection: Selection, after: Optional[str] = None,
+                           limit: int = PAGE_SIZE) -> List[TrainingData]:
+        filters = self._selection_filters(selection)
+        if after:
+            filters.append(f"fingerprint=gt.{urllib.parse.quote(after, safe='')}")
+        filters += ["order=fingerprint.asc", f"limit={int(limit)}"]
+        return self._select(TrainingData, "&".join(filters))
+
+    def iter_training_data(self, selection: Selection, page_size: int = PAGE_SIZE) -> Iterator[TrainingData]:
+        after: Optional[str] = None
+        while True:
+            page = self.training_data_page(selection, after, page_size)
+            if not page:
+                return
+            yield from page
+            after = page[-1].fingerprint
+
+    def training_data(self, selection: Optional[Selection] = None) -> List[TrainingData]:
+        return list(self.iter_training_data(selection or Selection(mode="everything")))
+
+    def count_training_data(self, selection: Optional[Selection] = None) -> int:
+        filters = self._selection_filters(selection or Selection(mode="everything"))
+        path = f"/{self._table(TrainingData)}?select=id&limit=1"
+        if filters:
+            path += "&" + "&".join(filters)
+        _, headers = self._request("GET", path, prefer="count=exact")
+        total = headers.get("content-range", "").rpartition("/")[2]
+        if not total.isdigit():
+            raise StoreError(f"Supabase did not report a row count (content-range {total!r})")
+        return int(total)
+
+    def latest_training_data_update(self, selection: Selection) -> Optional[str]:
+        filters = self._selection_filters(selection) + ["order=updated_at.desc", "limit=1"]
+        path = f"/{self._table(TrainingData)}?select=updated_at&" + "&".join(filters)
+        found = self._call("GET", path)
+        return found[0]["updated_at"] if found else None
+
+    def training_data_by_fingerprint(self, fingerprints: Iterable[str]) -> List[TrainingData]:
+        wanted = sorted(set(fingerprints))
+        found: List[TrainingData] = []
+        for start in range(0, len(wanted), 100):
+            chunk = ",".join(wanted[start:start + 100])
+            found += self._select(TrainingData, f"fingerprint=in.({chunk})")
+        return found
+
+    def add_training_data(self, records: Iterable[TrainingData]) -> List[TrainingData]:
+        rows = [training_data_row(r) for r in records]
+        if not rows:
+            return []
+        fingerprints = [r["fingerprint"] for r in rows]
+        repeated = sorted({f for f in fingerprints if fingerprints.count(f) > 1})
+        if repeated:
+            raise DuplicateTrainingDataError(repeated, [])
+        existing = self.training_data_by_fingerprint(fingerprints)
+        if existing:
+            raise DuplicateTrainingDataError([e.fingerprint for e in existing], existing)
+        stored: List[TrainingData] = []
+        for start in range(0, len(rows), PAGE_SIZE):
+            try:
+                returned = self._call("POST", "/" + self._table(TrainingData),
+                                      rows[start:start + PAGE_SIZE], "return=representation")
+            except StoreError as exc:
+                if "ored_training_data_fingerprint_idx" in str(exc):
+                    raise DuplicateTrainingDataError(fingerprints, []) from exc
+                raise
+            stored += [self._build(TrainingData, row) for row in returned]
+        return stored
+
+    def update_training_data(self, record_id: str, **fields: Any) -> TrainingData:
+        allowed = set(TrainingData.__dataclass_fields__) - {"id", "fingerprint", "created_at", "updated_at"}
+        unknown = sorted(set(fields) - allowed)
+        if unknown:
+            raise StoreError(f"cannot update {unknown} on a training record")
+        path = f"/{self._table(TrainingData)}?id=eq.{urllib.parse.quote(record_id)}"
+        try:
+            returned = self._call("PATCH", path, fields, "return=representation")
+        except StoreError as exc:
+            if "ored_training_data_fingerprint_idx" in str(exc):
+                raise DuplicateTrainingDataError([], [], f"the edit makes record {record_id} an exact "
+                                                         f"duplicate of another record") from exc
+            raise
+        if not returned:
+            raise StoreError(f"training record {record_id} was not found")
+        return self._build(TrainingData, returned[0])
+
+    def training_data_summary(self) -> List[Dict[str, Any]]:
+        return self._call("GET", "/ored_training_data_summary?select=*"
+                                 "&order=dataset_tag.asc,category.asc,subject.asc,type.asc")
+
     def add_conversation(self, conversation: Conversation) -> Conversation:
         return self._insert(Conversation, [conversation])[0]
 
@@ -149,6 +297,15 @@ class SupabaseStore:
 
     def update_session(self, session: TrainingSession) -> TrainingSession:
         return self._update(TrainingSession, session)
+
+    def session(self, session_id: str) -> Optional[TrainingSession]:
+        found = self._select(TrainingSession, f"id=eq.{urllib.parse.quote(session_id)}")
+        return found[0] if found else None
+
+    def patch_session(self, session_id: str, **fields: Any) -> None:
+        values = {k: (v.value if hasattr(v, "value") else v) for k, v in fields.items()}
+        path = f"/{self._table(TrainingSession)}?id=eq.{urllib.parse.quote(session_id)}"
+        self._call("PATCH", path, values)
 
     def sessions(self, status: Optional[SessionStatus] = None) -> List[TrainingSession]:
         query = "order=created_at.asc"

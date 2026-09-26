@@ -110,7 +110,7 @@ Windows PCs; the output format is the one the test produces):
 
 ```
 rank  node  host                 device   gpu                      torch          os
-   0     0  pc-harsh             cuda:0   NVIDIA GeForce RTX 5060  2.11.0+cu128   Windows 11
+   0     0  pc-1                 cuda:0   NVIDIA GeForce RTX 5060  2.11.0+cu128   Windows 11
    1     1  pc-2                 cuda:0   NVIDIA GeForce RTX 3060  2.11.0+cu128   Windows 11
    2     2  pc-3                 cuda:0   NVIDIA GeForce RTX 4050  2.11.0+cu128   Windows 11
   OK   all ranks discovered 3 of 3

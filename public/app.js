@@ -412,16 +412,19 @@
     var query = new URLSearchParams(window.location.search);
     var pick = function (name) { return hash.get(name) || query.get(name) || ''; };
 
-    var access = pick('access_token');
-    var refresh = pick('refresh_token');
+    var access = hash.get('access_token') || '';
+    var refresh = hash.get('refresh_token') || '';
     var state = pick('state');
     var error = pick('error_description') || pick('error');
     var invited = query.has('sso') || query.get('from') === 'digiartz';
+    var misplaced = query.has('access_token') || query.has('refresh_token');
 
-    if (!access && !error && !invited) return null;
+    if (!access && !error && !invited && !misplaced) return null;
 
     try { window.history.replaceState({}, document.title, window.location.pathname); }
     catch (e) {   }
+
+    if (misplaced) return { error: 'That sign-in could not be verified. Try again.' };
 
     if (!access && !error) return { invited: true };
 

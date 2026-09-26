@@ -380,6 +380,15 @@ def _run_bit_addition(predictor: Predictor, args: argparse.Namespace) -> int:
 def _run_language_model(predictor: LanguageModelPredictor, args: argparse.Namespace) -> int:
     did_something = False
 
+    for question in args.ask or []:
+        from ored.data.training_data import prompt_for
+
+        prompt = prompt_for(question, args.ask_type)
+        answer = predictor.predict(prompt, max_new_tokens=args.tokens or 200).completion
+        logger.info(f"{prompt}{answer}")
+        logger.info("")
+        did_something = True
+
     if args.text is not None:
         if args.sample:
             logger.info(predictor.generate(
@@ -452,6 +461,11 @@ def main(argv: Optional[List[str]] = None) -> int:
                         metavar="A+B", help="several pairs at once, e.g. 3+4 9+6")
     parser.add_argument("--text", default=None, metavar="TEXT",
                         help="language models only: text to continue, e.g. \"17 + 9 = \"")
+    parser.add_argument("--ask", action="append", default=[], metavar="QUESTION",
+                        help="language models trained on Supabase data: ask a question in the "
+                             "'Question: ... / Answer: ...' form they learned (repeatable)")
+    parser.add_argument("--ask-type", default="qna", metavar="TYPE",
+                        help="the row type whose text form --ask uses (default qna)")
     parser.add_argument("--tokens", type=int, default=None,
                         help="language models only: how many characters to write")
     parser.add_argument("--temperature", type=float, default=None,

@@ -115,3 +115,31 @@ values
    'best/ored_v2/dfa3ab26-bfe6-4aad-bb6c-44e1606f81e2.pt', 10097567,
    '29ee68ae2028bce99b7b30b646cd5900bf04caeddb949a0b952a9fe90bbf37ea', '2.11.0+cu128', 100,
    '{"loss": 0.3266009567572029}', '2026-09-24 10:57:02+00');
+
+-- ored_datasets as it stood before 20260926120000_ored_training_data.sql
+-- (samples trimmed).
+create table public.ored_datasets (
+  id uuid primary key default gen_random_uuid(),
+  name text not null unique,
+  kind text not null check (kind = any (array['tabular', 'text'])),
+  summary text not null default '',
+  generator text not null default '',
+  spec jsonb not null default '{}'::jsonb,
+  samples jsonb not null default '[]'::jsonb,
+  version integer not null default 1,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+create index ored_datasets_name_version_idx on public.ored_datasets (name, version desc);
+
+alter table public.ored_datasets enable row level security;
+alter table public.ored_datasets force row level security;
+revoke all on public.ored_datasets from public, anon, authenticated;
+grant all on public.ored_datasets to service_role;
+
+insert into public.ored_datasets (id, name, kind, generator, spec, created_at)
+values
+  ('d80b9f60-0f08-4912-a4c0-b076819c8553', 'bit_addition', 'tabular', 'scripts/generate_dataset.py',
+   '{"path": "data/raw/bit_addition.csv", "rows": 256}', '2026-09-20 18:13:19+00'),
+  ('3823f83e-8965-4d91-baf0-eaf1ab7c2b61', 'char_corpus', 'text', 'scripts/generate_corpus.py',
+   '{"path": "data/raw/corpus", "operand_pairs": 961}', '2026-09-20 18:13:19+00');

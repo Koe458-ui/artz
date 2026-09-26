@@ -90,6 +90,7 @@ class CheckpointManager:
         self.directory.mkdir(parents=True, exist_ok=True)
         self.remote = remote
         self.upload_errors: List[str] = []
+        self.session_id: Optional[str] = None
 
         self.best_value: Optional[float] = None
         self.best_epoch = 0
@@ -233,6 +234,7 @@ class CheckpointManager:
         try:
             record = publish(
                 store, files, path, CheckpointKind(kind), self.run_name,
+                session_id=self.session_id,
                 rule=self.rule,
                 prune_superseded=not self.settings.keep_superseded_live,
                 workdir=self.directory / ".upload",

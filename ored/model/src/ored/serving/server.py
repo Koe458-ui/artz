@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import argparse
+import hmac
+import ipaddress
 import json
 import os
 import threading
@@ -48,7 +50,7 @@ class OredHandler(BaseHTTPRequestHandler):
         if not self.api_key:
             return True
         header = self.headers.get("authorization") or ""
-        return header == "Bearer " + self.api_key
+        return hmac.compare_digest(header.encode("utf-8"), ("Bearer " + self.api_key).encode("utf-8"))
 
     def do_GET(self) -> None:
         if self.path.rstrip("/") != "/health":
@@ -106,6 +108,29 @@ def build_remote(run_name: str) -> Optional[RemoteCheckpoints]:
         return None
 
 
+class InsecureServerError(RuntimeError):
+    pass
+
+
+def is_loopback(host: str) -> bool:
+    if host == "localhost":
+        return True
+    try:
+        return ipaddress.ip_address(host).is_loopback
+    except ValueError:
+        return False
+
+
+def check_exposure(host: str, api_key: str, allow_no_key: bool) -> None:
+    if api_key or allow_no_key or is_loopback(host):
+        return
+    raise InsecureServerError(
+        f"refusing to listen on {host} without ORED_API_KEY: anyone who can reach this port could "
+        f"chat with Ored and, with learning on, train it. Set ORED_API_KEY (the same value as the "
+        f"Worker secret), listen on 127.0.0.1, or pass --insecure-no-key to accept the risk."
+    )
+
+
 def build_server(
     host: str,
     port: int,
@@ -152,7 +177,16 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--no-learning", action="store_true")
     parser.add_argument("--remote-checkpoints", action="store_true")
     parser.add_argument("--run-name", default="live")
+    parser.add_argument("--insecure-no-key", action="store_true",
+                        help="allow serving on a non-loopback address without ORED_API_KEY")
     args = parser.parse_args(argv)
+
+    api_key = os.environ.get("ORED_API_KEY", "")
+    try:
+        check_exposure(args.host, api_key, args.insecure_no_key)
+    except InsecureServerError as exc:
+        logger.error(str(exc))
+        return 2
 
     policy = OnlinePolicy(
         learning_rate=args.learning_rate,
@@ -160,7 +194,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         save_every=args.save_every,
     )
     if args.no_learning:
-        policy.steps_per_message = 1
+        policy.enabled = False
         policy.save_every = 0
 
     remote = build_remote(args.run_name) if args.remote_checkpoints else None
@@ -172,7 +206,7 @@ def main(argv: Optional[List[str]] = None) -> int:
         device=args.device,
         policy=policy,
         live_dir=args.live_dir,
-        api_key=os.environ.get("ORED_API_KEY", ""),
+        api_key=api_key,
         remote=remote,
     )
 
@@ -181,6 +215,8 @@ def main(argv: Optional[List[str]] = None) -> int:
     logger.info(f"base checkpoint : {args.checkpoint}")
     logger.info(f"live checkpoint : {args.live_dir}/live.pt")
     logger.info(f"supabase        : {'on' if remote else 'off'}")
+    logger.info(f"learning        : {'on (redacted)' if policy.enabled else 'off'}")
+    logger.info(f"api key         : {'required' if api_key else 'NOT SET'}")
 
     try:
         server.serve_forever()

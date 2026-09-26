@@ -112,13 +112,27 @@ class LanguageModelTask(Task):
         super().__init__(cfg)
         self.criterion = nn.CrossEntropyLoss()
         self.tokenizer = None
+        self.dataset: Dict[str, Any] = {}
 
     def build_data(self, generator=None):
         from ored.data.text_dataset import build_text_dataloaders
 
         loaders, datasets, tokenizer = build_text_dataloaders(self.cfg, generator=generator)
         self.tokenizer = tokenizer
+        if self.cfg.data.source == "supabase":
+            self.dataset = self._snapshot_summary(tokenizer)
         return loaders, datasets
+
+    def _snapshot_summary(self, tokenizer) -> Dict[str, Any]:
+        from ored.data.snapshot import SnapshotError, load_snapshot, tokenizer_digest
+
+        snapshot = load_snapshot(self.cfg, verify=False)
+        built = tokenizer_digest(tokenizer.to_dict())
+        if built != snapshot.manifest["tokenizer"]["sha256"]:
+            raise SnapshotError(
+                f"the tokenizer built from snapshot {snapshot.sha256[:16]} ({built[:16]}) differs from the "
+                f"one its manifest records ({snapshot.manifest['tokenizer']['sha256'][:16]})")
+        return snapshot.summary()
 
     def build_model(self) -> nn.Module:
         if self.tokenizer is None:
@@ -152,10 +166,18 @@ class LanguageModelTask(Task):
                  for name in ("train", "val", "test")]
         if self.tokenizer is not None:
             lines.append(f"tokenizer  : {self.tokenizer.describe()}")
+        if self.dataset:
+            lines.append(f"corpus     : Supabase snapshot {self.dataset['snapshot_sha256'][:16]} of "
+                         f"{self.dataset['dataset_tag']!r}, {self.dataset['records']:,} records")
+        else:
+            lines.append(f"corpus     : generated, {self.cfg.data.corpus.dir}")
         return lines
 
     def checkpoint_extra(self) -> Dict[str, Any]:
-        return {"tokenizer": self.tokenizer.to_dict()} if self.tokenizer else {}
+        extra: Dict[str, Any] = {"tokenizer": self.tokenizer.to_dict()} if self.tokenizer else {}
+        if self.dataset:
+            extra["dataset"] = dict(self.dataset)
+        return extra
 
     def next_steps(self):
         return [

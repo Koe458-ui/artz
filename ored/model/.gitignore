@@ -32,6 +32,7 @@ checkpoints/*
 
 data/raw/*
 data/processed/*
+data/snapshots/
 !data/raw/.gitkeep
 !data/processed/.gitkeep
 !data/README.md

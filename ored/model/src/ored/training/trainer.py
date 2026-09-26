@@ -129,6 +129,8 @@ class Trainer:
         self.train_metrics = MetricAccumulator()
         self._resume_rng: Optional[Dict[str, Any]] = None
 
+        self.dataset_link: Dict[str, Any] = {}
+
         self.resumed_from = ""
         self.resumed_live = False
         if cfg.training.resume == "live":
@@ -159,6 +161,13 @@ class Trainer:
 
     def _tokenizer(self) -> Optional[Dict[str, Any]]:
         return self.task.checkpoint_extra().get("tokenizer")
+
+    def _payload_extra(self) -> Dict[str, Any]:
+        dataset = self.task.checkpoint_extra().get("dataset")
+        if not dataset:
+            return {}
+        return {"dataset": {**dataset, **self.dataset_link,
+                            "session_id": getattr(self.checkpoints, "session_id", None)}}
 
     def _warm_start(self, path: str) -> None:
         payload = load_checkpoint(path, map_location=self.device)
@@ -270,6 +279,7 @@ class Trainer:
             "trainer_state": self._trainer_state(),
             "tokenizer": self._tokenizer(),
             "promotion": self.checkpoints.promotion(),
+            "extra": self._payload_extra(),
         }
 
     def _step_metrics(self) -> Dict[str, float]:
@@ -525,6 +535,9 @@ class Trainer:
 
 
 def train(cfg: Config, ensure_dataset: bool = True) -> Dict[str, Any]:
+    if cfg.data.source == "supabase":
+        from ored.training.dataset_run import run_supabase_training
+        return run_supabase_training(cfg)
     if ensure_dataset:
         if cfg.task == "bit_addition" and not Path(cfg.data.raw_path).exists():
             from ored.data.generate import generate_dataset
@@ -556,6 +569,58 @@ def checkpoint_overrides(args: argparse.Namespace) -> List[str]:
     return overrides
 
 
+def add_dataset_arguments(parser: argparse.ArgumentParser) -> None:
+    group = parser.add_argument_group("training data from Supabase (ored_training_data)")
+    group.add_argument("--supabase-dataset", "--dataset-tag", dest="supabase_dataset", nargs="?",
+                       const="all", metavar="TAG",
+                       help="train on a snapshot of ored_training_data rows with this dataset_tag "
+                            "('all' or no value: every row)")
+    group.add_argument("--type", dest="types", action="append", default=[], metavar="TYPE")
+    group.add_argument("--category", dest="categories", action="append", default=[], metavar="CATEGORY")
+    group.add_argument("--subject", dest="subjects", action="append", default=[], metavar="SUBJECT")
+    group.add_argument("--language", dest="languages", action="append", default=[], metavar="LANG")
+    verified = group.add_mutually_exclusive_group()
+    verified.add_argument("--verified-only", action="store_true",
+                          help="only enabled and verified rows (the default)")
+    verified.add_argument("--include-unverified", action="store_true",
+                          help="also train on enabled rows nobody has verified yet")
+    group.add_argument("--skip-invalid", action="store_true",
+                       help="leave invalid rows out (listed in the manifest) instead of stopping")
+    group.add_argument("--snapshot", metavar="HASH", help="reuse this snapshot instead of taking a new one")
+    group.add_argument("--split-seed", type=int, metavar="N", help="seed of the train/val/test split")
+    group.add_argument("--notes", default=None, help="a note stored with the snapshot")
+
+
+def apply_dataset_arguments(cfg: Config, args: argparse.Namespace, overrides: List[str]) -> None:
+    has_filters = any((args.types, args.categories, args.subjects, args.languages,
+                       args.include_unverified, args.skip_invalid, args.snapshot))
+    if args.supabase_dataset is None and not has_filters:
+        return
+    settings = cfg.data.supabase
+    cfg.data.source = "supabase"
+    if args.supabase_dataset is not None:
+        settings.dataset_tag = args.supabase_dataset
+    settings.dataset_tag = settings.dataset_tag or "all"
+    for name in ("types", "categories", "subjects", "languages"):
+        if getattr(args, name):
+            setattr(settings, name, list(getattr(args, name)))
+    if args.include_unverified:
+        settings.include_unverified = True
+    if args.verified_only:
+        settings.include_unverified = False
+    if args.skip_invalid:
+        settings.on_invalid = "skip"
+    if args.snapshot:
+        settings.snapshot = args.snapshot.strip().lower()
+    if args.split_seed is not None:
+        settings.split_seed = args.split_seed
+    if args.notes is not None:
+        settings.notes = args.notes
+    if not args.run_name and not any(o.strip().startswith("run_name=") for o in overrides):
+        from ored.data.snapshot import safe_tag
+        cfg.run_name = f"{cfg.run_name}-{safe_tag(settings.dataset_tag)}"
+
+
 def main(argv: Optional[List[str]] = None) -> int:
     parser = argparse.ArgumentParser(description="Train an Ored.ai model.")
     parser.add_argument("--config", default="configs/bit_adder_mlp.yaml")
@@ -573,9 +638,22 @@ def main(argv: Optional[List[str]] = None) -> int:
     parser.add_argument("--live-every-steps", type=int, metavar="STEPS",
                         help="also save live.pt every N steps, not just every epoch")
     parser.add_argument("--upload", action="store_true", help="publish checkpoints to Supabase")
+    parser.add_argument("--run-name", metavar="NAME", help="name of the run (checkpoints/<NAME>/)")
+    parser.add_argument("--seed", type=int, help="training seed")
+    parser.add_argument("--epochs", type=int)
+    parser.add_argument("--batch-size", type=int)
+    add_dataset_arguments(parser)
     args = parser.parse_args(argv)
 
-    cfg = load_config(args.config, args.overrides + checkpoint_overrides(args))
+    overrides = args.overrides + checkpoint_overrides(args)
+    for flag, key in (("seed", "seed"), ("epochs", "training.epochs"), ("batch_size", "data.batch_size")):
+        if getattr(args, flag) is not None:
+            overrides.append(f"{key}={getattr(args, flag)}")
+    cfg = load_config(args.config, overrides)
+    if args.run_name:
+        cfg.run_name = args.run_name
+    apply_dataset_arguments(cfg, args, args.overrides)
+    cfg.validate()
     train(cfg)
     return 0
 
