@@ -115,7 +115,7 @@ pip install -r C:\Users\username\artz\ored\model\requirements-dev.txt
 
 It's now:
 
-C:\Users\harsh\artz\.venv
+C:\Users\username\artz\.venv
 
 not:
 
@@ -129,7 +129,7 @@ RUN
 
 You should see:
 
-(.venv) C:\Users\harsh\artz\ored\model>
+(.venv) C:\Users\username\artz\ored\model>
 
 ---
 
@@ -168,7 +168,7 @@ True RTX XXXX
 
 RUN
 
-cd C:\Users\harsh\artz\ored\model
+cd C:\Users\username\artz\ored\model
 python -m pytest
 
 OUTPUT
