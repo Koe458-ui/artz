@@ -204,8 +204,12 @@ The first four are what sign-in needs; without the first two the page says so.
 `ORED_API_URL` and `ORED_API_KEY` are what answering needs, and until they are
 set the chat says Ored is still in training, which is true.
 
-The two secrets are set on the server only. Neither has ever been in this
-repository and neither belongs in one.
+The two secrets are set on the server only, as Worker secrets
+(`npx wrangler secret put ORED_SB_SERVICE_KEY`, `npx wrangler secret put
+ORED_API_KEY`), never under `vars` in `wrangler.jsonc`: everything in that file
+is public. An earlier `ORED_API_KEY` value was committed there from 2026-09-22
+until the security audit removed it; that value stays in Git history, so it
+must be treated as leaked and replaced — see `ored/model/docs/security-audit.md`.
 
 `ORED_SB_CHECKPOINT_BUCKET` is not on this list because the Worker never reads
 it. `ored/model/src/ored/learning/checkpoints.py` does, so it belongs wherever
@@ -253,7 +257,9 @@ the `ored_checkpoints` rules are in `ored/model/CHECKPOINTS.md`.
 Training one model on several PCs at once is in
 `ored/model/docs/distributed-training.md`. Training on questions, facts and
 other rows kept in `ored_training_data` — snapshots, versions, and which data
-produced which checkpoint — is in `ored/model/docs/training-data.md`.
+produced which checkpoint — is in `ored/model/docs/training-data.md`. The
+security audit, its findings and the steps still open are in
+`ored/model/docs/security-audit.md`.
 
 `ored/model/README.md` is the long version: how the model works, what it learned,
 and why each piece is built the way it is.

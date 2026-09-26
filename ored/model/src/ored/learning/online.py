@@ -11,6 +11,7 @@ from ored.config import Config
 from ored.data.tokenizer import Tokenizer
 from ored.evaluation.lm_evaluator import load_language_model
 from ored.inference.generator import generate_text
+from ored.learning.candidates import redact
 from ored.learning.checkpoints import CheckpointStore, fetch, publish
 from ored.learning.records import CheckpointKind
 from ored.learning.store import StoreError
@@ -34,6 +35,8 @@ class OnlinePolicy:
     max_chars: int = 2000
     min_known_ratio: float = 0.9
     save_every: int = 25
+    enabled: bool = True
+    redact: bool = True
 
     def validate(self) -> None:
         if self.learning_rate <= 0:
@@ -183,7 +186,12 @@ class OnlineLearner:
 
     def learn(self, text: str) -> OnlineResult:
         self.stats.seen += 1
+        if not self.policy.enabled:
+            self.stats.skipped += 1
+            return OnlineResult(False, "learning is off")
         cleaned = (text or "").strip()
+        if self.policy.redact:
+            cleaned = redact(cleaned)[0]
 
         if len(cleaned) < self.policy.min_chars:
             self.stats.skipped += 1

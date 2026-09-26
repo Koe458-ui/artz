@@ -1273,7 +1273,7 @@ print(f"{len(files)} files: comments={comments} docstrings={docstrings}")
 PY
 ```
 
-Measured on the current tree: **107 files, 0 comments, 0 docstrings.**
+Measured on the current tree: **108 files, 0 comments, 0 docstrings.**
 
 ---
 

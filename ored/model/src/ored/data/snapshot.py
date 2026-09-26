@@ -138,6 +138,8 @@ class Snapshot:
 
     def verify(self) -> "Snapshot":
         problems = []
+        if set(self.manifest.get("files") or {}) != set(FILES):
+            raise SnapshotError(f"snapshot {self.directory} lists unexpected files in {MANIFEST}")
         for name, expected in self.manifest["files"].items():
             path = self.path(name)
             if not path.is_file():
@@ -418,6 +420,10 @@ def download_snapshot(files: Any, tag: str, sha256: str, snapshot_dir: str | Pat
         manifest = json.loads((landing / MANIFEST).read_text(encoding="utf-8"))
         if manifest.get("sha256") != sha256:
             raise SnapshotError(f"{prefix}/{MANIFEST} describes snapshot {manifest.get('sha256')}, not {sha256}")
+        unexpected = sorted(set(manifest.get("files") or {}) - set(FILES))
+        if unexpected or set(manifest.get("files") or {}) != set(FILES):
+            raise SnapshotError(f"{prefix}/{MANIFEST} lists files {unexpected or sorted(manifest.get('files') or {})}; "
+                                f"a snapshot holds exactly {', '.join(FILES)}")
         for name in manifest["files"]:
             files.download(f"{prefix}/{name}", landing / name)
         snapshot = Snapshot(landing, manifest).verify()
